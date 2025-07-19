@@ -10,6 +10,22 @@ import {
   FaCheckCircle
 } from 'react-icons/fa';
 
+// Helper to get CSRF token from cookie
+//function getCookie(name) {
+//  let cookieValue = null;
+//  if (document.cookie && document.cookie !== '') {
+//    const cookies = document.cookie.split(';');
+//    for (let i = 0; i < cookies.length; i++) {
+//      const cookie = cookies[i].trim();
+//      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+//        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+//        break;
+//      }
+ //   }
+//  }
+//  return cookieValue;
+//}
+
 const LoginPage = ({ onLogin }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -64,42 +80,57 @@ const LoginPage = ({ onLogin }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setLoading(true);
     setError('');
     setSuccess('');
 
-    // Simulate loading for better UX
-    setTimeout(() => {
-      // Create mock user data for selected role
-      const mockUserData = {
-        id: 1,
-        username: formData.username,
-        email: `${formData.role}@oox.com`,
-        first_name: formData.role.charAt(0).toUpperCase() + formData.role.slice(1),
-        last_name: 'User',
-        role: formData.role,
-        phone: '',
-        is_active: true
-      };
-      
-      // Store user data
-      localStorage.setItem('oox_user', JSON.stringify(mockUserData));
-      
-      setSuccess(`Login successful! Redirecting to ${formData.role.charAt(0).toUpperCase() + formData.role.slice(1)} Dashboard...`);
-      
-      // Call the parent's onLogin function
-      onLogin(mockUserData);
-      
-      // Redirect to dashboard
+    try {
+      const response = await fetch('http://localhost:8000/api/users/login/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        setError(data.error || 'Login failed');
+        setLoading(false);
+        return;
+      }
+
+      const data = await response.json();
+      // Save tokens to localStorage
+      localStorage.setItem('oox_token', data.access);
+      localStorage.setItem('oox_refresh', data.refresh);
+      localStorage.setItem('oox_user', JSON.stringify(data.user));
+
+      // Fetch current user info with Authorization header
+      const userRes = await fetch('http://localhost:8000/api/users/current-user/', {
+        headers: {
+          'Authorization': `Bearer ${data.access}`,
+        },
+      });
+      const userData = await userRes.json();
+
+      setSuccess('Login successful! Redirecting...');
+      onLogin(userData);
+
       setTimeout(() => {
-        navigate(`/${formData.role}`);
+        navigate(`/${userData.role}`);
       }, 1000);
-      
+    } catch (err) {
+      setError('Network error');
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
   const handleDemoLogin = (role) => {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Container, Row, Col, Card, Nav, Button, 
   Table, Modal, Form, Alert, Badge, Dropdown,
-  Navbar, NavDropdown
+  Navbar, NavDropdown, ButtonGroup
 } from 'react-bootstrap';
 import { 
   FaUsers, FaBoxes, FaTruck, FaChartLine, 
@@ -11,6 +11,8 @@ import {
   FaFileAlt, FaDownload, FaEye
 } from 'react-icons/fa';
 import OrderForm from '../components/OrderForm';
+import OrderDetail from '../components/OrderDetail';
+import { getDashboardStats, getUsers, getOrders, deleteUser, createOrder, createUser, updateUser, deleteOrder, updateOrder, getOrder } from '../components/api';
 
 const OwnerDashboard = ({ user, onLogout }) => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -28,6 +30,11 @@ const OwnerDashboard = ({ user, onLogout }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [showOrderDetail, setShowOrderDetail] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const [editingOrder, setEditingOrder] = useState(null);
+  const [orderFormData, setOrderFormData] = useState(null);
+  const [orderItems, setOrderItems] = useState([]);
 
   // Form states
   const [userForm, setUserForm] = useState({
@@ -82,167 +89,24 @@ const OwnerDashboard = ({ user, onLogout }) => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      // For now, use mock data since we don't have backend API working
-      setStats({
-        total_orders: 25,
-        pending_orders: 8,
-        in_production: 12,
-        ready_for_delivery: 5,
-        overdue_orders: 2
-      });
-      
-      setUsers([
-        {
-          id: 1,
-          username: 'owner',
-          email: 'owner@oox.com',
-          first_name: 'Owner',
-          last_name: 'User',
-          role: 'owner',
-          phone: '08012345678',
-          is_active: true
-        },
-        {
-          id: 2,
-          username: 'admin',
-          email: 'admin@oox.com',
-          first_name: 'Admin',
-          last_name: 'User',
-          role: 'admin',
-          phone: '08087654321',
-          is_active: true
-        }
+      setError(null);
+      const [statsData, usersData, ordersData] = await Promise.all([
+        getDashboardStats(),
+        getUsers(),
+        getOrders()
       ]);
-      
-      setOrders([
-        {
-          id: 1,
-          order_number: 'OOX000001',
-          customer: { name: 'John Doe', phone: '08012345678' },
-          product_name: 'Dining Table Set',
-          total_amount: '150000.00',
-          order_status: 'confirmed',
-          payment_status: 'deposit_only',
-          expected_delivery_date: '2024-02-15',
-          payments: [
-            {
-              id: 1,
-              amount: '50000.00',
-              payment_type: 'deposit',
-              payment_method: 'bank_transfer',
-              reference_number: 'TXN001234',
-              payment_date: '2024-01-15',
-              notes: 'Initial deposit payment',
-              pop_file: 'pop_001.jpg',
-              pop_url: '/uploads/pop_001.jpg'
-            }
-          ],
-          total_paid: '50000.00',
-          balance_due: '100000.00'
-        },
-        {
-          id: 2,
-          order_number: 'OOX000002',
-          customer: { name: 'Jane Smith', phone: '08087654321' },
-          product_name: 'Bedroom Suite',
-          total_amount: '200000.00',
-          order_status: 'in_production',
-          payment_status: 'fifty_percent',
-          expected_delivery_date: '2024-02-20',
-          payments: [
-            {
-              id: 2,
-              amount: '100000.00',
-              payment_type: 'deposit',
-              payment_method: 'cash',
-              reference_number: 'CASH001',
-              payment_date: '2024-01-20',
-              notes: '50% deposit payment',
-              pop_file: 'pop_002.jpg',
-              pop_url: '/uploads/pop_002.jpg'
-            }
-          ],
-          total_paid: '100000.00',
-          balance_due: '100000.00'
-        },
-        {
-          id: 3,
-          order_number: 'OOX000003',
-          customer: { name: 'Mike Johnson', phone: '08055556666' },
-          product_name: 'Living Room Set',
-          total_amount: '180000.00',
-          order_status: 'ready_for_delivery',
-          payment_status: 'fully_paid',
-          expected_delivery_date: '2024-02-25',
-          payments: [
-            {
-              id: 3,
-              amount: '90000.00',
-              payment_type: 'deposit',
-              payment_method: 'bank_transfer',
-              reference_number: 'TXN005678',
-              payment_date: '2024-01-25',
-              notes: '50% deposit',
-              pop_file: 'pop_003a.jpg',
-              pop_url: '/uploads/pop_003a.jpg'
-            },
-            {
-              id: 4,
-              amount: '90000.00',
-              payment_type: 'balance',
-              payment_method: 'bank_transfer',
-              reference_number: 'TXN005679',
-              payment_date: '2024-02-10',
-              notes: 'Final payment',
-              pop_file: 'pop_003b.jpg',
-              pop_url: '/uploads/pop_003b.jpg'
-            }
-          ],
-          total_paid: '180000.00',
-          balance_due: '0.00'
-        }
-      ]);
-    } catch (err) {
-      setError('Failed to load dashboard data');
-      console.error(err);
+      setStats(statsData);
+      // Handle paginated responses - extract results array if it exists
+      setUsers(usersData.results || usersData);
+      setOrders(ordersData.results || ordersData);
+    } catch (e) {
+      setError(e.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreateOrder = async (orderData) => {
-    try {
-      setLoading(true);
-      
-      // For now, just add to local state since we don't have backend API
-      const newOrder = {
-        id: orders.length + 1,
-        order_number: `OOX${String(orders.length + 1).padStart(6, '0')}`,
-        customer: { name: orderData.customerName, phone: orderData.customerPhone || '' },
-        product_name: orderData.productName,
-        total_amount: orderData.totalAmount,
-        order_status: orderData.orderStatus || 'pending',
-        payment_status: orderData.paymentStatus || 'deposit_only',
-        expected_delivery_date: orderData.expectedDeliveryDate,
-        payments: [],
-        total_paid: '0.00',
-        balance_due: orderData.totalAmount
-      };
-      
-      setOrders([newOrder, ...orders]);
-      setShowOrderForm(false);
-      setSuccess('Order created successfully!');
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccess(null), 3000);
-      
-    } catch (err) {
-      setError('Failed to create order');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Remove handleCreateOrder function
 
   const handleCreateUser = async (e) => {
     e.preventDefault();
@@ -250,65 +114,133 @@ const OwnerDashboard = ({ user, onLogout }) => {
       setError('Passwords do not match');
       return;
     }
-
     try {
-      // For now, just add to local state
-      const newUser = {
-        id: users.length + 1,
-        username: userForm.username,
-        email: userForm.email,
-        first_name: userForm.first_name,
-        last_name: userForm.last_name,
-        role: userForm.role,
-        phone: userForm.phone,
-        is_active: true
-      };
-      
-      setUsers([...users, newUser]);
+      setLoading(true);
+      setError(null);
+      await createUser(userForm);
       setShowUserModal(false);
       setUserForm({
         username: '', email: '', first_name: '', last_name: '',
         role: 'admin', phone: '', password: '', confirm_password: ''
       });
-      setError(null);
       setSuccess('User created successfully!');
+      fetchDashboardData();
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      setError('Failed to create user');
+      setError('Failed to create user: ' + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleEditUser = async (e) => {
     e.preventDefault();
     try {
-      // For now, just update local state
-      const updatedUsers = users.map(u => 
-        u.id === selectedUser.id 
-          ? { ...u, ...userForm }
-          : u
-      );
-      
-      setUsers(updatedUsers);
+      setLoading(true);
+      setError(null);
+      const userUpdate = { ...userForm };
+      if (!userUpdate.password) delete userUpdate.password;
+      if (!userUpdate.confirm_password) delete userUpdate.confirm_password;
+      await updateUser(selectedUser.id, userUpdate);
       setShowEditUserModal(false);
       setSelectedUser(null);
-      setError(null);
       setSuccess('User updated successfully!');
+      fetchDashboardData();
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      setError('Failed to update user');
+      setError('Failed to update user: ' + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDeleteUser = async (userId) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
+    try {
+      setLoading(true);
+      setError(null);
+      await deleteUser(userId);
+      setSuccess('User deleted successfully!');
+      fetchDashboardData();
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      setError('Failed to delete user: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteOrder = async (orderId) => {
+    try {
+      setLoading(true);
+      setError(null);
+      await deleteOrder(orderId);
+      setSuccess('Order deleted successfully!');
+      fetchDashboardData();
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      setError('Failed to delete order: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openOrderFormModal = async (order = null) => {
+    if (order) {
+      setLoading(true);
       try {
-        setUsers(users.filter(u => u.id !== userId));
-        setError(null);
-        setSuccess('User deleted successfully!');
-        setTimeout(() => setSuccess(null), 3000);
-      } catch (err) {
-        setError('Failed to delete user');
+        const fullOrder = await getOrder(order.id);
+        setEditingOrder(fullOrder);
+        setOrderFormData({
+          customerName: fullOrder.customer?.name || '',
+          customerPhone: fullOrder.customer?.phone || '',
+          customerEmail: fullOrder.customer?.email || '',
+          customerAddress: fullOrder.customer?.address || '',
+          expectedDeliveryDate: fullOrder.expected_delivery_date || '',
+          adminNotes: fullOrder.admin_notes || '',
+          depositAmount: fullOrder.deposit_amount || '',
+          paymentStatus: fullOrder.payment_status || 'deposit_only',
+          orderStatus: fullOrder.order_status || 'pending',
+        });
+        setOrderItems(
+          Array.isArray(fullOrder.items)
+            ? fullOrder.items.map(item => ({
+                productId: item.product,
+                productName: item.product_name || '',
+                productDescription: item.product_description || '',
+                quantity: item.quantity,
+                unitPrice: item.unit_price,
+                color: item.color || '',
+                fabric: item.fabric || '',
+              }))
+            : []
+        );
+      } catch (e) {
+        setError('Failed to load order details');
+      } finally {
+        setLoading(false);
       }
+    } else {
+      setEditingOrder(null);
+      setOrderFormData(null);
+      setOrderItems([]);
+    }
+    setShowOrderForm(true);
+  };
+
+  const handleOrderFormSubmit = async (payload) => {
+    try {
+      if (editingOrder) {
+        // Update existing order
+        await updateOrder(editingOrder.id, payload);
+        setSuccess('Order updated!');
+      } else {
+        await createOrder(payload);
+        setSuccess('Order created!');
+      }
+      setShowOrderForm(false);
+      fetchDashboardData();
+    } catch (e) {
+      setError(e.message);
     }
   };
 
@@ -345,51 +277,13 @@ const OwnerDashboard = ({ user, onLogout }) => {
     e.preventDefault();
     try {
       setLoading(true);
+      setError(null);
       
-      // Create new payment
-      const newPayment = {
-        id: Date.now(),
-        amount: paymentForm.amount,
-        payment_type: paymentForm.payment_type,
-        payment_method: paymentForm.payment_method,
-        reference_number: paymentForm.reference_number,
-        payment_date: paymentForm.payment_date,
-        notes: paymentForm.notes,
-        pop_file: 'pop_' + Date.now() + '.jpg',
-        pop_url: '/uploads/pop_' + Date.now() + '.jpg'
-      };
-
-      // Update order with new payment
-      const updatedOrders = orders.map(order => {
-        if (order.id === selectedOrder.id) {
-          const updatedPayments = [...order.payments, newPayment];
-          const totalPaid = updatedPayments.reduce((sum, payment) => 
-            sum + parseFloat(payment.amount), 0
-          );
-          const balanceDue = parseFloat(order.total_amount) - totalPaid;
-          
-          let newPaymentStatus = 'deposit_only';
-          if (balanceDue === 0) {
-            newPaymentStatus = 'fully_paid';
-          } else if (totalPaid >= parseFloat(order.total_amount) * 0.5) {
-            newPaymentStatus = 'fifty_percent';
-          }
-
-          return {
-            ...order,
-            payments: updatedPayments,
-            total_paid: totalPaid.toFixed(2),
-            balance_due: balanceDue.toFixed(2),
-            payment_status: newPaymentStatus
-          };
-        }
-        return order;
-      });
-
-      setOrders(updatedOrders);
+      // TODO: Implement payment creation API call
+      // For now, just close the modal and show success
       setShowPaymentModal(false);
       setSelectedOrder(null);
-      setSuccess('Payment added successfully!');
+      setSuccess('Payment functionality will be implemented with backend API');
       setTimeout(() => setSuccess(null), 3000);
       
     } catch (err) {
@@ -450,6 +344,15 @@ const OwnerDashboard = ({ user, onLogout }) => {
           <span className="visually-hidden">Loading...</span>
         </div>
       </Container>
+    );
+  }
+
+  if (showOrderDetail && selectedOrderId) {
+    return (
+      <OrderDetail 
+        orderId={selectedOrderId} 
+        onBack={() => { setShowOrderDetail(false); setSelectedOrderId(null); fetchDashboardData(); }} 
+      />
     );
   }
 
@@ -601,6 +504,7 @@ const OwnerDashboard = ({ user, onLogout }) => {
                               <th>Customer</th>
                               <th>Status</th>
                               <th>Amount</th>
+                              <th>Actions</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -614,6 +518,12 @@ const OwnerDashboard = ({ user, onLogout }) => {
                                   </Badge>
                                 </td>
                                 <td>₦{order.total_amount}</td>
+                                <td>
+                                  <Button variant="outline-danger" size="sm" onClick={() => handleDeleteOrder(order.id)} title="Delete Order">
+                                    <FaTrash />
+                                  </Button>
+                                  <Button variant="outline-primary" size="sm" onClick={() => { setSelectedOrderId(order.id); setShowOrderDetail(true); }}>View/Edit</Button>
+                                </td>
                               </tr>
                             ))}
                           </tbody>
@@ -754,6 +664,7 @@ const OwnerDashboard = ({ user, onLogout }) => {
                           <th>Status</th>
                           <th>Payment</th>
                           <th>Expected Delivery</th>
+                          <th>Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -782,6 +693,15 @@ const OwnerDashboard = ({ user, onLogout }) => {
                               </Badge>
                             </td>
                             <td>{new Date(order.expected_delivery_date).toLocaleDateString()}</td>
+                            <td>
+                              <Dropdown as={ButtonGroup} align="end">
+                                <Dropdown.Toggle variant="secondary" size="sm" id={`dropdown-actions-${order.id}`}>Actions</Dropdown.Toggle>
+                                <Dropdown.Menu>
+                                  <Dropdown.Item onClick={() => openOrderFormModal(order)}>Edit</Dropdown.Item>
+                                  <Dropdown.Item onClick={() => handleDeleteOrder(order.id)} className="text-danger">Delete</Dropdown.Item>
+                                </Dropdown.Menu>
+                              </Dropdown>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -1040,13 +960,18 @@ const OwnerDashboard = ({ user, onLogout }) => {
       </Container>
 
       {/* Order Form Modal */}
-      {showOrderForm && (
-        <OrderForm
-          onClose={() => setShowOrderForm(false)}
-          onSubmit={handleCreateOrder}
-          loading={loading}
-        />
-      )}
+      <Modal show={showOrderForm} onHide={() => setShowOrderForm(false)} size="lg" centered>
+        <Modal.Body className="p-0">
+          <OrderForm
+            onClose={() => setShowOrderForm(false)}
+            onSubmit={handleOrderFormSubmit}
+            loading={loading}
+            initialData={orderFormData}
+            initialItems={orderItems}
+            isEdit={!!editingOrder}
+          />
+        </Modal.Body>
+      </Modal>
 
       {/* Create User Modal */}
       <Modal show={showUserModal} onHide={() => setShowUserModal(false)} size="lg">
@@ -1158,8 +1083,8 @@ const OwnerDashboard = ({ user, onLogout }) => {
             <Button variant="secondary" onClick={() => setShowUserModal(false)}>
               Cancel
             </Button>
-            <Button variant="primary" type="submit">
-              Create User
+            <Button variant="primary" type="submit" disabled={loading}>
+              {loading ? 'Creating...' : 'Create User'}
             </Button>
           </Modal.Footer>
         </Form>
@@ -1251,8 +1176,8 @@ const OwnerDashboard = ({ user, onLogout }) => {
             <Button variant="secondary" onClick={() => setShowEditUserModal(false)}>
               Cancel
             </Button>
-            <Button variant="primary" type="submit">
-              Update User
+            <Button variant="primary" type="submit" disabled={loading}>
+              {loading ? 'Updating...' : 'Update User'}
             </Button>
           </Modal.Footer>
         </Form>
