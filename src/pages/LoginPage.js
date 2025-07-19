@@ -10,6 +10,9 @@ import {
   FaCheckCircle
 } from 'react-icons/fa';
 
+// API configuration
+const API_BASE = process.env.REACT_APP_API_BASE || 'https://internaloox-1.onrender.com/api';
+
 // Helper to get CSRF token from cookie
 //function getCookie(name) {
 //  let cookieValue = null;
@@ -88,7 +91,7 @@ const LoginPage = ({ onLogin }) => {
     setSuccess('');
 
     try {
-      const response = await fetch('http://localhost:8000/api/users/login/', {
+      const response = await fetch(`${API_BASE}/users/login/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -113,7 +116,7 @@ const LoginPage = ({ onLogin }) => {
       localStorage.setItem('oox_user', JSON.stringify(data.user));
 
       // Fetch current user info with Authorization header
-      const userRes = await fetch('http://localhost:8000/api/users/current-user/', {
+      const userRes = await fetch(`${API_BASE}/users/current-user/`, {
         headers: {
           'Authorization': `Bearer ${data.access}`,
         },

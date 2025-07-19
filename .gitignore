@@ -4,3 +4,6 @@ node_modules/
 dist/
 *.log
 
+# Environment variables for local development
+.env.local
+

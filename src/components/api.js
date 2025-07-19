@@ -1,4 +1,4 @@
-const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8000/api';
+const API_BASE = process.env.REACT_APP_API_BASE || 'https://internaloox-1.onrender.com/api';
 
 async function apiRequest(endpoint, { method = 'GET', data, isForm = false } = {}) {
   const url = `${API_BASE}${endpoint}`;
