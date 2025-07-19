@@ -59,4 +59,13 @@ export const deleteUser = (id) => apiRequest(`/users/users/${id}/`, { method: 'D
 // Products
 export const getProducts = () => apiRequest('/products/');
 export const getColors = () => apiRequest('/colors/');
-export const getFabrics = () => apiRequest('/fabrics/'); 
+export const getFabrics = () => apiRequest('/fabrics/');
+
+// Order Items
+export const getOrderItems = (orderId = null) => {
+    const endpoint = orderId ? `/order-items/?order=${orderId}` : '/order-items/';
+    return apiRequest(endpoint);
+};
+export const createOrderItem = (data) => apiRequest('/order-items/', { method: 'POST', data });
+export const updateOrderItem = (id, data) => apiRequest(`/order-items/${id}/`, { method: 'PUT', data });
+export const deleteOrderItem = (id) => apiRequest(`/order-items/${id}/`, { method: 'DELETE' }); 

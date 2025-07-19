@@ -250,13 +250,12 @@ const AdminDashboard = ({ user, onLogout }) => {
               <Card.Title><FaUsers className="me-2" />Customer Management</Card.Title>
                 <Button variant="primary" onClick={() => openCustomerModal()}><FaPlus className="me-2" />Add Customer</Button>
               </div>
-              <CustomersTable customers={customers} loading={customersLoading} />
-              {customers.map(customer => (
-                <span key={customer.id} style={{ display: 'none' }}>
-                  <Button size="sm" variant="outline-secondary" onClick={() => openCustomerModal(customer)}><FaEdit /></Button>
-                  <Button size="sm" variant="outline-danger" onClick={() => { setDeleteTarget(customer); setDeleteType('customer'); }}><FaTrash /></Button>
-                </span>
-              ))}
+              <CustomersTable 
+                customers={customers} 
+                loading={customersLoading} 
+                onEdit={openCustomerModal}
+                onDelete={(customer) => { setDeleteTarget(customer); setDeleteType('customer'); }}
+              />
             </Card.Body>
           </Card>
         );

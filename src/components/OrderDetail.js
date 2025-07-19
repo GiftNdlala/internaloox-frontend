@@ -19,6 +19,9 @@ const OrderDetail = ({ orderId, onBack }) => {
     setError(null);
     try {
       const data = await getOrder(orderId);
+      console.log('Order data received:', data); // Debug log
+      console.log('Order items:', data.items); // Debug log
+      
       setOrder(data);
       setForm({
         customer: { ...data.customer },
@@ -29,9 +32,10 @@ const OrderDetail = ({ orderId, onBack }) => {
         order_status: data.order_status,
         total_amount: data.total_amount,
         balance_amount: data.balance_amount,
-        items: data.items.map(item => ({ ...item })),
+        items: data.items ? data.items.map(item => ({ ...item })) : [],
       });
     } catch (e) {
+      console.error('Error fetching order:', e); // Debug log
       setError('Failed to load order');
     } finally {
       setLoading(false);
@@ -45,7 +49,11 @@ const OrderDetail = ({ orderId, onBack }) => {
     getFabrics().then(setFabrics);
   }, [fetchData]);
 
-  const handleEdit = () => setEditMode(true);
+  const handleEdit = () => {
+    console.log('Form state when editing:', form); // Debug log
+    console.log('Form items:', form?.items); // Debug log
+    setEditMode(true);
+  };
   const handleCancel = () => {
     setEditMode(false);
     setForm({
@@ -89,8 +97,30 @@ const OrderDetail = ({ orderId, onBack }) => {
     setError(null);
     setSuccess(null);
     try {
+      // Prepare the payload with customer data at the top level
       const payload = {
-        ...form,
+        customer_id: form.customer.id,
+        expected_delivery_date: form.expected_delivery_date,
+        admin_notes: form.admin_notes,
+        deposit_amount: form.deposit_amount,
+        payment_status: form.payment_status,
+        order_status: form.order_status,
+        total_amount: form.total_amount,
+        balance_amount: form.balance_amount,
+        customer_update: {
+          id: form.customer.id,
+          name: form.customer.name,
+          phone: form.customer.phone,
+          email: form.customer.email,
+          address: form.customer.address,
+        }, // Include full customer object for backend processing
+        customer_data: {
+          id: form.customer.id,
+          name: form.customer.name,
+          phone: form.customer.phone,
+          email: form.customer.email,
+          address: form.customer.address,
+        }, // Alternative field name
         items: form.items.map(item => ({
           id: item.id,
           product: item.product,
@@ -101,11 +131,15 @@ const OrderDetail = ({ orderId, onBack }) => {
           product_description: item.product_description || '',
         })),
       };
+      console.log('Saving order with payload:', payload); // Debug log
+      console.log('Customer data being sent:', payload.customer_update); // Debug log
+      console.log('Full payload keys:', Object.keys(payload)); // Debug log
       await updateOrder(orderId, payload);
       setSuccess('Order updated successfully!');
       setEditMode(false);
       fetchData();
     } catch (e) {
+      console.error('Error saving order:', e); // Debug log
       setError('Failed to update order');
     }
   };
@@ -173,40 +207,46 @@ const OrderDetail = ({ orderId, onBack }) => {
                 </tr>
               </thead>
               <tbody>
-                {form.items.map((item, idx) => (
-                  <tr key={idx}>
-                    <td>
-                      <Form.Select value={item.product} onChange={e => handleItemChange(idx, 'product', e.target.value)}>
-                        <option value="">Select</option>
-                        {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                      </Form.Select>
-                    </td>
-                    <td>
-                      <Form.Control value={item.product_description} onChange={e => handleItemChange(idx, 'product_description', e.target.value)} />
-                    </td>
-                    <td>
-                      <Form.Control type="number" min="1" value={item.quantity} onChange={e => handleItemChange(idx, 'quantity', e.target.value)} />
-                    </td>
-                    <td>
-                      <Form.Control type="number" min="0" value={item.unit_price} onChange={e => handleItemChange(idx, 'unit_price', e.target.value)} />
-                    </td>
-                    <td>
-                      <Form.Select value={item.color || ''} onChange={e => handleItemChange(idx, 'color', e.target.value)}>
-                        <option value="">None</option>
-                        {colors.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                      </Form.Select>
-                    </td>
-                    <td>
-                      <Form.Select value={item.fabric || ''} onChange={e => handleItemChange(idx, 'fabric', e.target.value)}>
-                        <option value="">None</option>
-                        {fabrics.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
-                      </Form.Select>
-                    </td>
-                    <td>
-                      <Button variant="danger" size="sm" onClick={() => handleRemoveItem(idx)}>Remove</Button>
-                    </td>
+                {form.items && form.items.length > 0 ? (
+                  form.items.map((item, idx) => (
+                    <tr key={idx}>
+                      <td>
+                        <Form.Select value={item.product} onChange={e => handleItemChange(idx, 'product', e.target.value)}>
+                          <option value="">Select</option>
+                          {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                        </Form.Select>
+                      </td>
+                      <td>
+                        <Form.Control value={item.product_description} onChange={e => handleItemChange(idx, 'product_description', e.target.value)} />
+                      </td>
+                      <td>
+                        <Form.Control type="number" min="1" value={item.quantity} onChange={e => handleItemChange(idx, 'quantity', e.target.value)} />
+                      </td>
+                      <td>
+                        <Form.Control type="number" min="0" value={item.unit_price} onChange={e => handleItemChange(idx, 'unit_price', e.target.value)} />
+                      </td>
+                      <td>
+                        <Form.Select value={item.color || ''} onChange={e => handleItemChange(idx, 'color', e.target.value)}>
+                          <option value="">None</option>
+                          {colors.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                        </Form.Select>
+                      </td>
+                      <td>
+                        <Form.Select value={item.fabric || ''} onChange={e => handleItemChange(idx, 'fabric', e.target.value)}>
+                          <option value="">None</option>
+                          {fabrics.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+                        </Form.Select>
+                      </td>
+                      <td>
+                        <Button variant="danger" size="sm" onClick={() => handleRemoveItem(idx)}>Remove</Button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="7" className="text-center text-muted">No products added yet</td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </Table>
             <Button variant="outline-primary" onClick={handleAddItem}>Add Product</Button>
@@ -236,16 +276,22 @@ const OrderDetail = ({ orderId, onBack }) => {
               </tr>
             </thead>
             <tbody>
-              {order.items.map((item, idx) => (
-                <tr key={idx}>
-                  <td>{products.find(p => String(p.id) === String(item.product))?.name || item.product_name}</td>
-                  <td>{item.product_description}</td>
-                  <td>{item.quantity}</td>
-                  <td>R{item.unit_price}</td>
-                  <td>{colors.find(c => String(c.id) === String(item.color))?.name || ''}</td>
-                  <td>{fabrics.find(f => String(f.id) === String(item.fabric))?.name || ''}</td>
+              {order.items && order.items.length > 0 ? (
+                order.items.map((item, idx) => (
+                  <tr key={idx}>
+                    <td>{products.find(p => String(p.id) === String(item.product))?.name || item.product_name}</td>
+                    <td>{item.product_description}</td>
+                    <td>{item.quantity}</td>
+                    <td>R{item.unit_price}</td>
+                    <td>{colors.find(c => String(c.id) === String(item.color))?.name || ''}</td>
+                    <td>{fabrics.find(f => String(f.id) === String(item.fabric))?.name || ''}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="text-center text-muted">No products in this order</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </Table>
           <Button variant="primary" onClick={handleEdit}>Edit</Button>

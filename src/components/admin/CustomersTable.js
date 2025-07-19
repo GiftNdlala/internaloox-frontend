@@ -1,7 +1,8 @@
 import React from 'react';
-import { Table, Spinner } from 'react-bootstrap';
+import { Table, Spinner, Button } from 'react-bootstrap';
+import { FaEdit, FaTrash } from 'react-icons/fa';
 
-const CustomersTable = ({ customers, loading }) => {
+const CustomersTable = ({ customers, loading, onEdit, onDelete }) => {
   if (loading) {
     return (
       <div className="text-center my-4">
@@ -22,6 +23,7 @@ const CustomersTable = ({ customers, loading }) => {
           <th>Customer Name</th>
           <th>Phone</th>
           <th>Email</th>
+          <th>Address</th>
           <th>Orders</th>
           <th>Actions</th>
         </tr>
@@ -32,10 +34,15 @@ const CustomersTable = ({ customers, loading }) => {
             <td>{customer.name}</td>
             <td>{customer.phone}</td>
             <td>{customer.email}</td>
+            <td>{customer.address}</td>
             <td>{customer.orders_count || 0}</td>
             <td>
-              {/* Actions will be added here */}
-              <span className="text-muted">(Actions)</span>
+              <Button size="sm" variant="outline-secondary" onClick={() => onEdit(customer)} className="me-2">
+                <FaEdit />
+              </Button>
+              <Button size="sm" variant="outline-danger" onClick={() => onDelete(customer)}>
+                <FaTrash />
+              </Button>
             </td>
           </tr>
         ))}

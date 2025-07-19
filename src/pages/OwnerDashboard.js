@@ -155,33 +155,33 @@ const OwnerDashboard = ({ user, onLogout }) => {
   };
 
   const handleDeleteUser = async (userId) => {
-    try {
-      setLoading(true);
-      setError(null);
-      await deleteUser(userId);
-      setSuccess('User deleted successfully!');
-      fetchDashboardData();
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err) {
+      try {
+        setLoading(true);
+        setError(null);
+        await deleteUser(userId);
+        setSuccess('User deleted successfully!');
+        fetchDashboardData();
+        setTimeout(() => setSuccess(null), 3000);
+      } catch (err) {
       setError('Failed to delete user: ' + err.message);
-    } finally {
-      setLoading(false);
+      } finally {
+        setLoading(false);
     }
   };
 
   const handleDeleteOrder = async (orderId) => {
-    try {
-      setLoading(true);
-      setError(null);
+      try {
+        setLoading(true);
+        setError(null);
       await deleteOrder(orderId);
-      setSuccess('Order deleted successfully!');
-      fetchDashboardData();
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err) {
-      setError('Failed to delete order: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
+        setSuccess('Order deleted successfully!');
+        fetchDashboardData();
+        setTimeout(() => setSuccess(null), 3000);
+      } catch (err) {
+        setError('Failed to delete order: ' + err.message);
+      } finally {
+        setLoading(false);
+      }
   };
 
   const openOrderFormModal = async (order = null) => {
@@ -962,14 +962,14 @@ const OwnerDashboard = ({ user, onLogout }) => {
       {/* Order Form Modal */}
       <Modal show={showOrderForm} onHide={() => setShowOrderForm(false)} size="lg" centered>
         <Modal.Body className="p-0">
-          <OrderForm
-            onClose={() => setShowOrderForm(false)}
+        <OrderForm
+          onClose={() => setShowOrderForm(false)}
             onSubmit={handleOrderFormSubmit}
-            loading={loading}
+          loading={loading}
             initialData={orderFormData}
             initialItems={orderItems}
             isEdit={!!editingOrder}
-          />
+        />
         </Modal.Body>
       </Modal>
 
