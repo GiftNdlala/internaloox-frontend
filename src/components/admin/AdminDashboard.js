@@ -422,17 +422,17 @@ const AdminDashboard = ({ user, onLogout }) => {
   const AdminNav = () => (
     <Nav variant="pills" className="mb-4 flex-nowrap" style={{ overflowX: 'auto' }}>
       {[
-        { key: 'overview', label: 'Overview', icon: FaChartBar },
-        { key: 'orders', label: 'Orders', icon: FaClipboardList },
-        { key: 'users', label: 'Users', icon: FaUsers },
-        { key: 'customers', label: 'Customers', icon: FaFileAlt },
-        { key: 'payments', label: 'Payments', icon: FaMoneyBillWave },
-        { key: 'reports', label: 'Reports', icon: FaFileAlt },
+        { key: 'overview', label: 'Overview', icon: FaChartBar, isTab: true },
+        { key: 'orders', label: 'Orders', icon: FaClipboardList, isTab: false, route: '/admin/orders' },
+        { key: 'users', label: 'Users', icon: FaUsers, isTab: true },
+        { key: 'customers', label: 'Customers', icon: FaFileAlt, isTab: true },
+        { key: 'payments', label: 'Payments', icon: FaMoneyBillWave, isTab: true },
+        { key: 'reports', label: 'Reports', icon: FaFileAlt, isTab: true },
       ].map(tab => (
         <Nav.Link
           key={tab.key}
           active={activeTab === tab.key}
-          onClick={() => setActiveTab(tab.key)}
+          onClick={() => tab.isTab ? setActiveTab(tab.key) : navigate(tab.route)}
           className="d-flex align-items-center text-nowrap me-2"
           style={{
             backgroundColor: activeTab === tab.key ? '#3b82f6' : 'transparent',
@@ -616,16 +616,6 @@ const AdminDashboard = ({ user, onLogout }) => {
       )}
 
       {/* Tab Content */}
-      {activeTab === 'orders' && (
-        <Card className="shadow-sm">
-          <Card.Header className="bg-primary text-white">
-            <h5 className="mb-0">Order Management</h5>
-          </Card.Header>
-          <Card.Body>
-            <OrdersTable orders={orders} loading={loading} />
-          </Card.Body>
-        </Card>
-      )}
 
       {activeTab === 'customers' && (
         <Card className="shadow-sm">

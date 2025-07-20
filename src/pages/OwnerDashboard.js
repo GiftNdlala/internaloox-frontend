@@ -237,15 +237,15 @@ const OwnerDashboard = ({ user, onLogout }) => {
   const MobileNav = () => (
     <Nav variant="pills" className="mb-4 flex-nowrap" style={{ overflowX: 'auto' }}>
       {[
-        { key: 'overview', label: 'Overview', icon: FaChartLine },
-        { key: 'orders', label: 'Orders', icon: FaClipboardList },
-        { key: 'users', label: 'Team', icon: FaUsers },
-        { key: 'analytics', label: 'Analytics', icon: FaChartBar },
+        { key: 'overview', label: 'Overview', icon: FaChartLine, isTab: true },
+        { key: 'orders', label: 'Orders', icon: FaClipboardList, isTab: false, route: '/owner/orders' },
+        { key: 'users', label: 'Team', icon: FaUsers, isTab: true },
+        { key: 'analytics', label: 'Analytics', icon: FaChartBar, isTab: true },
       ].map(tab => (
         <Nav.Link
           key={tab.key}
           active={activeTab === tab.key}
-          onClick={() => setActiveTab(tab.key)}
+          onClick={() => tab.isTab ? setActiveTab(tab.key) : navigate(tab.route)}
           className="d-flex align-items-center text-nowrap me-2"
           style={{
             backgroundColor: activeTab === tab.key ? '#1e293b' : 'transparent',
@@ -380,7 +380,7 @@ const OwnerDashboard = ({ user, onLogout }) => {
       )}
 
       {/* Add other tab content here */}
-      {activeTab !== 'overview' && (
+      {(activeTab === 'users' || activeTab === 'analytics') && (
         <Card className="text-center p-5">
           <h4>Coming Soon</h4>
           <p className="text-muted">This section is being enhanced with executive-level features</p>
