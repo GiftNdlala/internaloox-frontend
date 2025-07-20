@@ -9,7 +9,7 @@ import {
   FaPlus, FaEdit, FaTrash, FaCog, FaSignOutAlt,
   FaUserShield, FaClipboardList, FaMoneyBillWave,
   FaFileAlt, FaDownload, FaEye, FaArrowUp,
-  FaArrowDown, FaCrown, FaGem, FaChartBar,
+  FaArrowDown, FaStar, FaCircle, FaChartBar,
   FaCalendarCheck, FaClock, FaExclamationTriangle
 } from 'react-icons/fa';
 import OrderForm from '../components/OrderForm';
@@ -88,7 +88,7 @@ const OwnerDashboard = ({ user, onLogout }) => {
       <Row className="align-items-center">
         <Col md={8}>
           <div className="d-flex align-items-center mb-3">
-            <FaCrown className="text-warning me-3" size={40} />
+                            <FaStar className="text-warning me-3" size={40} />
             <div>
               <h2 className="mb-0" style={{ fontWeight: '700', fontSize: '2.2rem' }}>
                 {getGreeting()}
@@ -324,7 +324,7 @@ const OwnerDashboard = ({ user, onLogout }) => {
                 title="Avg Order Value"
                 value={Math.round(avgOrderValue)}
                 change={15}
-                icon={FaGem}
+                                  icon={FaCircle}
                 color="#8b5cf6"
                 prefix="R"
               />

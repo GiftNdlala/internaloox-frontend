@@ -4,7 +4,7 @@ import {
   ProgressBar, Alert, Form, Modal 
 } from 'react-bootstrap';
 import { 
-  FaHammer, FaBoxes, FaClock, FaPlay, FaPause, 
+  FaWrench, FaBoxes, FaClock, FaPlay, FaPause, 
   FaCheck, FaExclamationTriangle, FaQrcode,
   FaEye, FaEdit, FaChevronRight, FaUser
 } from 'react-icons/fa';
@@ -62,7 +62,7 @@ const WarehouseDashboard = ({ user, onLogout }) => {
       <Row className="align-items-center">
         <Col md={8}>
           <div className="d-flex align-items-center mb-3">
-            <FaHammer className="text-success me-3" size={50} />
+                          <FaWrench className="text-success me-3" size={50} />
             <div>
               <h1 className="mb-0" style={{ 
                 fontWeight: '900', 
@@ -343,7 +343,7 @@ const WarehouseDashboard = ({ user, onLogout }) => {
           <StatusCard
             title="IN PROGRESS"
             count={inProduction.length}
-            icon={FaHammer}
+            icon={FaWrench}
             color="#f59e0b"
             bgColor="#fbbf24"
           />
@@ -372,7 +372,7 @@ const WarehouseDashboard = ({ user, onLogout }) => {
           title="🟠 IN PRODUCTION"
           status="in_production"
           orders={inProduction}
-          icon={FaHammer}
+          icon={FaWrench}
           color="#f59e0b"
         />
         <KanbanColumn

@@ -6,7 +6,7 @@ import {
 import {
   FaClipboardList, FaMoneyBillWave, FaUsers, FaChartBar,
   FaPlus, FaEdit, FaTrash, FaBell, FaCheckCircle, FaExclamationTriangle,
-  FaCog, FaShield, FaFileAlt, FaClock, FaUserShield,
+  FaCog, FaFileAlt, FaClock, FaUserShield,
   FaEnvelope, FaTasks, FaEye, FaCheck
 } from 'react-icons/fa';
 import OrdersTable from './OrdersTable';
@@ -229,7 +229,7 @@ const AdminDashboard = ({ user, onLogout }) => {
               backgroundColor: '#3b82f6',
               color: 'white'
             }}>
-                              <FaShield size={35} />
+                              <FaUserShield size={35} />
             </div>
             <div>
               <h1 className="mb-0" style={{
