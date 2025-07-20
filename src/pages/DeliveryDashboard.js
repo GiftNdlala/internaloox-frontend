@@ -5,7 +5,7 @@ import {
 } from 'react-bootstrap';
 import {
   FaTruck, FaMapMarkerAlt, FaRoute, FaClock,
-  FaCheckCircle, FaCamera, FaPhone, FaNavigation,
+  FaCheckCircle, FaCamera, FaPhone, FaCompass,
   FaPlay, FaPause, FaFlag, FaUser, FaMoneyBillWave,
   FaClipboardCheck, FaExclamationTriangle
 } from 'react-icons/fa';
@@ -362,7 +362,7 @@ const DeliveryDashboard = ({ user, onLogout }) => {
         <Card className="mb-4 shadow-lg border-warning border-2">
           <Card.Header className="bg-warning text-dark">
             <h5 className="mb-0">
-              <FaNavigation className="me-2" />
+              <FaCompass className="me-2" />
               Active Delivery: {activeDelivery.order_number}
             </h5>
           </Card.Header>
@@ -460,7 +460,7 @@ const DeliveryDashboard = ({ user, onLogout }) => {
                 <DeliveryButton
                   variant="primary"
                   onClick={() => openGoogleMaps(selectedOrder.customer?.address)}
-                  icon={FaNavigation}
+                  icon={FaCompass}
                 >
                   Open Navigation
                 </DeliveryButton>
