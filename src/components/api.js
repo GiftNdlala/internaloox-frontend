@@ -61,6 +61,14 @@ export const getProducts = () => apiRequest('/products/');
 export const getColors = () => apiRequest('/colors/');
 export const getFabrics = () => apiRequest('/fabrics/');
 
+// MVP: Reference Boards
+export const getColorReferences = () => apiRequest('/color-references/');
+export const getFabricReferences = () => apiRequest('/fabric-references/');
+
+// Production Status Updates
+export const updateProductionStatus = (orderId, data) => apiRequest(`/orders/${orderId}/update_production_status/`, { method: 'POST', data });
+export const updateOrderStatus = (orderId, data) => apiRequest(`/orders/${orderId}/update_status/`, { method: 'POST', data });
+
 // Order Items
 export const getOrderItems = (orderId = null) => {
     const endpoint = orderId ? `/order-items/?order=${orderId}` : '/order-items/';

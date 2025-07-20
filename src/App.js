@@ -5,6 +5,7 @@ import AdminDashboard from './components/admin/AdminDashboard';
 import WarehouseDashboard from './pages/WarehouseDashboard';
 import DeliveryDashboard from './pages/DeliveryDashboard';
 import OwnerDashboard from './pages/OwnerDashboard';
+import Orders from './pages/Orders';
 import LoginPage from './pages/LoginPage';
 import './App.css';
 
@@ -124,6 +125,32 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['delivery', 'owner', 'admin']}>
                 <DeliveryDashboard user={user} onLogout={handleLogout} />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Orders Routes - Shared across roles */}
+          <Route 
+            path="/owner/orders" 
+            element={
+              <ProtectedRoute allowedRoles={['owner']}>
+                <Orders user={user} userRole="owner" onLogout={handleLogout} />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/orders" 
+            element={
+              <ProtectedRoute allowedRoles={['admin', 'owner']}>
+                <Orders user={user} userRole="admin" onLogout={handleLogout} />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/warehouse/orders" 
+            element={
+              <ProtectedRoute allowedRoles={['warehouse', 'owner', 'admin']}>
+                <Orders user={user} userRole="warehouse" onLogout={handleLogout} />
               </ProtectedRoute>
             } 
           />
