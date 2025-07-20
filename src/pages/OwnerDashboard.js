@@ -8,8 +8,8 @@ import {
   FaUsers, FaBoxes, FaTruck, FaChartLine, 
   FaPlus, FaEdit, FaTrash, FaCog, FaSignOutAlt,
   FaUserShield, FaClipboardList, FaMoneyBillWave,
-  FaFileAlt, FaDownload, FaEye, FaTrendingUp,
-  FaTrendingDown, FaCrown, FaGem, FaChartBar,
+  FaFileAlt, FaDownload, FaEye, FaArrowUp,
+  FaArrowDown, FaCrown, FaGem, FaChartBar,
   FaCalendarCheck, FaClock, FaExclamationTriangle
 } from 'react-icons/fa';
 import OrderForm from '../components/OrderForm';
@@ -146,7 +146,7 @@ const OwnerDashboard = ({ user, onLogout }) => {
         </p>
         {change !== undefined && (
           <div className={`small ${change >= 0 ? 'text-success' : 'text-danger'}`}>
-            {change >= 0 ? <FaTrendingUp /> : <FaTrendingDown />}
+            {change >= 0 ? <FaArrowUp /> : <FaArrowDown />}
             <span className="ms-1">{Math.abs(change)}%</span>
           </div>
         )}

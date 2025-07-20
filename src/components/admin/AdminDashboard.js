@@ -6,8 +6,8 @@ import {
 import {
   FaClipboardList, FaMoneyBillWave, FaUsers, FaChartBar,
   FaPlus, FaEdit, FaTrash, FaBell, FaCheckCircle, FaExclamationTriangle,
-  FaCog, FaShieldAlt, FaFileAlt, FaClock, FaUserShield,
-  FaInbox, FaTasks, FaEye, FaCheck
+  FaCog, FaShield, FaFileAlt, FaClock, FaUserShield,
+  FaEnvelope, FaTasks, FaEye, FaCheck
 } from 'react-icons/fa';
 import OrdersTable from './OrdersTable';
 import PaymentsTable from './PaymentsTable';
@@ -229,7 +229,7 @@ const AdminDashboard = ({ user, onLogout }) => {
               backgroundColor: '#3b82f6',
               color: 'white'
             }}>
-              <FaShieldAlt size={35} />
+                              <FaShield size={35} />
             </div>
             <div>
               <h1 className="mb-0" style={{
@@ -332,7 +332,7 @@ const AdminDashboard = ({ user, onLogout }) => {
       <Card className="h-100 shadow-sm">
         <Card.Header className="bg-warning text-dark d-flex justify-content-between align-items-center">
           <h6 className="mb-0">
-            <FaInbox className="me-2" />
+                          <FaEnvelope className="me-2" />
             Approval Queue
           </h6>
           <Badge bg="dark">{pendingOrders.length}</Badge>
