@@ -22,7 +22,7 @@ const WarehouseDashboard = ({ user, onLogout }) => {
 
   // Real-time clock
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000); // 1 minute
     return () => clearInterval(timer);
   }, []);
 
@@ -94,7 +94,7 @@ const WarehouseDashboard = ({ user, onLogout }) => {
             </Badge>
             <div className="text-light" style={{ fontSize: '1.1rem', fontWeight: '600' }}>
               <FaClock className="me-2" />
-              {currentTime.toLocaleTimeString()}
+                              {currentTime.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
             </div>
           </div>
         </Col>

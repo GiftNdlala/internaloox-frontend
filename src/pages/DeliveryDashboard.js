@@ -24,7 +24,7 @@ const DeliveryDashboard = ({ user, onLogout }) => {
 
   // Real-time clock
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000); // 1 minute
     return () => clearInterval(timer);
   }, []);
 
@@ -106,7 +106,7 @@ const DeliveryDashboard = ({ user, onLogout }) => {
             </Badge>
             <div style={{ color: '#6b7280', fontSize: '1rem', fontWeight: '600' }}>
               <FaClock className="me-2" />
-              {currentTime.toLocaleTimeString()}
+              {currentTime.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
             </div>
           </div>
         </Col>

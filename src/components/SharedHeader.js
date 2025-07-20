@@ -9,7 +9,7 @@ const SharedHeader = ({ user, onLogout, dashboardType = 'default' }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 120000); // 2 minutes
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000); // 1 minute
     return () => clearInterval(timer);
   }, []);
 
@@ -85,7 +85,7 @@ const SharedHeader = ({ user, onLogout, dashboardType = 'default' }) => {
             <Nav.Item className="d-none d-md-block">
               <Nav.Link disabled style={{ color: config.textColor }}>
                 <FaClock className="me-2" />
-                {currentTime.toLocaleTimeString()}
+                {currentTime.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
               </Nav.Link>
             </Nav.Item>
           </Nav>
@@ -173,7 +173,7 @@ const SharedHeader = ({ user, onLogout, dashboardType = 'default' }) => {
         fontSize: '0.8rem',
         fontWeight: '600'
       }}>
-        {currentTime.toLocaleTimeString()}
+        {currentTime.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
       </div>
 
       {/* Custom Styles */}

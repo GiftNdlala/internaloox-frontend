@@ -28,7 +28,7 @@ const OwnerDashboard = ({ user, onLogout }) => {
 
   // Real-time clock
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000); // 1 minute
     return () => clearInterval(timer);
   }, []);
 
@@ -115,7 +115,7 @@ const OwnerDashboard = ({ user, onLogout }) => {
             </small>
             <small className="text-light">
               <FaClock className="me-1" />
-              {currentTime.toLocaleTimeString()}
+                              {currentTime.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
             </small>
           </div>
         </Col>
