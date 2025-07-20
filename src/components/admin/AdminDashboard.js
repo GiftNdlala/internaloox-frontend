@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Container, Row, Col, Nav, Card, Button, Modal, Form, Alert,
   Badge, Table, ProgressBar, ListGroup
@@ -22,6 +23,7 @@ import {
 } from '../api';
 
 const AdminDashboard = ({ user, onLogout }) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -468,6 +470,41 @@ const AdminDashboard = ({ user, onLogout }) => {
       padding: '1rem'
     }}>
       <AdminHeader />
+      
+      {/* Quick Actions */}
+      <Row className="mb-4">
+        <Col>
+          <Card className="border-0 shadow-sm">
+            <Card.Body className="py-3">
+              <div className="d-flex justify-content-between align-items-center">
+                <h5 className="mb-0 text-primary">
+                  <FaClipboardList className="me-2" />
+                  Quick Actions
+                </h5>
+                <div className="d-flex gap-2">
+                  <Button 
+                    variant="primary" 
+                    size="lg"
+                    onClick={() => navigate('/admin/orders')}
+                    className="d-flex align-items-center"
+                  >
+                    <FaClipboardList className="me-2" />
+                    Manage Orders
+                  </Button>
+                  <Button 
+                    variant="outline-primary" 
+                    onClick={() => setActiveTab('orders')}
+                  >
+                    <FaPlus className="me-1" />
+                    Add Customer
+                  </Button>
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+      
       <AdminNav />
 
       {/* Error/Success Alerts */}

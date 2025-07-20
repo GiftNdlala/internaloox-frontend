@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Container, Row, Col, Card, Button, Badge, 
   ProgressBar, Alert, Form, Modal 
@@ -11,6 +12,7 @@ import {
 import { getOrders, getProducts } from '../components/api';
 
 const WarehouseDashboard = ({ user, onLogout }) => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -323,6 +325,42 @@ const WarehouseDashboard = ({ user, onLogout }) => {
       padding: '1rem'
     }}>
       <IndustrialHeader />
+
+      {/* Quick Actions */}
+      <Row className="mb-4">
+        <Col>
+          <Card className="border-0 shadow-sm" style={{ borderLeft: '6px solid #10b981' }}>
+            <Card.Body className="py-3">
+              <div className="d-flex justify-content-between align-items-center">
+                <h5 className="mb-0" style={{ color: '#10b981' }}>
+                  <FaWrench className="me-2" />
+                  Production Management
+                </h5>
+                <div className="d-flex gap-2">
+                  <Button 
+                    variant="success" 
+                    size="lg"
+                    onClick={() => navigate('/warehouse/orders')}
+                    className="d-flex align-items-center"
+                    style={{ height: '60px', fontSize: '1.1rem' }}
+                  >
+                    <FaBoxes className="me-2" />
+                    Full Orders View
+                  </Button>
+                  <Button 
+                    variant="outline-success" 
+                    onClick={() => window.location.reload()}
+                    style={{ height: '60px' }}
+                  >
+                    <FaQrcode className="me-1" />
+                    Scan QR
+                  </Button>
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
 
       {/* Error/Success Alerts */}
       {error && <Alert variant="danger" dismissible onClose={() => setError(null)}>{error}</Alert>}

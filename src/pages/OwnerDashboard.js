@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Container, Row, Col, Card, Nav, Button, 
   Table, Modal, Form, Alert, Badge, Dropdown,
@@ -17,6 +18,7 @@ import OrderDetail from '../components/OrderDetail';
 import { getDashboardStats, getUsers, getOrders, deleteUser, createOrder, createUser, updateUser, deleteOrder, updateOrder, getOrder } from '../components/api';
 
 const OwnerDashboard = ({ user, onLogout }) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [stats, setStats] = useState({});
   const [users, setUsers] = useState([]);
@@ -278,6 +280,40 @@ const OwnerDashboard = ({ user, onLogout }) => {
     <Container fluid className="owner-dashboard" style={{ backgroundColor: '#f8fafc', minHeight: '100vh' }}>
       {/* Executive Header */}
       <ExecutiveHeader />
+
+      {/* Quick Actions */}
+      <Row className="mb-4">
+        <Col>
+          <Card className="border-0 shadow-sm">
+            <Card.Body className="py-3">
+              <div className="d-flex justify-content-between align-items-center">
+                <h5 className="mb-0 text-primary">
+                  <FaClipboardList className="me-2" />
+                  Quick Actions
+                </h5>
+                <div className="d-flex gap-2">
+                  <Button 
+                    variant="primary" 
+                    size="lg"
+                    onClick={() => navigate('/owner/orders')}
+                    className="d-flex align-items-center"
+                  >
+                    <FaClipboardList className="me-2" />
+                    Manage Orders
+                  </Button>
+                  <Button 
+                    variant="outline-primary" 
+                    onClick={() => setActiveTab('orders')}
+                  >
+                    <FaPlus className="me-1" />
+                    Quick Add Order
+                  </Button>
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
 
       {/* Mobile Navigation */}
       <MobileNav />
