@@ -34,6 +34,23 @@ const AdminDashboard = ({ user, onLogout }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  // Modal states
+  const [showOrderFormModal, setShowOrderFormModal] = useState(false);
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  
+  // Form states
+  const [editingOrder, setEditingOrder] = useState(null);
+  const [orderFormData, setOrderFormData] = useState({});
+  const [orderItems, setOrderItems] = useState([]);
+  const [editingCustomer, setEditingCustomer] = useState(null);
+  const [customerForm, setCustomerForm] = useState({});
+  const [editingPayment, setEditingPayment] = useState(null);
+  const [paymentForm, setPaymentForm] = useState({});
+  
+  // Delete confirmation
+  const [deleteTarget, setDeleteTarget] = useState(null);
+
   // Real-time clock
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -690,6 +707,109 @@ const AdminDashboard = ({ user, onLogout }) => {
           }
         }
       `}</style>
+
+      {/* Order Form Modal */}
+      <Modal show={showOrderFormModal} onHide={() => setShowOrderFormModal(false)} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>{editingOrder ? 'Edit Order' : 'Create New Order'}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <OrderForm
+            initialData={editingOrder || {}}
+            onSubmit={handleOrderFormSubmit}
+            onCancel={() => setShowOrderFormModal(false)}
+          />
+        </Modal.Body>
+      </Modal>
+
+      {/* Customer Form Modal */}
+      <Modal show={showCustomerModal} onHide={() => setShowCustomerModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>{editingCustomer ? 'Edit Customer' : 'Add New Customer'}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleCustomerSubmit}>
+            <Form.Group className="mb-3">
+              <Form.Label>Company Name</Form.Label>
+              <Form.Control
+                type="text"
+                value={customerForm.company_name || ''}
+                onChange={(e) => setCustomerForm({...customerForm, company_name: e.target.value})}
+                required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Contact Person</Form.Label>
+              <Form.Control
+                type="text"
+                value={customerForm.contact_person || ''}
+                onChange={(e) => setCustomerForm({...customerForm, contact_person: e.target.value})}
+                required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Email</Form.Label>
+              <Form.Control
+                type="email"
+                value={customerForm.email || ''}
+                onChange={(e) => setCustomerForm({...customerForm, email: e.target.value})}
+                required
+              />
+            </Form.Group>
+            <div className="d-flex justify-content-end gap-2">
+              <Button variant="secondary" onClick={() => setShowCustomerModal(false)}>
+                Cancel
+              </Button>
+              <Button variant="primary" type="submit">
+                {editingCustomer ? 'Update' : 'Create'} Customer
+              </Button>
+            </div>
+          </Form>
+        </Modal.Body>
+      </Modal>
+
+      {/* Payment Form Modal */}
+      <Modal show={showPaymentModal} onHide={() => setShowPaymentModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>{editingPayment ? 'Edit Payment' : 'Record New Payment'}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handlePaymentSubmit}>
+            <Form.Group className="mb-3">
+              <Form.Label>Amount</Form.Label>
+              <Form.Control
+                type="number"
+                step="0.01"
+                value={paymentForm.amount || ''}
+                onChange={(e) => setPaymentForm({...paymentForm, amount: e.target.value})}
+                required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Method</Form.Label>
+              <Form.Select
+                value={paymentForm.method || ''}
+                onChange={(e) => setPaymentForm({...paymentForm, method: e.target.value})}
+                required
+              >
+                <option value="">Select payment method</option>
+                <option value="cash">Cash</option>
+                <option value="card">Card</option>
+                <option value="transfer">Bank Transfer</option>
+              </Form.Select>
+            </Form.Group>
+            <div className="d-flex justify-content-end gap-2">
+              <Button variant="secondary" onClick={() => setShowPaymentModal(false)}>
+                Cancel
+              </Button>
+              <Button variant="primary" type="submit">
+                {editingPayment ? 'Update' : 'Record'} Payment
+              </Button>
+            </div>
+          </Form>
+        </Modal.Body>
+      </Modal>
+
     </Container>
   );
 };
