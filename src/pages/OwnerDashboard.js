@@ -239,8 +239,8 @@ const OwnerDashboard = ({ user, onLogout }) => {
       {[
         { key: 'overview', label: 'Overview', icon: FaChartLine, isTab: true },
         { key: 'orders', label: 'Orders', icon: FaClipboardList, isTab: false, route: '/owner/orders' },
-        { key: 'users', label: 'Team', icon: FaUsers, isTab: true },
-        { key: 'analytics', label: 'Analytics', icon: FaChartBar, isTab: true },
+        { key: 'payments', label: 'Payments', icon: FaMoneyBillWave, isTab: false, route: '/owner/payments' },
+        { key: 'deliveries', label: 'Deliveries', icon: FaTruck, isTab: false, route: '/owner/deliveries' },
       ].map(tab => (
         <Nav.Link
           key={tab.key}
@@ -292,22 +292,42 @@ const OwnerDashboard = ({ user, onLogout }) => {
                   Quick Actions
                 </h5>
                 <div className="d-flex gap-2">
-                  <Button 
-                    variant="primary" 
-                    size="lg"
-                    onClick={() => navigate('/owner/orders')}
-                    className="d-flex align-items-center"
-                  >
-                    <FaClipboardList className="me-2" />
-                    Manage Orders
-                  </Button>
-                  <Button 
-                    variant="outline-primary" 
-                    onClick={() => setActiveTab('orders')}
-                  >
-                    <FaPlus className="me-1" />
-                    Quick Add Order
-                  </Button>
+                                     <Button
+                     variant="primary"
+                     size="lg"
+                     onClick={() => navigate('/owner/orders')}
+                     className="d-flex align-items-center"
+                   >
+                     <FaClipboardList className="me-2" />
+                     Manage Orders
+                   </Button>
+                   <Button
+                     variant="success"
+                     size="lg"
+                     onClick={() => navigate('/owner/customers')}
+                     className="d-flex align-items-center"
+                   >
+                     <FaUsers className="me-2" />
+                     Customers
+                   </Button>
+                   <Button
+                     variant="info"
+                     size="lg"
+                     onClick={() => navigate('/owner/payments')}
+                     className="d-flex align-items-center"
+                   >
+                     <FaMoneyBillWave className="me-2" />
+                     Payments
+                   </Button>
+                   <Button
+                     variant="warning"
+                     size="lg"
+                     onClick={() => navigate('/owner/deliveries')}
+                     className="d-flex align-items-center"
+                   >
+                     <FaTruck className="me-2" />
+                     Deliveries
+                   </Button>
                 </div>
               </div>
             </Card.Body>
@@ -380,7 +400,7 @@ const OwnerDashboard = ({ user, onLogout }) => {
       )}
 
       {/* Add other tab content here */}
-      {(activeTab === 'users' || activeTab === 'analytics') && (
+      {activeTab !== 'overview' && (
         <Card className="text-center p-5">
           <h4>Coming Soon</h4>
           <p className="text-muted">This section is being enhanced with executive-level features</p>

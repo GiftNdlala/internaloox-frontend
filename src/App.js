@@ -6,6 +6,10 @@ import WarehouseDashboard from './pages/WarehouseDashboard';
 import DeliveryDashboard from './pages/DeliveryDashboard';
 import OwnerDashboard from './pages/OwnerDashboard';
 import Orders from './pages/Orders';
+import Customers from './pages/Customers';
+import Users from './pages/Users';
+import Payments from './pages/Payments';
+import Deliveries from './pages/Deliveries';
 import LoginPage from './pages/LoginPage';
 import './App.css';
 
@@ -151,6 +155,40 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['warehouse', 'owner', 'admin']}>
                 <Orders user={user} userRole="warehouse" onLogout={handleLogout} />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Owner Management Routes */}
+          <Route 
+            path="/owner/customers" 
+            element={
+              <ProtectedRoute allowedRoles={['owner']}>
+                <Customers user={user} userRole="owner" onLogout={handleLogout} />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/owner/users" 
+            element={
+              <ProtectedRoute allowedRoles={['owner']}>
+                <Users user={user} userRole="owner" onLogout={handleLogout} />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/owner/payments" 
+            element={
+              <ProtectedRoute allowedRoles={['owner']}>
+                <Payments user={user} userRole="owner" onLogout={handleLogout} />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/owner/deliveries" 
+            element={
+              <ProtectedRoute allowedRoles={['owner']}>
+                <Deliveries user={user} userRole="owner" onLogout={handleLogout} />
               </ProtectedRoute>
             } 
           />
