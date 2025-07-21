@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Container, Row, Col, Card, Nav, Button, 
-  Alert, Badge, ProgressBar, Table, Modal, Form
+  Row, Col, Button, 
+  Alert, Modal, Form
 } from 'react-bootstrap';
 import { 
-  FaUsers, FaTruck, FaChartLine, 
-  FaUserShield, FaClipboardList, FaMoneyBillWave,
-  FaArrowUp, FaArrowDown, FaStar, FaCircle, FaChartBar,
-  FaCalendarCheck, FaClock, FaCouch, FaBolt, FaGem,
-  FaUserCog, FaPlus, FaEdit, FaTrash, FaEye, FaTimes
+  FaUsers, FaChartLine, 
+  FaClipboardList, FaMoneyBillWave,
+  FaArrowUp, FaArrowDown, FaChartBar,
+  FaCalendarCheck, FaCouch, FaBolt, FaGem,
+  FaUserCog, FaPlus, FaEdit, FaTrash, FaTimes
 } from 'react-icons/fa';
 import UniversalSidebar from '../components/UniversalSidebar';
 import { getDashboardStats, getOrders, getUsers, createUser, updateUser, deleteUser } from '../components/api';
@@ -18,7 +18,6 @@ import '../styles/MobileFirst.css';
 const OwnerDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
-  const [stats, setStats] = useState({});
   const [users, setUsers] = useState([]);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,12 +54,10 @@ const OwnerDashboard = ({ user, onLogout }) => {
     try {
       setLoading(true);
       setError(null);
-      const [statsData, usersData, ordersData] = await Promise.all([
-        getDashboardStats(),
+      const [usersData, ordersData] = await Promise.all([
         getUsers(),
         getOrders()
       ]);
-      setStats(statsData);
       setUsers(usersData.results || usersData);
       setOrders(ordersData.results || ordersData);
     } catch (err) {
@@ -140,7 +137,6 @@ const OwnerDashboard = ({ user, onLogout }) => {
 
   // Calculate KPIs
   const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.total_amount || 0), 0);
-  const avgOrderValue = orders.length ? totalRevenue / orders.length : 0;
   const todayOrders = orders.filter(order => 
     new Date(order.created_at).toDateString() === new Date().toDateString()
   ).length;

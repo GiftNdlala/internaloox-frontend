@@ -1,22 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap';
 import {
-  Container, Row, Col, Card, Button, Table, Alert, Spinner,
-  ProgressBar, Badge, Form, ButtonGroup
-} from 'react-bootstrap';
-import {
-  FaChartLine, FaChartBar, FaChartPie, FaArrowUp, FaArrowDown,
-  FaMoneyBillWave, FaUsers, FaClipboardList, FaTruck, FaCalendarAlt,
-  FaSync, FaDownload, FaFilter, FaEquals,
-  FaBoxes, FaClock, FaCheckCircle, FaExclamationTriangle, FaStar,
-  FaEye, FaFileAlt, FaPrint
+  FaChartLine, FaMoneyBillWave, FaUsers, FaClipboardList,
+  FaTruck, FaArrowUp, FaArrowDown
 } from 'react-icons/fa';
-import { 
-  getOrders, getCustomers, getUsers
-} from '../components/api';
-import SharedHeader from '../components/SharedHeader';
-import EnhancedPageHeader from '../components/EnhancedPageHeader';
 import UniversalSidebar from '../components/UniversalSidebar';
+import EnhancedPageHeader from '../components/EnhancedPageHeader';
+import { getOrders, getCustomers, getUsers, getDashboardStats } from '../components/api';
 
 const Analytics = ({ user, userRole, onLogout }) => {
   const navigate = useNavigate();
@@ -30,7 +21,6 @@ const Analytics = ({ user, userRole, onLogout }) => {
 
   // Filter states
   const [dateRange, setDateRange] = useState('30'); // days
-  const [selectedPeriod, setSelectedPeriod] = useState('current_month');
 
   // Load data on component mount
   useEffect(() => {

@@ -7,14 +7,13 @@ import {
 import { 
   FaWrench, FaBoxes, FaClock, FaPlay, FaPause, 
   FaCheck, FaExclamationTriangle, FaQrcode,
-  FaEye, FaUser
+  FaEye
 } from 'react-icons/fa';
-import { getOrders, getProducts } from '../components/api';
+import { getOrders } from '../components/api';
 
 const WarehouseDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
-  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -38,12 +37,8 @@ const WarehouseDashboard = ({ user, onLogout }) => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [ordersData, productsData] = await Promise.all([
-        getOrders(),
-        getProducts()
-      ]);
+      const ordersData = await getOrders();
       setOrders(ordersData.results || ordersData);
-      setProducts(productsData.results || productsData);
     } catch (err) {
       setError('Failed to load warehouse data');
       console.error(err);

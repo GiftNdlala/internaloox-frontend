@@ -3,7 +3,7 @@ import { Offcanvas, Nav, Badge, Button } from 'react-bootstrap';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   FaHome, FaClipboardList, FaUsers, FaUserCog, FaMoneyBillWave, 
-  FaTruck, FaChartLine, FaBars, FaTimes, FaCouch, FaWarehouse,
+  FaTruck, FaChartLine, FaBars, FaCouch, FaWarehouse,
   FaRoute, FaCog, FaSignOutAlt, FaUserShield, FaChevronLeft, FaChevronRight
 } from 'react-icons/fa';
 

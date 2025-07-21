@@ -1,10 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {
-  Container, Row, Col, Card, Button, Table, Modal, Form,
-  Badge, InputGroup, Alert, Spinner, ButtonGroup, 
-  OverlayTrigger, Tooltip
-} from 'react-bootstrap';
+import { Container, Row, Col, Card, Table, Button, Modal, Form, Alert, Badge } from 'react-bootstrap';
 import {
   FaUserShield, FaPlus, FaEdit, FaTrash, FaEye, FaSearch,
   FaEnvelope, FaDownload, FaCheck, 
@@ -267,8 +262,8 @@ const Users = ({ user, userRole, onLogout }) => {
   if (loading && users.length === 0) {
     return (
       <Container fluid className="py-4 text-center">
-        <Spinner animation="border" variant="primary" />
-        <p className="mt-2">Loading users...</p>
+        <FaUsers size={48} className="text-muted mb-3" />
+        <h5 className="text-muted">Loading users...</h5>
       </Container>
     );
   }
@@ -392,17 +387,12 @@ const Users = ({ user, userRole, onLogout }) => {
           <Card.Body>
             <Row className="g-3">
               <Col md={4}>
-                <InputGroup>
-                  <InputGroup.Text>
-                    <FaSearch />
-                  </InputGroup.Text>
-                  <Form.Control
-                    type="text"
-                    placeholder="Search users by name, username, or email..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </InputGroup>
+                <Form.Control
+                  type="text"
+                  placeholder="Search users by name, username, or email..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </Col>
               <Col md={3}>
                 <Form.Select
@@ -515,31 +505,25 @@ const Users = ({ user, userRole, onLogout }) => {
                       </td>
                       <td>
                         <ButtonGroup size="sm">
-                          <OverlayTrigger overlay={<Tooltip>View Details</Tooltip>}>
-                            <Button 
-                              variant="outline-primary" 
-                              onClick={() => handleViewDetails(userItem)}
-                            >
-                              <FaEye />
-                            </Button>
-                          </OverlayTrigger>
-                          <OverlayTrigger overlay={<Tooltip>Edit User</Tooltip>}>
-                            <Button 
-                              variant="outline-secondary" 
-                              onClick={() => handleEditUser(userItem)}
-                            >
-                              <FaEdit />
-                            </Button>
-                          </OverlayTrigger>
+                          <Button 
+                            variant="outline-primary" 
+                            onClick={() => handleViewDetails(userItem)}
+                          >
+                            <FaEye />
+                          </Button>
+                          <Button 
+                            variant="outline-secondary" 
+                            onClick={() => handleEditUser(userItem)}
+                          >
+                            <FaEdit />
+                          </Button>
                           {userItem.id !== user?.id && (
-                            <OverlayTrigger overlay={<Tooltip>Delete User</Tooltip>}>
-                              <Button 
-                                variant="outline-danger" 
-                                onClick={() => handleDeleteUser(userItem)}
-                              >
-                                <FaTrash />
-                              </Button>
-                            </OverlayTrigger>
+                            <Button 
+                              variant="outline-danger" 
+                              onClick={() => handleDeleteUser(userItem)}
+                            >
+                              <FaTrash />
+                            </Button>
                           )}
                         </ButtonGroup>
                       </td>

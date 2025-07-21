@@ -4,7 +4,7 @@ import {
   Alert, Modal, Form, ListGroup
 } from 'react-bootstrap';
 import {
-  FaTruck, FaMapMarkerAlt, FaRoute, FaClock,
+  FaTruck, FaMapMarkerAlt, FaRoute, 
   FaCheckCircle, FaCamera, FaPhone, FaCompass,
   FaPlay, FaFlag, FaUser, FaMoneyBillWave,
   FaClipboardCheck

@@ -1,26 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Container, Row, Col, Card, Table, Button, Modal, Form, Alert, Badge } from 'react-bootstrap';
 import {
-  Container, Row, Col, Card, Button, Table, Modal, Form,
-  Badge, InputGroup, Alert, Spinner, ButtonGroup, 
-  OverlayTrigger, Tooltip
-} from 'react-bootstrap';
-import {
-  FaUsers, FaPlus, FaEdit, FaTrash, FaEye, FaSearch,
-  FaPhone, FaEnvelope, FaMapMarkerAlt, FaCalendarAlt,
-  FaSync, FaDownload, FaCheck, FaExclamationTriangle,
-  FaSortUp, FaSortDown, FaBuilding
+  FaUsers, FaPlus, FaEdit, FaTrash, FaEye, FaPhone, FaEnvelope, FaMapMarkerAlt
 } from 'react-icons/fa';
-import { 
-  getCustomers, createCustomer, updateCustomer, deleteCustomer,
-  getOrders
-} from '../components/api';
-import SharedHeader from '../components/SharedHeader';
-import EnhancedPageHeader from '../components/EnhancedPageHeader';
 import UniversalSidebar from '../components/UniversalSidebar';
+import EnhancedPageHeader from '../components/EnhancedPageHeader';
+import { getCustomers, createCustomer, updateCustomer, deleteCustomer } from '../components/api';
 
 const Customers = ({ user, userRole, onLogout }) => {
-  const navigate = useNavigate();
   
   // State management
   const [customers, setCustomers] = useState([]);

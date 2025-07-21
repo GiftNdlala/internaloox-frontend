@@ -1,30 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Container, Row, Col, Card, Table, Button, Modal, Form, Alert, Badge } from 'react-bootstrap';
 import {
-  Container, Row, Col, Card, Button, Table, Modal, Form,
-  Badge, InputGroup, Alert, Spinner, ButtonGroup, 
-  OverlayTrigger, Tooltip, Tabs, Tab
-} from 'react-bootstrap';
-import {
-  FaTruck, FaPlus, FaEdit, FaTrash, FaEye, FaSearch,
-  FaCalendarAlt, FaSync, FaDownload, FaCheck, FaExclamationTriangle,
-  FaSortUp, FaSortDown, FaMapMarkerAlt, FaRoute, FaClock,
-  FaShippingFast, FaCheckCircle, FaTimesCircle, FaBoxes,
-  FaClipboardCheck, FaPhoneAlt
+  FaTruck, FaMapMarkerAlt, FaEye, FaEdit, FaRoute, FaPhone
 } from 'react-icons/fa';
-import { 
-  getOrders, getCustomers, updateOrder
-} from '../components/api';
-import SharedHeader from '../components/SharedHeader';
-import EnhancedPageHeader from '../components/EnhancedPageHeader';
 import UniversalSidebar from '../components/UniversalSidebar';
+import EnhancedPageHeader from '../components/EnhancedPageHeader';
+import { getOrders, updateOrder, getCustomers } from '../components/api';
 
 const Deliveries = ({ user, userRole, onLogout }) => {
-  const navigate = useNavigate();
   
   // State management
   const [orders, setOrders] = useState([]);
-  const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');

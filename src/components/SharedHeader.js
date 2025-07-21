@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Navbar, Nav, NavDropdown, Container, Badge } from 'react-bootstrap';
+import { Navbar, NavDropdown, Container, Badge } from 'react-bootstrap';
 import { 
-  FaUserShield, FaSignOutAlt, FaCog, FaUser, 
+  FaSignOutAlt, FaCog, FaUser, 
   FaBell, FaClock, FaChevronDown, FaCouch
 } from 'react-icons/fa';
 
