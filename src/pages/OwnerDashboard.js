@@ -11,12 +11,13 @@ import {
   FaCalendarCheck, FaClock
 } from 'react-icons/fa';
 import UniversalSidebar from '../components/UniversalSidebar';
-import { getDashboardStats, getOrders } from '../components/api';
+import { getDashboardStats, getOrders, getUsers } from '../components/api';
 
 const OwnerDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [stats, setStats] = useState({});
+  const [users, setUsers] = useState([]);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

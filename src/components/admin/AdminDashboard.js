@@ -8,7 +8,7 @@ import {
   FaClipboardList, FaMoneyBillWave, FaUsers, FaChartBar,
   FaBell, FaCheckCircle, FaExclamationTriangle,
   FaCog, FaFileAlt, FaClock, FaUserShield,
-  FaEnvelope, FaTasks
+  FaEnvelope, FaTasks, FaCheck, FaPlus
 } from 'react-icons/fa';
 import OrdersTable from './OrdersTable';
 import PaymentsTable from './PaymentsTable';

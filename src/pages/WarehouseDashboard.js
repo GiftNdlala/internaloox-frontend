@@ -14,7 +14,7 @@ import { getOrders, getProducts } from '../components/api';
 const WarehouseDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
-
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);

@@ -7,7 +7,7 @@ import {
 import {
   FaPlus, FaEdit, FaTrash, FaEye, FaSearch,
   FaDownload, FaCheck, FaExclamationTriangle,
-  FaClipboardList, FaSortUp, FaSortDown
+  FaClipboardList, FaSortUp, FaSortDown, FaBoxes
 } from 'react-icons/fa';
 import { 
   getOrders, getCustomers, getProducts, 
