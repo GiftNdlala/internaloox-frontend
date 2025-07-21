@@ -7,7 +7,8 @@ import {
   FaLock, 
   FaSpinner,
   FaExclamationTriangle,
-  FaCheckCircle
+  FaCheckCircle,
+  FaCouch
 } from 'react-icons/fa';
 
 // API configuration
@@ -183,6 +184,22 @@ const LoginPage = ({ onLogin }) => {
         {/* Login Card */}
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
           <div className="text-center mb-6">
+            {/* OOX Furniture Logo/Icon */}
+            <div className="mb-4">
+              <div 
+                className="mx-auto flex items-center justify-center"
+                style={{
+                  width: '80px',
+                  height: '80px',
+                  background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                  borderRadius: '20px',
+                  color: 'white',
+                  boxShadow: '0 8px 32px rgba(245, 158, 11, 0.3)'
+                }}
+              >
+                <FaCouch size={35} />
+              </div>
+            </div>
             <h2 className="text-2xl font-semibold text-gray-900 mb-2">
               Welcome to OOX Furniture
             </h2>
@@ -304,7 +321,7 @@ const LoginPage = ({ onLogin }) => {
           {/* Demo Login Buttons */}
           <div className="mt-6 pt-6 border-t border-gray-200">
             <p className="text-sm text-gray-600 text-center mb-3">
-              Quick Access (No Authentication Required)
+              Quick Access
             </p>
             <div className="grid grid-cols-2 gap-2">
               <button
