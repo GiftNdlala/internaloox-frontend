@@ -1,0 +1,556 @@
+/* OOX Furniture Mobile-First Design System */
+/* Prioritizing mobile experience for WhatsApp link sharing */
+
+:root {
+  /* OOX Brand Colors */
+  --oox-primary: #f59e0b;
+  --oox-primary-dark: #d97706;
+  --oox-secondary: #1e293b;
+  --oox-secondary-light: #334155;
+  --oox-accent: #10b981;
+  --oox-danger: #ef4444;
+  --oox-warning: #fbbf24;
+  --oox-success: #22c55e;
+  
+  /* OOX Gradients */
+  --oox-gradient-primary: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  --oox-gradient-secondary: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  --oox-gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  
+  /* Mobile-First Spacing */
+  --oox-mobile-padding: 1rem;
+  --oox-mobile-margin: 0.75rem;
+  --oox-mobile-border-radius: 16px;
+  --oox-mobile-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  
+  /* Typography Scale for Mobile */
+  --oox-mobile-h1: 1.75rem;
+  --oox-mobile-h2: 1.5rem;
+  --oox-mobile-h3: 1.25rem;
+  --oox-mobile-body: 0.875rem;
+  --oox-mobile-small: 0.75rem;
+}
+
+/* Global Mobile-First Styles */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+/* Mobile-First Container */
+.oox-mobile-container {
+  padding: var(--oox-mobile-padding);
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* OOX Mobile Header Styles */
+.oox-mobile-header {
+  background: var(--oox-gradient-secondary);
+  border-radius: 0 0 var(--oox-mobile-border-radius) var(--oox-mobile-border-radius);
+  padding: 1.5rem var(--oox-mobile-padding);
+  margin: -1rem -1rem 1rem -1rem;
+  box-shadow: var(--oox-mobile-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.oox-mobile-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.03)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.03)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.02)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.oox-mobile-header .oox-brand {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  position: relative;
+  z-index: 1;
+}
+
+.oox-mobile-header .oox-logo {
+  width: 50px;
+  height: 50px;
+  background: var(--oox-gradient-primary);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
+  animation: logoFloat 3s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-3px); }
+}
+
+.oox-mobile-header .oox-title {
+  color: white;
+  font-size: var(--oox-mobile-h2);
+  font-weight: 700;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.oox-mobile-header .oox-subtitle {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: var(--oox-mobile-body);
+  margin: 0;
+  font-weight: 500;
+}
+
+/* OOX Mobile Cards */
+.oox-mobile-card {
+  background: white;
+  border-radius: var(--oox-mobile-border-radius);
+  box-shadow: var(--oox-mobile-shadow);
+  padding: var(--oox-mobile-padding);
+  margin-bottom: var(--oox-mobile-margin);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.oox-mobile-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.oox-mobile-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--oox-gradient-primary);
+}
+
+/* OOX Mobile Buttons */
+.oox-mobile-btn {
+  background: var(--oox-gradient-primary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0.875rem 1.5rem;
+  font-weight: 600;
+  font-size: var(--oox-mobile-body);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.oox-mobile-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+}
+
+.oox-mobile-btn:active {
+  transform: translateY(0);
+  transition-duration: 0.1s;
+}
+
+.oox-mobile-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+}
+
+.oox-mobile-btn:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* OOX Mobile Stats Grid */
+.oox-mobile-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: var(--oox-mobile-margin);
+}
+
+.oox-mobile-stat {
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.oox-mobile-stat:hover {
+  transform: scale(1.02);
+}
+
+.oox-mobile-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--oox-primary);
+  margin-bottom: 0.25rem;
+}
+
+.oox-mobile-stat-label {
+  font-size: var(--oox-mobile-small);
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* OOX Mobile Navigation */
+.oox-mobile-nav {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: var(--oox-mobile-margin);
+}
+
+.oox-mobile-nav-item {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.oox-mobile-nav-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  text-decoration: none;
+  color: inherit;
+}
+
+.oox-mobile-nav-item.active {
+  background: var(--oox-gradient-primary);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.oox-mobile-nav-icon {
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.oox-mobile-nav-label {
+  font-size: var(--oox-mobile-small);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* OOX Mobile Animations */
+@keyframes ooxFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ooxSlideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes ooxPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.oox-animate-fadeInUp {
+  animation: ooxFadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.oox-animate-slideInLeft {
+  animation: ooxSlideInLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.oox-animate-pulse {
+  animation: ooxPulse 2s infinite;
+}
+
+/* OOX Mobile Loading States */
+.oox-mobile-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.oox-mobile-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(245, 158, 11, 0.2);
+  border-top: 3px solid var(--oox-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* OOX Mobile Tables */
+.oox-mobile-table {
+  width: 100%;
+  margin-bottom: var(--oox-mobile-margin);
+}
+
+.oox-mobile-table-item {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.oox-mobile-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.oox-mobile-table-title {
+  font-weight: 600;
+  color: var(--oox-secondary);
+}
+
+.oox-mobile-table-meta {
+  font-size: var(--oox-mobile-small);
+  color: #6b7280;
+}
+
+/* OOX Mobile Forms */
+.oox-mobile-form-group {
+  margin-bottom: 1rem;
+}
+
+.oox-mobile-form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--oox-secondary);
+  font-size: var(--oox-mobile-body);
+}
+
+.oox-mobile-form-input {
+  width: 100%;
+  padding: 0.875rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: var(--oox-mobile-body);
+  transition: border-color 0.3s ease;
+  background: white;
+}
+
+.oox-mobile-form-input:focus {
+  outline: none;
+  border-color: var(--oox-primary);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+
+/* OOX Mobile Status Badges */
+.oox-mobile-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.oox-mobile-badge.success {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+.oox-mobile-badge.warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+}
+
+.oox-mobile-badge.danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+/* OOX Mobile Responsive Utilities */
+.oox-mobile-hidden {
+  display: none !important;
+}
+
+.oox-mobile-text-center {
+  text-align: center;
+}
+
+.oox-mobile-text-right {
+  text-align: right;
+}
+
+.oox-mobile-flex {
+  display: flex;
+}
+
+.oox-mobile-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.oox-mobile-flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.oox-mobile-mb-1 { margin-bottom: 0.25rem; }
+.oox-mobile-mb-2 { margin-bottom: 0.5rem; }
+.oox-mobile-mb-3 { margin-bottom: 0.75rem; }
+.oox-mobile-mb-4 { margin-bottom: 1rem; }
+
+/* Desktop Enhancements (min-width: 768px) */
+@media (min-width: 768px) {
+  .oox-mobile-stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .oox-mobile-nav {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+  
+  .oox-mobile-header {
+    padding: 2rem;
+    margin: -1rem -1rem 2rem -1rem;
+  }
+  
+  .oox-mobile-card {
+    padding: 1.5rem;
+  }
+  
+  .oox-mobile-container {
+    padding: 1.5rem;
+  }
+}
+
+/* Large Desktop Enhancements (min-width: 1024px) */
+@media (min-width: 1024px) {
+  .oox-mobile-container {
+    padding: 2rem;
+  }
+  
+  .oox-mobile-stats {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* OOX Mobile Touch Interactions */
+@media (hover: none) and (pointer: coarse) {
+  .oox-mobile-btn {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+  }
+  
+  .oox-mobile-nav-item {
+    padding: 1.25rem;
+  }
+  
+  .oox-mobile-form-input {
+    padding: 1rem;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+/* OOX Brand Consistency */
+.oox-brand-text {
+  font-weight: 700;
+  color: var(--oox-primary);
+}
+
+.oox-brand-gradient {
+  background: var(--oox-gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+}
+
+/* OOX Mobile Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .oox-mobile-card {
+    background: #1f2937;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
+  
+  .oox-mobile-form-input {
+    background: #374151;
+    border-color: rgba(255, 255, 255, 0.2);
+    color: white;
+  }
+}

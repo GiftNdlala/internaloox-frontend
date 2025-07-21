@@ -8,27 +8,19 @@ import {
   FaSpinner,
   FaExclamationTriangle,
   FaCheckCircle,
-  FaCouch
+  FaCouch,
+  FaUserShield,
+  FaCog,
+  FaWarehouse,
+  FaTruck,
+  FaStar,
+  FaBolt,
+  FaGem
 } from 'react-icons/fa';
+import '../styles/MobileFirst.css';
 
 // API configuration
 const API_BASE = process.env.REACT_APP_API_BASE || 'https://internaloox-1.onrender.com/api';
-
-// Helper to get CSRF token from cookie
-//function getCookie(name) {
-//  let cookieValue = null;
-//  if (document.cookie && document.cookie !== '') {
-//    const cookies = document.cookie.split(';');
-//    for (let i = 0; i < cookies.length; i++) {
-//      const cookie = cookies[i].trim();
-//      if (cookie.substring(0, name.length + 1) === (name + '=')) {
-//        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-//        break;
-//      }
- //   }
-//  }
-//  return cookieValue;
-//}
 
 const LoginPage = ({ onLogin }) => {
   const navigate = useNavigate();
@@ -42,6 +34,7 @@ const LoginPage = ({ onLogin }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isMobile, setIsMobile] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   // Check screen size for mobile responsiveness
   useEffect(() => {
@@ -52,7 +45,13 @@ const LoginPage = ({ onLogin }) => {
     checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
     
-    return () => window.removeEventListener('resize', checkScreenSize);
+    // Update time every minute
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+    
+    return () => {
+      window.removeEventListener('resize', checkScreenSize);
+      clearInterval(timer);
+    };
   }, []);
 
   const handleInputChange = (e) => {
@@ -124,14 +123,14 @@ const LoginPage = ({ onLogin }) => {
       });
       const userData = await userRes.json();
 
-      setSuccess('Login successful! Redirecting...');
+      setSuccess('Welcome to OOX Furniture! Redirecting...');
       onLogin(userData);
 
       setTimeout(() => {
         navigate(`/${userData.role}`);
-      }, 1000);
+      }, 1500);
     } catch (err) {
-      setError('Network error');
+      setError('Network error. Please check your connection.');
     } finally {
       setLoading(false);
     }
@@ -140,14 +139,15 @@ const LoginPage = ({ onLogin }) => {
   const handleDemoLogin = (role) => {
     setLoading(true);
     setError('');
+    setSuccess(`Welcome to OOX Furniture ${role.charAt(0).toUpperCase() + role.slice(1)} Dashboard!`);
     
     // Create mock user data based on role
     const mockUserData = {
       id: 1,
       username: role,
-      email: `${role}@oox.com`,
+      email: `${role}@ooxfurniture.com`,
       first_name: role.charAt(0).toUpperCase() + role.slice(1),
-      last_name: 'User',
+      last_name: 'Manager',
       role: role,
       phone: '',
       is_active: true
@@ -159,144 +159,322 @@ const LoginPage = ({ onLogin }) => {
       
       setTimeout(() => {
         navigate(`/${role}`);
-      }, 500);
+      }, 1000);
       
       setLoading(false);
-    }, 1000);
+    }, 1500);
+  };
+
+  const getRoleConfig = (role) => {
+    const configs = {
+      owner: {
+        icon: FaUserShield,
+        color: '#f59e0b',
+        gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+        title: 'Executive Portal',
+        description: 'Full system control & analytics'
+      },
+      admin: {
+        icon: FaCog,
+        color: '#3b82f6',
+        gradient: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+        title: 'Operations Control',
+        description: 'Manage orders & customers'
+      },
+      warehouse: {
+        icon: FaWarehouse,
+        color: '#10b981',
+        gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+        title: 'Production Floor',
+        description: 'Handle manufacturing workflow'
+      },
+      delivery: {
+        icon: FaTruck,
+        color: '#06b6d4',
+        gradient: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
+        title: 'Delivery Hub',
+        description: 'Coordinate deliveries & routes'
+      }
+    };
+    return configs[role] || configs.admin;
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Logo and Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-4">
-            <FaUser className="text-white text-2xl" />
+    <div 
+      className="oox-mobile-container"
+      style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+        position: 'relative',
+        overflow: 'hidden'
+      }}
+    >
+      {/* Animated Background Elements */}
+      <div 
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: `
+            radial-gradient(circle at 20% 80%, rgba(245, 158, 11, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(59, 130, 246, 0.2) 0%, transparent 50%)
+          `,
+          animation: 'float 20s ease-in-out infinite'
+        }}
+      />
+
+      {/* Floating Particles */}
+      <div className="oox-floating-particles">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            style={{
+              position: 'absolute',
+              width: `${Math.random() * 10 + 5}px`,
+              height: `${Math.random() * 10 + 5}px`,
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '50%',
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              animation: `float ${Math.random() * 10 + 10}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 5}s`
+            }}
+          />
+        ))}
+      </div>
+
+      <div 
+        className="oox-animate-fadeInUp"
+        style={{
+          position: 'relative',
+          zIndex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          padding: isMobile ? '1rem' : '2rem'
+        }}
+      >
+        {/* OOX Brand Header */}
+        <div className="oox-mobile-text-center oox-mobile-mb-4">
+          <div 
+            className="oox-logo"
+            style={{
+              width: isMobile ? '100px' : '120px',
+              height: isMobile ? '100px' : '120px',
+              margin: '0 auto 1.5rem',
+              position: 'relative'
+            }}
+          >
+            <FaCouch 
+              size={isMobile ? 50 : 60} 
+              style={{ color: 'white' }}
+            />
+            {/* Pulsing Ring */}
+            <div 
+              style={{
+                position: 'absolute',
+                top: '-10px',
+                left: '-10px',
+                right: '-10px',
+                bottom: '-10px',
+                border: '3px solid rgba(255, 255, 255, 0.3)',
+                borderRadius: '50%',
+                animation: 'pulse 2s ease-in-out infinite'
+              }}
+            />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            OOX Furniture
+          
+          <h1 
+            className="oox-brand-gradient"
+            style={{
+              fontSize: isMobile ? '2.5rem' : '3.5rem',
+              fontWeight: '900',
+              margin: '0 0 0.5rem 0',
+              textShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+              background: 'linear-gradient(135deg, #ffffff 0%, #f59e0b 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}
+          >
+            OOX FURNITURE
           </h1>
-          <p className="text-gray-600">
+          
+          <p 
+            style={{
+              color: 'rgba(255, 255, 255, 0.9)',
+              fontSize: isMobile ? '1.1rem' : '1.3rem',
+              fontWeight: '600',
+              margin: '0 0 0.5rem 0',
+              textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)'
+            }}
+          >
             Internal Order Management System
           </p>
+          
+          <div 
+            style={{
+              color: 'rgba(255, 255, 255, 0.7)',
+              fontSize: '0.9rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            <FaBolt style={{ color: '#f59e0b' }} />
+            <span>Powered by Innovation</span>
+            <FaGem style={{ color: '#10b981' }} />
+          </div>
         </div>
 
-        {/* Login Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-          <div className="text-center mb-6">
-            {/* OOX Furniture Logo/Icon */}
-            <div className="mb-4">
-              <div 
-                className="mx-auto flex items-center justify-center"
-                style={{
-                  width: '80px',
-                  height: '80px',
-                  background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                  borderRadius: '20px',
-                  color: 'white',
-                  boxShadow: '0 8px 32px rgba(245, 158, 11, 0.3)'
-                }}
-              >
-                <FaCouch size={35} />
-              </div>
+        {/* Main Login Card */}
+        <div className="oox-mobile-card oox-animate-slideInLeft" style={{ maxWidth: '400px', margin: '0 auto', position: 'relative' }}>
+          {/* Login Header */}
+          <div className="oox-mobile-text-center oox-mobile-mb-4">
+            <div className="oox-mobile-flex-center oox-mobile-mb-3">
+              <FaStar style={{ color: '#f59e0b', fontSize: '1.5rem', marginRight: '0.5rem' }} />
+              <h2 style={{ margin: 0, color: '#1e293b', fontWeight: '700', fontSize: '1.5rem' }}>
+                Welcome Back
+              </h2>
+              <FaStar style={{ color: '#f59e0b', fontSize: '1.5rem', marginLeft: '0.5rem' }} />
             </div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-              Welcome to OOX Furniture
-            </h2>
-            <p className="text-gray-600">
-              Sign in to your OOX Furniture management system
+            <p style={{ color: '#6b7280', margin: 0, fontSize: '0.95rem' }}>
+              Access your OOX Furniture dashboard
             </p>
+            <div 
+              style={{
+                fontSize: '0.8rem',
+                color: '#9ca3af',
+                marginTop: '0.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem'
+              }}
+            >
+              <span>{currentTime.toLocaleDateString()}</span>
+              <span>•</span>
+              <span>{currentTime.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</span>
+            </div>
           </div>
 
           {/* Error/Success Messages */}
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center">
-              <FaExclamationTriangle className="text-red-500 mr-2 flex-shrink-0" />
-              <span className="text-red-700 text-sm">{error}</span>
+            <div className="oox-mobile-mb-3" style={{
+              padding: '0.875rem',
+              background: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.2)',
+              borderRadius: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              <FaExclamationTriangle style={{ color: '#dc2626', flexShrink: 0 }} />
+              <span style={{ color: '#dc2626', fontSize: '0.875rem', fontWeight: '500' }}>{error}</span>
             </div>
           )}
 
           {success && (
-            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center">
-              <FaCheckCircle className="text-green-500 mr-2 flex-shrink-0" />
-              <span className="text-green-700 text-sm">{success}</span>
+            <div className="oox-mobile-mb-3" style={{
+              padding: '0.875rem',
+              background: 'rgba(16, 185, 129, 0.1)',
+              border: '1px solid rgba(16, 185, 129, 0.2)',
+              borderRadius: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              <FaCheckCircle style={{ color: '#059669', flexShrink: 0 }} />
+              <span style={{ color: '#059669', fontSize: '0.875rem', fontWeight: '500' }}>{success}</span>
             </div>
           )}
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit}>
             {/* Username Field */}
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="oox-mobile-form-group">
+              <label className="oox-mobile-form-label">
+                <FaUser style={{ marginRight: '0.5rem', color: '#f59e0b' }} />
                 Username
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaUser className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="username"
-                  name="username"
-                  type="text"
-                  value={formData.username}
-                  onChange={handleInputChange}
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                  placeholder="Enter your username"
-                  disabled={loading}
-                />
-              </div>
+              <input
+                name="username"
+                type="text"
+                value={formData.username}
+                onChange={handleInputChange}
+                className="oox-mobile-form-input"
+                placeholder="Enter your username"
+                disabled={loading}
+                style={{ 
+                  paddingLeft: '1rem',
+                  fontSize: isMobile ? '16px' : '0.875rem' // Prevent iOS zoom
+                }}
+              />
             </div>
 
-            {/* Role Selection Field */}
-            <div>
-              <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
-                Role
+            {/* Role Selection */}
+            <div className="oox-mobile-form-group">
+              <label className="oox-mobile-form-label">
+                <FaUserShield style={{ marginRight: '0.5rem', color: '#f59e0b' }} />
+                Access Level
               </label>
               <select
-                id="role"
                 name="role"
                 value={formData.role}
                 onChange={handleInputChange}
-                className="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                className="oox-mobile-form-input"
                 disabled={loading}
+                style={{ fontSize: isMobile ? '16px' : '0.875rem' }}
               >
-                <option value="admin">Admin</option>
-                <option value="warehouse">Warehouse</option>
-                <option value="delivery">Delivery</option>
-                <option value="owner">Owner</option>
+                <option value="admin">Admin - Operations Control</option>
+                <option value="warehouse">Warehouse - Production Floor</option>
+                <option value="delivery">Delivery - Distribution Hub</option>
+                <option value="owner">Owner - Executive Portal</option>
               </select>
             </div>
 
             {/* Password Field */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="oox-mobile-form-group">
+              <label className="oox-mobile-form-label">
+                <FaLock style={{ marginRight: '0.5rem', color: '#f59e0b' }} />
                 Password
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaLock className="h-5 w-5 text-gray-400" />
-                </div>
+              <div style={{ position: 'relative' }}>
                 <input
-                  id="password"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                  className="oox-mobile-form-input"
                   placeholder="Enter your password"
                   disabled={loading}
+                  style={{ 
+                    paddingRight: '3rem',
+                    fontSize: isMobile ? '16px' : '0.875rem'
+                  }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
                   disabled={loading}
+                  style={{
+                    position: 'absolute',
+                    right: '1rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    color: '#6b7280',
+                    cursor: 'pointer',
+                    padding: 0
+                  }}
                 >
-                  {showPassword ? (
-                    <FaEyeSlash className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  ) : (
-                    <FaEye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  )}
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
             </div>
@@ -305,76 +483,181 @@ const LoginPage = ({ onLogin }) => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="oox-mobile-btn"
+              style={{
+                width: '100%',
+                marginBottom: '1.5rem',
+                fontSize: '1rem',
+                fontWeight: '700'
+              }}
             >
               {loading ? (
                 <>
-                  <FaSpinner className="animate-spin mr-2" />
-                  Signing In...
+                  <FaSpinner style={{ animation: 'spin 1s linear infinite' }} />
+                  Authenticating...
                 </>
               ) : (
-                'Sign In'
+                <>
+                  <FaUserShield />
+                  Access OOX Dashboard
+                </>
               )}
             </button>
           </form>
 
-          {/* Demo Login Buttons */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-sm text-gray-600 text-center mb-3">
-              Quick Access
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => handleDemoLogin('owner')}
-                disabled={loading}
-                className="px-3 py-2 text-xs bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors duration-200 disabled:opacity-50 font-medium"
-              >
-                Owner Dashboard
-              </button>
-              <button
-                onClick={() => handleDemoLogin('admin')}
-                disabled={loading}
-                className="px-3 py-2 text-xs bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors duration-200 disabled:opacity-50 font-medium"
-              >
-                Admin Dashboard
-              </button>
-              <button
-                onClick={() => handleDemoLogin('warehouse')}
-                disabled={loading}
-                className="px-3 py-2 text-xs bg-yellow-100 text-yellow-700 rounded-md hover:bg-yellow-200 transition-colors duration-200 disabled:opacity-50 font-medium"
-              >
-                Warehouse Dashboard
-              </button>
-              <button
-                onClick={() => handleDemoLogin('delivery')}
-                disabled={loading}
-                className="px-3 py-2 text-xs bg-purple-100 text-purple-700 rounded-md hover:bg-purple-200 transition-colors duration-200 disabled:opacity-50 font-medium"
-              >
-                Delivery Dashboard
-              </button>
+          {/* Quick Access Section */}
+          <div style={{
+            borderTop: '1px solid rgba(0, 0, 0, 0.1)',
+            paddingTop: '1.5rem',
+            marginTop: '1.5rem'
+          }}>
+            <div className="oox-mobile-text-center oox-mobile-mb-3">
+              <h3 style={{
+                margin: 0,
+                color: '#374151',
+                fontSize: '1rem',
+                fontWeight: '600',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem'
+              }}>
+                <FaBolt style={{ color: '#f59e0b' }} />
+                OOX Quick Access
+                <FaBolt style={{ color: '#f59e0b' }} />
+              </h3>
+              <p style={{ 
+                color: '#6b7280', 
+                fontSize: '0.8rem', 
+                margin: '0.25rem 0 0 0' 
+              }}>
+                Instant dashboard access for demo
+              </p>
+            </div>
+            
+            <div className="oox-mobile-nav">
+              {['owner', 'admin', 'warehouse', 'delivery'].map((role) => {
+                const config = getRoleConfig(role);
+                const IconComponent = config.icon;
+                
+                return (
+                  <button
+                    key={role}
+                    onClick={() => handleDemoLogin(role)}
+                    disabled={loading}
+                    className="oox-mobile-nav-item"
+                    style={{
+                      border: 'none',
+                      background: 'white',
+                      cursor: 'pointer',
+                      opacity: loading ? 0.6 : 1
+                    }}
+                  >
+                    <div 
+                      className="oox-mobile-nav-icon"
+                      style={{ color: config.color }}
+                    >
+                      <IconComponent />
+                    </div>
+                    <div className="oox-mobile-nav-label" style={{ color: '#374151' }}>
+                      {config.title}
+                    </div>
+                    <div style={{ 
+                      fontSize: '0.7rem', 
+                      color: '#9ca3af',
+                      marginTop: '0.25rem',
+                      lineHeight: '1.2'
+                    }}>
+                      {config.description}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           {/* Footer */}
-          <div className="mt-6 text-center">
-            <p className="text-xs text-gray-500">
-              © 2024 OOX Furniture. All rights reserved.
+          <div className="oox-mobile-text-center" style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid rgba(0, 0, 0, 0.06)' }}>
+            <p style={{ 
+              fontSize: '0.75rem', 
+              color: '#9ca3af',
+              margin: '0 0 0.25rem 0',
+              fontWeight: '500'
+            }}>
+              © 2024 OOX Furniture Management System
             </p>
-            <p className="text-xs text-gray-400 mt-1">
-              Authentication disabled for development
-            </p>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              fontSize: '0.7rem',
+              color: '#d1d5db'
+            }}>
+              <span>Secure</span>
+              <span>•</span>
+              <span>Reliable</span>
+              <span>•</span>
+              <span>Mobile-First</span>
+            </div>
           </div>
         </div>
 
-        {/* Mobile-specific features */}
+        {/* Mobile-specific bottom message */}
         {isMobile && (
-          <div className="mt-4 text-center">
-            <p className="text-sm text-gray-600">
-              💡 Tip: Use the quick access buttons for instant dashboard access
+          <div 
+            className="oox-mobile-text-center oox-animate-fadeInUp"
+            style={{
+              marginTop: '1.5rem',
+              padding: '1rem',
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '12px',
+              backdropFilter: 'blur(10px)'
+            }}
+          >
+            <p style={{
+              color: 'rgba(255, 255, 255, 0.9)',
+              fontSize: '0.9rem',
+              margin: 0,
+              fontWeight: '500'
+            }}>
+              📱 Optimized for mobile experience
+            </p>
+            <p style={{
+              color: 'rgba(255, 255, 255, 0.7)',
+              fontSize: '0.8rem',
+              margin: '0.25rem 0 0 0'
+            }}>
+              Tap any dashboard above for instant access
             </p>
           </div>
         )}
       </div>
+
+      {/* Additional CSS for animations */}
+      <style jsx>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          33% { transform: translateY(-10px) rotate(1deg); }
+          66% { transform: translateY(5px) rotate(-1deg); }
+        }
+        
+        @keyframes pulse {
+          0%, 100% { 
+            transform: scale(1);
+            opacity: 0.7;
+          }
+          50% { 
+            transform: scale(1.05);
+            opacity: 1;
+          }
+        }
+        
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };
