@@ -204,7 +204,7 @@ const LoginPage = ({ onLogin }) => {
       className="oox-mobile-container"
       style={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+        background: '#f8f9fa',
         position: 'relative',
         overflow: 'hidden'
       }}
