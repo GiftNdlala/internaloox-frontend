@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Container, Row, Col, Button } from 'react-bootstrap';
-import { FaClock, FaRefresh } from 'react-icons/fa';
+import { FaClock, FaSync } from 'react-icons/fa';
 
 const EnhancedPageHeader = ({ 
   title, 
@@ -162,7 +162,7 @@ const EnhancedPageHeader = ({
                       className="page-refresh-btn d-flex align-items-center"
                       onClick={onRefresh}
                     >
-                      <FaRefresh className="me-2" />
+                      <FaSync className="me-2" />
                       Refresh
                     </Button>
                   )}
@@ -200,7 +200,7 @@ const EnhancedPageHeader = ({
                     style={{ background: accentColor, border: 'none' }}
                     onClick={onRefresh}
                   >
-                    <FaRefresh />
+                    <FaSync />
                   </Button>
                 )}
               </div>
