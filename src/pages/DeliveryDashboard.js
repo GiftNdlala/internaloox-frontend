@@ -77,14 +77,14 @@ const DeliveryDashboard = ({ user, onLogout }) => {
                 fontSize: '2.2rem',
                 color: '#1f2937'
               }}>
-                Delivery Hub
+                OOX Furniture Delivery Hub
               </h1>
               <p className="mb-0" style={{
                 fontSize: '1.1rem',
                 color: '#6b7280',
                 fontWeight: '500'
               }}>
-                Route Management • {currentTime.toLocaleDateString()}
+                OOX Furniture Route Management • {currentTime.toLocaleDateString()}
               </p>
             </div>
           </div>

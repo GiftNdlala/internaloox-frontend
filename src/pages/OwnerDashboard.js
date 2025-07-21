@@ -92,7 +92,7 @@ const OwnerDashboard = ({ user, onLogout }) => {
                             <FaStar className="text-warning me-3" size={40} />
             <div>
               <h2 className="mb-0" style={{ fontWeight: '700', fontSize: '2.2rem' }}>
-                Welcome to Oox Furniture Internal Order Management System
+                Welcome to OOX Furniture Internal Order Management System
               </h2>
               <p className="mb-0 text-warning" style={{ fontSize: '1.1rem' }}>
                 {user?.username || user?.first_name || 'Owner'} • {currentTime.toLocaleDateString('en-ZA', { 

@@ -184,10 +184,10 @@ const LoginPage = ({ onLogin }) => {
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-              Welcome Back
+              Welcome to OOX Furniture
             </h2>
             <p className="text-gray-600">
-              Sign in to your account
+              Sign in to your OOX Furniture management system
             </p>
           </div>
 

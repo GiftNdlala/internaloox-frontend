@@ -288,10 +288,10 @@ const Users = ({ user, userRole, onLogout }) => {
               <div>
                 <h2 className="mb-1">
                   <FaUsers className="me-2 text-primary" />
-                  Team Management
+                  OOX Furniture - Team Management
                 </h2>
                 <p className="text-muted">
-                  Manage user accounts, roles, and system access permissions
+                  OOX Furniture user accounts, roles, and system access permissions management
                 </p>
               </div>
               <div className="d-flex gap-2">

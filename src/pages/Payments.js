@@ -257,10 +257,10 @@ const Payments = ({ user, userRole, onLogout }) => {
               <div>
                 <h2 className="mb-1">
                   <FaMoneyBillWave className="me-2 text-success" />
-                  Payment Management
+                  OOX Furniture - Payment Management
                 </h2>
                 <p className="text-muted">
-                  Track payments, deposits, balances, and financial transactions
+                  OOX Furniture payments, deposits, balances, and financial transactions tracking
                 </p>
               </div>
               <div className="d-flex gap-2">

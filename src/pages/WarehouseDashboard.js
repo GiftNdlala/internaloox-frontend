@@ -71,7 +71,7 @@ const WarehouseDashboard = ({ user, onLogout }) => {
                 fontSize: '2.5rem',
                 textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
               }}>
-                PRODUCTION FLOOR
+                OOX FURNITURE PRODUCTION FLOOR
               </h1>
               <p className="mb-0 text-success" style={{ 
                 fontSize: '1.2rem', 
@@ -79,7 +79,7 @@ const WarehouseDashboard = ({ user, onLogout }) => {
                 textTransform: 'uppercase',
                 letterSpacing: '2px'
               }}>
-                Warehouse Operations • {currentTime.toLocaleDateString()}
+                OOX Furniture Warehouse Operations • {currentTime.toLocaleDateString()}
               </p>
             </div>
           </div>

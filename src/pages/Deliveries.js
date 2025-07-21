@@ -296,10 +296,10 @@ const Deliveries = ({ user, userRole, onLogout }) => {
               <div>
                 <h2 className="mb-1">
                   <FaTruck className="me-2 text-info" />
-                  Delivery Management
+                  OOX Furniture - Delivery Management
                 </h2>
                 <p className="text-muted">
-                  Track order deliveries, manage logistics, and monitor delivery status
+                  OOX Furniture order deliveries, logistics management, and delivery status monitoring
                 </p>
               </div>
               <div className="d-flex gap-2">

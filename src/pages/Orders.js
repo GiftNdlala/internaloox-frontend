@@ -258,12 +258,12 @@ const Orders = ({ user, userRole, onLogout }) => {
               <div>
                 <h2 className="mb-1">
                   <FaClipboardList className="me-2 text-primary" />
-                  Orders Management
+                  OOX Furniture - Orders Management
                 </h2>
                 <p className="text-muted">
-                  {userRole === 'owner' && 'Full order oversight and management'}
-                  {userRole === 'admin' && 'Order administration and customer service'}  
-                  {userRole === 'warehouse' && 'Production tracking and fulfillment'}
+                  {userRole === 'owner' && 'OOX Furniture full order oversight and management'}
+                  {userRole === 'admin' && 'OOX Furniture order administration and customer service'}  
+                  {userRole === 'warehouse' && 'OOX Furniture production tracking and fulfillment'}
                 </p>
               </div>
               <div className="d-flex gap-2">

@@ -263,7 +263,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                 fontWeight: '500',
                 color: '#93c5fd !important'
               }}>
-                Admin Dashboard • {currentTime.toLocaleDateString('en-ZA', {
+                OOX Furniture Admin Dashboard • {currentTime.toLocaleDateString('en-ZA', {
                   weekday: 'long',
                   year: 'numeric',
                   month: 'long',

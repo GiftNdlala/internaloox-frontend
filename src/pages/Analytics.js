@@ -237,10 +237,10 @@ const Analytics = ({ user, userRole, onLogout }) => {
               <div>
                 <h2 className="mb-1">
                   <FaChartLine className="me-2 text-primary" />
-                  Business Analytics
+                  OOX Furniture - Business Analytics
                 </h2>
                 <p className="text-muted">
-                  Comprehensive business intelligence and performance metrics
+                  OOX Furniture comprehensive business intelligence and performance metrics
                 </p>
               </div>
               <div className="d-flex gap-2">

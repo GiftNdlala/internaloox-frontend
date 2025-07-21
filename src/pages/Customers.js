@@ -219,10 +219,10 @@ const Customers = ({ user, userRole, onLogout }) => {
               <div>
                 <h2 className="mb-1">
                   <FaUsers className="me-2 text-primary" />
-                  Customer Management
+                  OOX Furniture - Customer Management
                 </h2>
                 <p className="text-muted">
-                  Manage customer information, contact details, and order history
+                  OOX Furniture customer information, contact details, and order history management
                 </p>
               </div>
               <div className="d-flex gap-2">

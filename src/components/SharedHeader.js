@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Navbar, Nav, NavDropdown, Container, Badge } from 'react-bootstrap';
 import { 
   FaUserShield, FaSignOutAlt, FaCog, FaUser, 
-  FaBell, FaClock, FaChevronDown 
+  FaBell, FaClock, FaChevronDown, FaCouch
 } from 'react-icons/fa';
 
 const SharedHeader = ({ user, onLogout, dashboardType = 'default' }) => {
@@ -17,35 +17,35 @@ const SharedHeader = ({ user, onLogout, dashboardType = 'default' }) => {
     switch (dashboardType) {
       case 'owner':
         return {
-          title: 'Executive Portal',
+          title: 'OOX Furniture - Executive Portal',
           bgColor: '#1e293b',
           textColor: 'white',
           accentColor: '#f59e0b'
         };
       case 'admin':
         return {
-          title: 'Operations Control',
+          title: 'OOX Furniture - Operations Control',
           bgColor: '#64748b',
           textColor: 'white',
           accentColor: '#3b82f6'
         };
       case 'warehouse':
         return {
-          title: 'Production Floor',
+          title: 'OOX Furniture - Production Floor',
           bgColor: '#1f2937',
           textColor: 'white',
           accentColor: '#10b981'
         };
       case 'delivery':
         return {
-          title: 'Delivery Hub',
+          title: 'OOX Furniture - Delivery Hub',
           bgColor: '#ffffff',
           textColor: '#1f2937',
           accentColor: '#fbbf24'
         };
       default:
         return {
-          title: 'OOX System',
+          title: 'OOX Furniture System',
           bgColor: '#6b7280',
           textColor: 'white',
           accentColor: '#3b82f6'
@@ -73,7 +73,7 @@ const SharedHeader = ({ user, onLogout, dashboardType = 'default' }) => {
             fontSize: '1.3rem'
           }}
         >
-          <FaUserShield className="me-2" style={{ color: config.accentColor }} />
+          <FaCouch className="me-2" style={{ color: config.accentColor }} />
           {config.title}
         </Navbar.Brand>
         
