@@ -2,27 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Container, Row, Col, Card, Nav, Button, 
-  Table, Modal, Form, Alert, Badge, Dropdown,
-  Navbar, NavDropdown, ButtonGroup, ProgressBar
+  Alert, Badge, ProgressBar
 } from 'react-bootstrap';
 import { 
-  FaUsers, FaBoxes, FaTruck, FaChartLine, 
-  FaPlus, FaEdit, FaTrash, FaCog, FaSignOutAlt,
+  FaUsers, FaTruck, FaChartLine, 
   FaUserShield, FaClipboardList, FaMoneyBillWave,
-  FaFileAlt, FaDownload, FaEye, FaArrowUp,
-  FaArrowDown, FaStar, FaCircle, FaChartBar,
-  FaCalendarCheck, FaClock, FaExclamationTriangle
+  FaArrowUp, FaArrowDown, FaStar, FaCircle, FaChartBar,
+  FaCalendarCheck, FaClock
 } from 'react-icons/fa';
-import OrderForm from '../components/OrderForm';
-import OrderDetail from '../components/OrderDetail';
 import UniversalSidebar from '../components/UniversalSidebar';
-import { getDashboardStats, getUsers, getOrders, deleteUser, createOrder, createUser, updateUser, deleteOrder, updateOrder, getOrder } from '../components/api';
+import { getDashboardStats, getOrders } from '../components/api';
 
 const OwnerDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [stats, setStats] = useState({});
-  const [users, setUsers] = useState([]);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -61,13 +55,7 @@ const OwnerDashboard = ({ user, onLogout }) => {
     }
   };
 
-  const getGreeting = () => {
-    const hour = currentTime.getHours();
-    const name = user?.first_name || user?.username || 'Owner';
-    if (hour < 12) return `Good morning, ${name}`;
-    if (hour < 18) return `Good afternoon, ${name}`;
-    return `Good evening, ${name}`;
-  };
+
 
   const formatCurrency = (amount) => `R${Number(amount).toLocaleString()}`;
 

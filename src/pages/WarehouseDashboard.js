@@ -2,19 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Container, Row, Col, Card, Button, Badge, 
-  ProgressBar, Alert, Form, Modal 
+  Alert, Modal 
 } from 'react-bootstrap';
 import { 
   FaWrench, FaBoxes, FaClock, FaPlay, FaPause, 
   FaCheck, FaExclamationTriangle, FaQrcode,
-  FaEye, FaEdit, FaChevronRight, FaUser
+  FaEye, FaUser
 } from 'react-icons/fa';
 import { getOrders, getProducts } from '../components/api';
 
 const WarehouseDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
-  const [products, setProducts] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);

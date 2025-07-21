@@ -7,7 +7,7 @@ import {
 } from 'react-bootstrap';
 import {
   FaUserShield, FaPlus, FaEdit, FaTrash, FaEye, FaSearch,
-  FaEnvelope, FaCalendarAlt, FaSync, FaDownload, FaCheck, 
+  FaEnvelope, FaDownload, FaCheck, 
   FaExclamationTriangle, FaSortUp, FaSortDown, FaUsers,
   FaCrown, FaCog, FaWrench, FaTruck, FaKey, FaUserCheck
 } from 'react-icons/fa';
@@ -19,7 +19,6 @@ import EnhancedPageHeader from '../components/EnhancedPageHeader';
 import UniversalSidebar from '../components/UniversalSidebar';
 
 const Users = ({ user, userRole, onLogout }) => {
-  const navigate = useNavigate();
   
   // State management
   const [users, setUsers] = useState([]);

@@ -2,18 +2,16 @@ import React, { useState, useEffect } from 'react';
 import {
   Container, Row, Col, Card, Button, Table, Modal, Form,
   Badge, Dropdown, InputGroup, Alert, Spinner, Tab, Tabs,
-  ProgressBar, ButtonGroup, OverlayTrigger, Tooltip
+  ButtonGroup, OverlayTrigger, Tooltip
 } from 'react-bootstrap';
 import {
-  FaPlus, FaEdit, FaTrash, FaEye, FaSearch, FaFilter,
-  FaDownload, FaUpload, FaCheck, FaClock, FaExclamationTriangle,
-  FaBoxes, FaTruck, FaMoneyBillWave, FaUser, FaCalendarAlt,
-  FaClipboardList, FaSync, FaChartLine, FaSortUp, FaSortDown
+  FaPlus, FaEdit, FaTrash, FaEye, FaSearch,
+  FaDownload, FaCheck, FaExclamationTriangle,
+  FaClipboardList, FaSortUp, FaSortDown
 } from 'react-icons/fa';
 import { 
   getOrders, getCustomers, getProducts, 
-  createOrder, updateOrder, deleteOrder,
-  getOrderItems, createOrderItem, updateOrderItem
+  createOrder, updateOrder, deleteOrder
 } from '../components/api';
 import SharedHeader from '../components/SharedHeader';
 import OrderForm from '../components/OrderForm';
@@ -78,7 +76,7 @@ const Orders = ({ user, userRole, onLogout }) => {
   const canCreate = userRole === 'owner' || userRole === 'admin';
   const canEdit = userRole === 'owner' || userRole === 'admin';
   const canDelete = userRole === 'owner';
-  const canUpdateProduction = userRole === 'owner' || userRole === 'warehouse';
+
   const canViewFinancials = userRole === 'owner' || userRole === 'admin';
 
   // Filter and sort orders

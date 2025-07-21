@@ -6,9 +6,9 @@ import {
   OverlayTrigger, Tooltip, Tabs, Tab
 } from 'react-bootstrap';
 import {
-  FaMoneyBillWave, FaPlus, FaEdit, FaTrash, FaEye, FaSearch,
-  FaCalendarAlt, FaSync, FaDownload, FaCheck, FaExclamationTriangle,
-  FaSortUp, FaSortDown, FaCreditCard, FaReceipt, FaChartLine,
+  FaMoneyBillWave, FaPlus, FaEdit, FaEye, FaSearch,
+  FaDownload, FaCheck, FaExclamationTriangle,
+  FaSortUp, FaSortDown, FaReceipt, FaChartLine,
   FaFileInvoice, FaWallet, FaExchangeAlt, FaClock, FaCheckCircle
 } from 'react-icons/fa';
 import { 

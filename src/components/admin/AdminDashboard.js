@@ -6,9 +6,9 @@ import {
 } from 'react-bootstrap';
 import {
   FaClipboardList, FaMoneyBillWave, FaUsers, FaChartBar,
-  FaPlus, FaEdit, FaTrash, FaBell, FaCheckCircle, FaExclamationTriangle,
+  FaBell, FaCheckCircle, FaExclamationTriangle,
   FaCog, FaFileAlt, FaClock, FaUserShield,
-  FaEnvelope, FaTasks, FaEye, FaCheck
+  FaEnvelope, FaTasks
 } from 'react-icons/fa';
 import OrdersTable from './OrdersTable';
 import PaymentsTable from './PaymentsTable';

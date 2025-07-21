@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
   Container, Row, Col, Card, Button, Badge,
-  Alert, Modal, Form, ProgressBar, ListGroup
+  Alert, Modal, Form, ListGroup
 } from 'react-bootstrap';
 import {
   FaTruck, FaMapMarkerAlt, FaRoute, FaClock,
   FaCheckCircle, FaCamera, FaPhone, FaCompass,
-  FaPlay, FaPause, FaFlag, FaUser, FaMoneyBillWave,
-  FaClipboardCheck, FaExclamationTriangle
+  FaPlay, FaFlag, FaUser, FaMoneyBillWave,
+  FaClipboardCheck
 } from 'react-icons/fa';
 import { getOrders } from '../components/api';
 
