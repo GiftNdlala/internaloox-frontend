@@ -28,10 +28,9 @@ const OwnerDashboard = ({ user, onLogout }) => {
   const [success, setSuccess] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Real-time clock
+  // Initialize time once
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 60000); // 1 minute
-    return () => clearInterval(timer);
+    setCurrentTime(new Date());
   }, []);
 
   useEffect(() => {
@@ -93,10 +92,10 @@ const OwnerDashboard = ({ user, onLogout }) => {
                             <FaStar className="text-warning me-3" size={40} />
             <div>
               <h2 className="mb-0" style={{ fontWeight: '700', fontSize: '2.2rem' }}>
-                {getGreeting()}
+                Welcome to Oox Furniture Internal Order Management System
               </h2>
               <p className="mb-0 text-warning" style={{ fontSize: '1.1rem' }}>
-                Executive Dashboard • {currentTime.toLocaleDateString('en-ZA', { 
+                {user?.username || user?.first_name || 'Owner'} • {currentTime.toLocaleDateString('en-ZA', { 
                   weekday: 'long', 
                   year: 'numeric', 
                   month: 'long', 
@@ -282,68 +281,7 @@ const OwnerDashboard = ({ user, onLogout }) => {
       {/* Executive Header */}
       <ExecutiveHeader />
 
-      {/* Quick Actions */}
-      <Row className="mb-4">
-        <Col>
-          <Card className="border-0 shadow-sm">
-            <Card.Body className="py-3">
-              <div className="d-flex justify-content-between align-items-center">
-                <h5 className="mb-0 text-primary">
-                  <FaClipboardList className="me-2" />
-                  Quick Actions
-                </h5>
-                <div className="d-flex gap-2">
-                                     <Button
-                     variant="primary"
-                     size="lg"
-                     onClick={() => navigate('/owner/orders')}
-                     className="d-flex align-items-center"
-                   >
-                     <FaClipboardList className="me-2" />
-                     Manage Orders
-                   </Button>
-                   <Button
-                     variant="success"
-                     size="lg"
-                     onClick={() => navigate('/owner/customers')}
-                     className="d-flex align-items-center"
-                   >
-                     <FaUsers className="me-2" />
-                     Customers
-                   </Button>
-                   <Button
-                     variant="info"
-                     size="lg"
-                     onClick={() => navigate('/owner/payments')}
-                     className="d-flex align-items-center"
-                   >
-                     <FaMoneyBillWave className="me-2" />
-                     Payments
-                   </Button>
-                                       <Button
-                      variant="warning"
-                      size="lg"
-                      onClick={() => navigate('/owner/deliveries')}
-                      className="d-flex align-items-center"
-                    >
-                      <FaTruck className="me-2" />
-                      Deliveries
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="lg"
-                      onClick={() => navigate('/owner/analytics')}
-                      className="d-flex align-items-center"
-                    >
-                      <FaChartBar className="me-2" />
-                      Analytics
-                    </Button>
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+
 
       {/* Mobile Navigation */}
       <MobileNav />
@@ -416,6 +354,27 @@ const OwnerDashboard = ({ user, onLogout }) => {
           <p className="text-muted">This section is being enhanced with executive-level features</p>
         </Card>
       )}
+
+      {/* Bottom Navigation */}
+      <Row className="mt-4">
+        <Col>
+          <Card className="border-0 shadow-sm">
+            <Card.Body className="text-center">
+              <div className="d-flex justify-content-center gap-3">
+                <Button
+                  variant="success"
+                  size="lg"
+                  onClick={() => navigate('/owner/customers')}
+                  className="d-flex align-items-center"
+                >
+                  <FaUsers className="me-2" />
+                  Customers
+                </Button>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
 
       {/* Custom Styles */}
       <style jsx>{`
