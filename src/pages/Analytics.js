@@ -5,9 +5,9 @@ import {
   ProgressBar, Badge, Form, ButtonGroup
 } from 'react-bootstrap';
 import {
-  FaChartLine, FaChartBar, FaChartPie, FaTrendingUp, FaTrendingDown,
+  FaChartLine, FaChartBar, FaChartPie, FaArrowUp, FaArrowDown,
   FaMoneyBillWave, FaUsers, FaClipboardList, FaTruck, FaCalendarAlt,
-  FaSync, FaDownload, FaFilter, FaArrowUp, FaArrowDown, FaEquals,
+  FaSync, FaDownload, FaFilter, FaEquals,
   FaBoxes, FaClock, FaCheckCircle, FaExclamationTriangle, FaStar,
   FaEye, FaFileAlt, FaPrint
 } from 'react-icons/fa';
@@ -201,8 +201,8 @@ const Analytics = ({ user, userRole, onLogout }) => {
 
   // Get trend indicator
   const getTrendIndicator = (current, previous) => {
-    if (current > previous) return { icon: FaTrendingUp, color: 'success', direction: 'up' };
-    if (current < previous) return { icon: FaTrendingDown, color: 'danger', direction: 'down' };
+    if (current > previous) return { icon: FaArrowUp, color: 'success', direction: 'up' };
+    if (current < previous) return { icon: FaArrowDown, color: 'danger', direction: 'down' };
     return { icon: FaEquals, color: 'secondary', direction: 'same' };
   };
 
@@ -284,10 +284,10 @@ const Analytics = ({ user, userRole, onLogout }) => {
                 <FaMoneyBillWave size={40} className="text-success mb-3" />
                 <h3 className="text-success mb-1">{formatCurrency(financial.totalRevenue)}</h3>
                 <p className="text-muted mb-2">Total Revenue</p>
-                <div className="d-flex align-items-center justify-content-center">
-                  <FaTrendingUp className="text-success me-1" size={14} />
-                  <small className="text-success">+12% vs last period</small>
-                </div>
+                                 <div className="d-flex align-items-center justify-content-center">
+                   <FaArrowUp className="text-success me-1" size={14} />
+                   <small className="text-success">+12% vs last period</small>
+                 </div>
               </Card.Body>
             </Card>
           </Col>
@@ -297,10 +297,10 @@ const Analytics = ({ user, userRole, onLogout }) => {
                 <FaClipboardList size={40} className="text-primary mb-3" />
                 <h3 className="text-primary mb-1">{financial.totalOrders}</h3>
                 <p className="text-muted mb-2">Total Orders</p>
-                <div className="d-flex align-items-center justify-content-center">
-                  <FaTrendingUp className="text-success me-1" size={14} />
-                  <small className="text-success">+8% vs last period</small>
-                </div>
+                                 <div className="d-flex align-items-center justify-content-center">
+                   <FaArrowUp className="text-success me-1" size={14} />
+                   <small className="text-success">+8% vs last period</small>
+                 </div>
               </Card.Body>
             </Card>
           </Col>
@@ -310,10 +310,10 @@ const Analytics = ({ user, userRole, onLogout }) => {
                 <FaUsers size={40} className="text-info mb-3" />
                 <h3 className="text-info mb-1">{customerStats.total}</h3>
                 <p className="text-muted mb-2">Total Customers</p>
-                <div className="d-flex align-items-center justify-content-center">
-                  <FaTrendingUp className="text-success me-1" size={14} />
-                  <small className="text-success">+{customerStats.new} new</small>
-                </div>
+                                 <div className="d-flex align-items-center justify-content-center">
+                   <FaArrowUp className="text-success me-1" size={14} />
+                   <small className="text-success">+{customerStats.new} new</small>
+                 </div>
               </Card.Body>
             </Card>
           </Col>
