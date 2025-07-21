@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap';
+import { Container, Row, Col, Card, Table, Spinner, ProgressBar, Form, Button, Badge, ButtonGroup, OverlayTrigger, Tooltip, Alert } from 'react-bootstrap';
 import {
   FaChartLine, FaMoneyBillWave, FaUsers, FaClipboardList,
-  FaTruck, FaArrowUp, FaArrowDown
+  FaTruck, FaArrowUp, FaArrowDown, FaChartBar, FaCalendarAlt, FaSync, FaDownload, 
+  FaFilter, FaEquals, FaBoxes, FaClock, FaCheckCircle, FaExclamationTriangle, 
+  FaStar, FaEye, FaFileAlt, FaPrint, FaChartPie
 } from 'react-icons/fa';
 import UniversalSidebar from '../components/UniversalSidebar';
 import EnhancedPageHeader from '../components/EnhancedPageHeader';
+import SharedHeader from '../components/SharedHeader';
 import { getOrders, getCustomers, getUsers, getDashboardStats } from '../components/api';
 
 const Analytics = ({ user, userRole, onLogout }) => {

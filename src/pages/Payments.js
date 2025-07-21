@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Table, Button, Modal, Form, Alert, Badge } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
+import { Container, Row, Col, Card, Table, Button, Modal, Form, Alert, Badge, Tabs, Tab, InputGroup, ButtonGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import {
-  FaMoneyBillWave, FaPlus, FaEdit, FaTrash, FaEye, FaCheck, FaExclamationTriangle
+  FaMoneyBillWave, FaPlus, FaEdit, FaTrash, FaEye, FaCheck, FaExclamationTriangle,
+  FaSearch, FaDownload, FaReceipt, FaChartLine, FaFileInvoice, FaWallet, 
+  FaExchangeAlt, FaClock, FaCheckCircle, FaSortUp, FaSortDown
 } from 'react-icons/fa';
 import UniversalSidebar from '../components/UniversalSidebar';
 import EnhancedPageHeader from '../components/EnhancedPageHeader';
-import { getPayments, getOrders, createPayment, updatePayment, deletePayment } from '../components/api';
+import SharedHeader from '../components/SharedHeader';
+import { getPayments, getOrders, getCustomers, createPayment, updatePayment, deletePayment, updateOrder } from '../components/api';
 
 const Payments = ({ user, userRole, onLogout }) => {
   const navigate = useNavigate();
