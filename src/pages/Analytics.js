@@ -16,6 +16,7 @@ import {
 } from '../components/api';
 import SharedHeader from '../components/SharedHeader';
 import EnhancedPageHeader from '../components/EnhancedPageHeader';
+import UniversalSidebar from '../components/UniversalSidebar';
 
 const Analytics = ({ user, userRole, onLogout }) => {
   const navigate = useNavigate();
@@ -224,13 +225,15 @@ const Analytics = ({ user, userRole, onLogout }) => {
 
   return (
     <>
-      <SharedHeader 
-        user={user} 
-        onLogout={onLogout} 
-        dashboardType={userRole} 
-      />
-      
-      <Container fluid className="py-4">
+      <UniversalSidebar user={user} userRole={userRole} onLogout={onLogout} />
+      <div className="main-content">
+        <SharedHeader 
+          user={user} 
+          onLogout={onLogout} 
+          dashboardType={userRole} 
+        />
+        
+        <Container fluid className="py-4">
         {/* Enhanced Header */}
         <EnhancedPageHeader
           title="OOX Furniture - Business Analytics"
@@ -746,7 +749,8 @@ const Analytics = ({ user, userRole, onLogout }) => {
             </Card>
           </Col>
         </Row>
-      </Container>
+        </Container>
+      </div>
     </>
   );
 };

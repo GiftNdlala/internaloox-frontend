@@ -18,6 +18,7 @@ import {
 import SharedHeader from '../components/SharedHeader';
 import OrderForm from '../components/OrderForm';
 import EnhancedPageHeader from '../components/EnhancedPageHeader';
+import UniversalSidebar from '../components/UniversalSidebar';
 
 const Orders = ({ user, userRole, onLogout }) => {
   // State management
@@ -245,13 +246,15 @@ const Orders = ({ user, userRole, onLogout }) => {
 
   return (
     <>
-      <SharedHeader 
-        user={user} 
-        onLogout={onLogout} 
-        dashboardType={userRole} 
-      />
-      
-      <Container fluid className="py-4">
+      <UniversalSidebar user={user} userRole={userRole} onLogout={onLogout} />
+      <div className="main-content">
+        <SharedHeader 
+          user={user} 
+          onLogout={onLogout} 
+          dashboardType={userRole} 
+        />
+        
+        <Container fluid className="py-4">
         {/* Enhanced Header */}
         <EnhancedPageHeader
           title="OOX Furniture - Orders Management"
@@ -619,7 +622,7 @@ const Orders = ({ user, userRole, onLogout }) => {
               customers={customers}
               products={products}
               onSubmit={handleOrderSubmit}
-              onCancel={() => setShowOrderModal(false)}
+              onClose={() => setShowOrderModal(false)}
               userRole={userRole}
             />
           </Modal.Body>
@@ -649,7 +652,8 @@ const Orders = ({ user, userRole, onLogout }) => {
             </Button>
           </Modal.Footer>
         </Modal>
-      </Container>
+        </Container>
+      </div>
     </>
   );
 };

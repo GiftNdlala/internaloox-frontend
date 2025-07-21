@@ -15,6 +15,7 @@ import {
 } from 'react-icons/fa';
 import OrderForm from '../components/OrderForm';
 import OrderDetail from '../components/OrderDetail';
+import UniversalSidebar from '../components/UniversalSidebar';
 import { getDashboardStats, getUsers, getOrders, deleteUser, createOrder, createUser, updateUser, deleteOrder, updateOrder, getOrder } from '../components/api';
 
 const OwnerDashboard = ({ user, onLogout }) => {
@@ -277,9 +278,12 @@ const OwnerDashboard = ({ user, onLogout }) => {
   }
 
   return (
-    <Container fluid className="owner-dashboard" style={{ backgroundColor: '#f8fafc', minHeight: '100vh' }}>
-      {/* Executive Header */}
-      <ExecutiveHeader />
+    <>
+      <UniversalSidebar user={user} userRole="owner" onLogout={onLogout} />
+      <div className="main-content">
+        <Container fluid className="owner-dashboard" style={{ backgroundColor: '#f8fafc', minHeight: '100vh' }}>
+          {/* Executive Header */}
+          <ExecutiveHeader />
 
 
 
@@ -410,7 +414,9 @@ const OwnerDashboard = ({ user, onLogout }) => {
           }
         }
       `}</style>
-    </Container>
+        </Container>
+      </div>
+    </>
   );
 };
 

@@ -17,6 +17,7 @@ import {
 } from '../components/api';
 import SharedHeader from '../components/SharedHeader';
 import EnhancedPageHeader from '../components/EnhancedPageHeader';
+import UniversalSidebar from '../components/UniversalSidebar';
 
 const Deliveries = ({ user, userRole, onLogout }) => {
   const navigate = useNavigate();
@@ -283,13 +284,15 @@ const Deliveries = ({ user, userRole, onLogout }) => {
 
   return (
     <>
-      <SharedHeader 
-        user={user} 
-        onLogout={onLogout} 
-        dashboardType={userRole} 
-      />
-      
-      <Container fluid className="py-4">
+      <UniversalSidebar user={user} userRole={userRole} onLogout={onLogout} />
+      <div className="main-content">
+        <SharedHeader 
+          user={user} 
+          onLogout={onLogout} 
+          dashboardType={userRole} 
+        />
+        
+        <Container fluid className="py-4">
         {/* Enhanced Header */}
         <EnhancedPageHeader
           title="OOX Furniture - Delivery Management"
@@ -811,7 +814,8 @@ const Deliveries = ({ user, userRole, onLogout }) => {
             </Button>
           </Modal.Footer>
         </Modal>
-      </Container>
+        </Container>
+      </div>
     </>
   );
 };
