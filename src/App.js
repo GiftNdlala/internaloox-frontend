@@ -13,6 +13,7 @@ import Deliveries from './pages/Deliveries';
 import Analytics from './pages/Analytics';
 import LoginPage from './pages/LoginPage';
 import './App.css';
+import './styles/MobileFirst.css';
 
 function App() {
   const [user, setUser] = useState(null);

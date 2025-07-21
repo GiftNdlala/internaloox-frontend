@@ -256,7 +256,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                 fontSize: '2.3rem',
                 textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
               }}>
-                Operations Control
+                OOX Operations Control
               </h1>
               <p className="mb-0 text-primary" style={{
                 fontSize: '1.1rem',
@@ -424,7 +424,6 @@ const AdminDashboard = ({ user, onLogout }) => {
       {[
         { key: 'overview', label: 'Overview', icon: FaChartBar, isTab: true },
         { key: 'orders', label: 'Orders', icon: FaClipboardList, isTab: false, route: '/admin/orders' },
-        { key: 'users', label: 'Users', icon: FaUsers, isTab: true },
         { key: 'customers', label: 'Customers', icon: FaFileAlt, isTab: true },
         { key: 'payments', label: 'Payments', icon: FaMoneyBillWave, isTab: true },
         { key: 'reports', label: 'Reports', icon: FaFileAlt, isTab: true },
@@ -635,50 +634,6 @@ const AdminDashboard = ({ user, onLogout }) => {
           </Card.Header>
           <Card.Body>
             <PaymentsTable payments={payments} loading={loading} />
-          </Card.Body>
-        </Card>
-      )}
-
-      {activeTab === 'users' && (
-        <Card className="shadow-sm">
-          <Card.Header className="bg-info text-white">
-            <h5 className="mb-0">User Management</h5>
-          </Card.Header>
-          <Card.Body>
-            <Table striped hover responsive>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Username</th>
-                  <th>Role</th>
-                  <th>Status</th>
-                  <th>Last Login</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map(userItem => (
-                  <tr key={userItem.id}>
-                    <td>{userItem.first_name} {userItem.last_name}</td>
-                    <td>{userItem.username}</td>
-                    <td>
-                      <Badge bg={
-                        userItem.role === 'owner' ? 'danger' :
-                        userItem.role === 'admin' ? 'primary' :
-                        userItem.role === 'warehouse' ? 'warning' : 'success'
-                      }>
-                        {userItem.role?.toUpperCase()}
-                      </Badge>
-                    </td>
-                    <td>
-                      <Badge bg={userItem.is_active ? 'success' : 'secondary'}>
-                        {userItem.is_active ? 'Active' : 'Inactive'}
-                      </Badge>
-                    </td>
-                    <td>{userItem.last_login ? new Date(userItem.last_login).toLocaleDateString() : 'Never'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
           </Card.Body>
         </Card>
       )}

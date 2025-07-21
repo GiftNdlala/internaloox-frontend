@@ -55,62 +55,44 @@ const DeliveryDashboard = ({ user, onLogout }) => {
 
   // Delivery Header - UberEats style
   const DeliveryHeader = () => (
-    <div className="delivery-header mb-4" style={{
+    <div className="oox-mobile-header oox-animate-fadeInUp" style={{
       background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
-      borderRadius: '20px',
-      padding: '2rem',
       border: '2px solid #fbbf24',
       boxShadow: '0 10px 30px rgba(251, 191, 36, 0.1)'
     }}>
-      <Row className="align-items-center">
-        <Col md={8}>
-          <div className="d-flex align-items-center mb-3">
-            <div className="p-3 rounded-circle me-3" style={{
-              backgroundColor: '#fbbf24',
-              color: 'white'
-            }}>
-              <FaTruck size={30} />
-            </div>
-            <div>
-              <h1 className="mb-0" style={{
-                fontWeight: '700',
-                fontSize: '2.2rem',
-                color: '#1f2937'
-              }}>
-                OOX Furniture Delivery Hub
-              </h1>
-              <p className="mb-0" style={{
-                fontSize: '1.1rem',
-                color: '#6b7280',
-                fontWeight: '500'
-              }}>
-                OOX Furniture Route Management • {currentTime.toLocaleDateString()}
-              </p>
-            </div>
-          </div>
-        </Col>
-        <Col md={4} className="text-end">
-          <div className="d-flex flex-column">
-            <Badge
-              style={{
-                backgroundColor: '#fbbf24',
-                color: '#1f2937',
-                fontSize: '0.9rem',
-                padding: '8px 16px',
-                borderRadius: '25px',
-                marginBottom: '8px'
-              }}
-            >
-              <FaUser className="me-2" />
-              {user?.first_name || 'Driver'} • {user?.role?.toUpperCase()}
-            </Badge>
-            <div style={{ color: '#6b7280', fontSize: '1rem', fontWeight: '600' }}>
-              <FaClock className="me-2" />
-              {currentTime.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
-            </div>
-          </div>
-        </Col>
-      </Row>
+      <div className="oox-brand">
+        <div className="oox-logo" style={{ backgroundColor: '#fbbf24' }}>
+          <FaTruck size={25} style={{ color: 'white' }} />
+        </div>
+        <div>
+          <h1 className="oox-title" style={{ color: '#1f2937' }}>
+            OOX Delivery Hub
+          </h1>
+          <p className="oox-subtitle" style={{ color: '#6b7280' }}>
+            OOX Furniture Route Management • {user?.first_name || 'DRIVER'} • {currentTime.toLocaleDateString()}
+          </p>
+        </div>
+      </div>
+      
+      {/* Delivery Stats */}
+      <div className="oox-mobile-stats">
+        <div className="oox-mobile-stat">
+          <div className="oox-mobile-stat-value">{orders.filter(o => o.order_status === 'out_for_delivery').length}</div>
+          <div className="oox-mobile-stat-label">Out for Delivery</div>
+        </div>
+        <div className="oox-mobile-stat">
+          <div className="oox-mobile-stat-value">{orders.filter(o => o.order_status === 'delivered').length}</div>
+          <div className="oox-mobile-stat-label">Delivered</div>
+        </div>
+        <div className="oox-mobile-stat">
+          <div className="oox-mobile-stat-value">{orders.filter(o => o.production_status === 'ready_for_delivery').length}</div>
+          <div className="oox-mobile-stat-label">Ready</div>
+        </div>
+        <div className="oox-mobile-stat">
+          <div className="oox-mobile-stat-value">{orders.length}</div>
+          <div className="oox-mobile-stat-label">Total</div>
+        </div>
+      </div>
     </div>
   );
 

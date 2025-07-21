@@ -54,53 +54,43 @@ const WarehouseDashboard = ({ user, onLogout }) => {
 
   // Industrial Header
   const IndustrialHeader = () => (
-    <div className="warehouse-header mb-4" style={{
+    <div className="oox-mobile-header oox-animate-fadeInUp" style={{
       background: 'linear-gradient(135deg, #1f2937 0%, #374151 100%)',
-      color: 'white',
-      borderRadius: '15px',
-      padding: '2rem',
       border: '3px solid #10b981'
     }}>
-      <Row className="align-items-center">
-        <Col md={8}>
-          <div className="d-flex align-items-center mb-3">
-                          <FaWrench className="text-success me-3" size={50} />
-            <div>
-              <h1 className="mb-0" style={{ 
-                fontWeight: '900', 
-                fontSize: '2.5rem',
-                textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
-              }}>
-                OOX FURNITURE PRODUCTION FLOOR
-              </h1>
-              <p className="mb-0 text-success" style={{ 
-                fontSize: '1.2rem', 
-                fontWeight: '600',
-                textTransform: 'uppercase',
-                letterSpacing: '2px'
-              }}>
-                OOX Furniture Warehouse Operations • {currentTime.toLocaleDateString()}
-              </p>
-            </div>
-          </div>
-        </Col>
-        <Col md={4} className="text-end">
-          <div className="d-flex flex-column">
-            <Badge bg="success" className="mb-2" style={{ 
-              fontSize: '1rem',
-              padding: '8px 16px',
-              borderRadius: '25px'
-            }}>
-              <FaUser className="me-2" />
-              {user?.first_name || 'WORKER'} • {user?.role?.toUpperCase()}
-            </Badge>
-            <div className="text-light" style={{ fontSize: '1.1rem', fontWeight: '600' }}>
-              <FaClock className="me-2" />
-                              {currentTime.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
-            </div>
-          </div>
-        </Col>
-      </Row>
+      <div className="oox-brand">
+        <div className="oox-logo" style={{ backgroundColor: '#10b981' }}>
+          <FaWrench size={25} style={{ color: 'white' }} />
+        </div>
+        <div>
+          <h1 className="oox-title">
+            OOX Production Floor
+          </h1>
+          <p className="oox-subtitle">
+            OOX Furniture Warehouse Operations • {user?.first_name || 'WORKER'} • {currentTime.toLocaleDateString()}
+          </p>
+        </div>
+      </div>
+      
+      {/* Production Stats */}
+      <div className="oox-mobile-stats">
+        <div className="oox-mobile-stat">
+          <div className="oox-mobile-stat-value">{orders.filter(o => o.production_status === 'in_production').length}</div>
+          <div className="oox-mobile-stat-label">In Production</div>
+        </div>
+        <div className="oox-mobile-stat">
+          <div className="oox-mobile-stat-value">{orders.filter(o => o.production_status === 'ready_for_delivery').length}</div>
+          <div className="oox-mobile-stat-label">Ready</div>
+        </div>
+        <div className="oox-mobile-stat">
+          <div className="oox-mobile-stat-value">{orders.filter(o => o.production_status === 'not_started').length}</div>
+          <div className="oox-mobile-stat-label">Queue</div>
+        </div>
+        <div className="oox-mobile-stat">
+          <div className="oox-mobile-stat-value">{orders.length}</div>
+          <div className="oox-mobile-stat-label">Total</div>
+        </div>
+      </div>
     </div>
   );
 
