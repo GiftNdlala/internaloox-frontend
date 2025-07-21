@@ -9,7 +9,7 @@ const SharedHeader = ({ user, onLogout, dashboardType = 'default' }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 60000); // 1 minute
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000); // Update every second for dynamic clock
     return () => clearInterval(timer);
   }, []);
 
@@ -56,53 +56,172 @@ const SharedHeader = ({ user, onLogout, dashboardType = 'default' }) => {
   const config = getDashboardConfig();
 
   return (
+    <>
+      {/* Enhanced Header Styles */}
+      <style>{`
+        .user-dropdown .dropdown-toggle {
+          border: none !important;
+          background: none !important;
+          box-shadow: none !important;
+          padding: 0.5rem 0.75rem !important;
+          border-radius: 25px !important;
+          transition: all 0.3s ease !important;
+        }
+        .user-dropdown .dropdown-toggle:hover {
+          background: rgba(255,255,255,0.1) !important;
+          transform: translateY(-1px);
+        }
+        .user-dropdown .dropdown-toggle:focus {
+          box-shadow: 0 0 0 2px ${config.accentColor}40 !important;
+        }
+        .navbar-toggler {
+          border: 1px solid ${config.accentColor} !important;
+          padding: 0.5rem !important;
+        }
+        .navbar-toggler:focus {
+          box-shadow: 0 0 0 2px ${config.accentColor}40 !important;
+        }
+        .navbar-toggler-icon {
+          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='${config.accentColor.replace('#', '%23')}' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+        }
+        @media (max-width: 991px) {
+          .navbar-brand {
+            font-size: 1.2rem !important;
+          }
+        }
+        @media (max-width: 576px) {
+          .navbar-brand {
+            font-size: 1rem !important;
+          }
+        }
+      `}</style>
+      
     <Navbar 
       expand="lg" 
-      className="mb-3 shadow-sm"
+      className="mb-4 shadow-lg"
       style={{ 
         background: `linear-gradient(135deg, ${config.bgColor} 0%, ${config.bgColor}dd 100%)`,
-        borderBottom: `3px solid ${config.accentColor}`,
-        borderRadius: '0 0 15px 15px'
+        borderBottom: `4px solid ${config.accentColor}`,
+        borderRadius: '0 0 20px 20px',
+        padding: '1rem 0'
       }}
     >
-      <Container fluid>
+      <Container fluid className="px-4">
+        {/* Left Section - Logo/Brand */}
         <Navbar.Brand 
+          className="d-flex align-items-center"
           style={{ 
             color: config.textColor,
-            fontWeight: '700',
-            fontSize: '1.3rem'
+            fontWeight: '800',
+            fontSize: '1.5rem',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease'
           }}
+          onMouseEnter={(e) => e.target.style.transform = 'scale(1.02)'}
+          onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
         >
-          <FaCouch className="me-2" style={{ color: config.accentColor }} />
-          {config.title}
+          <div 
+            className="d-flex align-items-center justify-content-center me-3"
+            style={{
+              width: '45px',
+              height: '45px',
+              backgroundColor: config.accentColor,
+              borderRadius: '12px',
+              color: 'white',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+            }}
+          >
+            <FaCouch size={20} />
+          </div>
+          <div className="d-none d-sm-block">
+            {config.title}
+          </div>
+          <div className="d-block d-sm-none">
+            OOX
+          </div>
         </Navbar.Brand>
         
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+        <Navbar.Toggle 
+          aria-controls="basic-navbar-nav"
+          style={{ borderColor: config.accentColor }}
+        />
         
         <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="me-auto">
-            {/* Live Clock - Desktop */}
-            <Nav.Item className="d-none d-md-block">
-              <Nav.Link disabled style={{ color: config.textColor }}>
-                <FaClock className="me-2" />
-                {currentTime.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
-              </Nav.Link>
-            </Nav.Item>
-          </Nav>
+          {/* Center Section - Dynamic Clock */}
+          <div className="d-flex justify-content-center flex-grow-1">
+            <div 
+              className="d-none d-lg-flex align-items-center px-4 py-2"
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                borderRadius: '25px',
+                border: `1px solid ${config.accentColor}40`,
+                backdropFilter: 'blur(10px)'
+              }}
+            >
+              <FaClock className="me-2" style={{ color: config.accentColor }} />
+              <span style={{ 
+                color: config.textColor, 
+                fontWeight: '600',
+                fontSize: '1.1rem',
+                fontFamily: 'monospace'
+              }}>
+                {currentTime.toLocaleTimeString([], {
+                  hour: '2-digit', 
+                  minute: '2-digit', 
+                  second: '2-digit'
+                })}
+              </span>
+            </div>
+          </div>
           
-          <Nav>
-            {/* User Info Dropdown */}
+          {/* Right Section - User Info */}
+          <div className="d-flex align-items-center">
             <NavDropdown
               title={
-                <span style={{ color: config.textColor }}>
-                  <FaUser className="me-2" />
-                  {user?.first_name || user?.username || 'User'}
-                  <FaChevronDown className="ms-2" size={12} />
-                </span>
+                <div className="d-flex align-items-center">
+                  {/* Circle Avatar */}
+                  <div 
+                    className="rounded-circle d-flex align-items-center justify-content-center me-2"
+                    style={{
+                      width: '40px',
+                      height: '40px',
+                      backgroundColor: config.accentColor,
+                      color: 'white',
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                      border: '2px solid rgba(255,255,255,0.2)'
+                    }}
+                  >
+                    {(user?.first_name?.[0] || user?.username?.[0] || 'U').toUpperCase()}
+                  </div>
+                  {/* User Name - Hidden on mobile */}
+                  <div className="d-none d-md-block">
+                    <div style={{ 
+                      color: config.textColor, 
+                      fontWeight: '600',
+                      fontSize: '0.95rem'
+                    }}>
+                      {user?.first_name || user?.username || 'User'}
+                    </div>
+                    <div style={{ 
+                      color: `${config.textColor}cc`, 
+                      fontSize: '0.8rem'
+                    }}>
+                      {user?.role?.charAt(0).toUpperCase() + user?.role?.slice(1) || 'User'}
+                    </div>
+                  </div>
+                  <FaChevronDown 
+                    className="ms-2" 
+                    size={10} 
+                    style={{ color: config.accentColor }}
+                  />
+                </div>
               }
               id="user-dropdown"
               align="end"
               menuVariant={dashboardType === 'delivery' ? 'light' : 'dark'}
+              className="user-dropdown"
             >
               <NavDropdown.Header>
                 <div className="text-center">
@@ -161,7 +280,7 @@ const SharedHeader = ({ user, onLogout, dashboardType = 'default' }) => {
                 Logout
               </NavDropdown.Item>
             </NavDropdown>
-          </Nav>
+          </div>
         </Navbar.Collapse>
       </Container>
       
@@ -210,6 +329,7 @@ const SharedHeader = ({ user, onLogout, dashboardType = 'default' }) => {
         }
       `}</style>
     </Navbar>
+    </>
   );
 };
 

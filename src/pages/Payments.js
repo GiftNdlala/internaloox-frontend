@@ -15,6 +15,7 @@ import {
   getOrders, getCustomers, updateOrder
 } from '../components/api';
 import SharedHeader from '../components/SharedHeader';
+import EnhancedPageHeader from '../components/EnhancedPageHeader';
 
 const Payments = ({ user, userRole, onLogout }) => {
   const navigate = useNavigate();
@@ -250,32 +251,36 @@ const Payments = ({ user, userRole, onLogout }) => {
       />
       
       <Container fluid className="py-4">
-        {/* Header Section */}
-        <Row className="mb-4">
-          <Col>
-            <div className="d-flex justify-content-between align-items-center">
-              <div>
-                <h2 className="mb-1">
-                  <FaMoneyBillWave className="me-2 text-success" />
-                  OOX Furniture - Payment Management
-                </h2>
-                <p className="text-muted">
-                  OOX Furniture payments, deposits, balances, and financial transactions tracking
-                </p>
-              </div>
-              <div className="d-flex gap-2">
-                <Button variant="outline-primary" onClick={fetchAllData}>
-                  <FaSync className="me-1" />
-                  Refresh
-                </Button>
-                <Button variant="success" onClick={() => navigate('/owner/orders')}>
-                  <FaPlus className="me-1" />
-                  New Order
-                </Button>
-              </div>
-            </div>
-          </Col>
-        </Row>
+        {/* Enhanced Header */}
+        <EnhancedPageHeader
+          title="OOX Furniture - Payment Management"
+          subtitle="OOX Furniture payments, deposits, balances, and financial transactions tracking"
+          icon={FaMoneyBillWave}
+          onRefresh={fetchAllData}
+          accentColor="#10b981"
+        >
+          <div className="d-flex gap-2 justify-content-end">
+            <Button 
+              variant="success" 
+              onClick={() => navigate('/owner/orders')}
+              className="d-flex align-items-center"
+              style={{
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                border: 'none',
+                borderRadius: '12px',
+                padding: '0.75rem 1.5rem',
+                fontWeight: '600',
+                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+              onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+            >
+              <FaPlus className="me-2" />
+              New Order
+            </Button>
+          </div>
+        </EnhancedPageHeader>
 
         {/* Alerts */}
         {error && (

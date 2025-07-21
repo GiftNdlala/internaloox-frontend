@@ -15,6 +15,7 @@ import {
   getOrders, getCustomers, getUsers
 } from '../components/api';
 import SharedHeader from '../components/SharedHeader';
+import EnhancedPageHeader from '../components/EnhancedPageHeader';
 
 const Analytics = ({ user, userRole, onLogout }) => {
   const navigate = useNavigate();
@@ -230,43 +231,51 @@ const Analytics = ({ user, userRole, onLogout }) => {
       />
       
       <Container fluid className="py-4">
-        {/* Header Section */}
-        <Row className="mb-4">
-          <Col>
-            <div className="d-flex justify-content-between align-items-center">
-              <div>
-                <h2 className="mb-1">
-                  <FaChartLine className="me-2 text-primary" />
-                  OOX Furniture - Business Analytics
-                </h2>
-                <p className="text-muted">
-                  OOX Furniture comprehensive business intelligence and performance metrics
-                </p>
-              </div>
-              <div className="d-flex gap-2">
-                <Form.Select
-                  value={dateRange}
-                  onChange={(e) => setDateRange(e.target.value)}
-                  style={{ width: '150px' }}
-                >
-                  <option value="7">Last 7 days</option>
-                  <option value="30">Last 30 days</option>
-                  <option value="90">Last 3 months</option>
-                  <option value="365">Last year</option>
-                  <option value="all">All time</option>
-                </Form.Select>
-                <Button variant="outline-primary" onClick={fetchAllData}>
-                  <FaSync className="me-1" />
-                  Refresh
-                </Button>
-                <Button variant="primary">
-                  <FaDownload className="me-1" />
-                  Export Report
-                </Button>
-              </div>
-            </div>
-          </Col>
-        </Row>
+        {/* Enhanced Header */}
+        <EnhancedPageHeader
+          title="OOX Furniture - Business Analytics"
+          subtitle="OOX Furniture comprehensive business intelligence and performance metrics"
+          icon={FaChartLine}
+          onRefresh={fetchAllData}
+          accentColor="#f59e0b"
+        >
+          <div className="d-flex gap-3 justify-content-end align-items-center">
+            <Form.Select
+              value={dateRange}
+              onChange={(e) => setDateRange(e.target.value)}
+              style={{ 
+                width: '150px',
+                borderRadius: '12px',
+                border: '2px solid #f59e0b40',
+                fontWeight: '600'
+              }}
+            >
+              <option value="7">Last 7 days</option>
+              <option value="30">Last 30 days</option>
+              <option value="90">Last 3 months</option>
+              <option value="365">Last year</option>
+              <option value="all">All time</option>
+            </Form.Select>
+            <Button 
+              variant="primary"
+              className="d-flex align-items-center"
+              style={{
+                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                border: 'none',
+                borderRadius: '12px',
+                padding: '0.75rem 1.5rem',
+                fontWeight: '600',
+                boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+              onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+            >
+              <FaDownload className="me-2" />
+              Export Report
+            </Button>
+          </div>
+        </EnhancedPageHeader>
 
         {/* Error Alert */}
         {error && (

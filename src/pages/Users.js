@@ -15,6 +15,7 @@ import {
   getUsers, createUser, updateUser, deleteUser
 } from '../components/api';
 import SharedHeader from '../components/SharedHeader';
+import EnhancedPageHeader from '../components/EnhancedPageHeader';
 
 const Users = ({ user, userRole, onLogout }) => {
   const navigate = useNavigate();
@@ -281,32 +282,36 @@ const Users = ({ user, userRole, onLogout }) => {
       />
       
       <Container fluid className="py-4">
-        {/* Header Section */}
-        <Row className="mb-4">
-          <Col>
-            <div className="d-flex justify-content-between align-items-center">
-              <div>
-                <h2 className="mb-1">
-                  <FaUsers className="me-2 text-primary" />
-                  OOX Furniture - Team Management
-                </h2>
-                <p className="text-muted">
-                  OOX Furniture user accounts, roles, and system access permissions management
-                </p>
-              </div>
-              <div className="d-flex gap-2">
-                <Button variant="outline-primary" onClick={fetchUsers}>
-                  <FaSync className="me-1" />
-                  Refresh
-                </Button>
-                <Button variant="primary" onClick={handleCreateUser}>
-                  <FaPlus className="me-1" />
-                  Add User
-                </Button>
-              </div>
-            </div>
-          </Col>
-        </Row>
+        {/* Enhanced Header */}
+        <EnhancedPageHeader
+          title="OOX Furniture - Team Management"
+          subtitle="OOX Furniture user accounts, roles, and system access permissions management"
+          icon={FaUsers}
+          onRefresh={fetchUsers}
+          accentColor="#8b5cf6"
+        >
+          <div className="d-flex gap-2 justify-content-end">
+            <Button 
+              variant="primary" 
+              onClick={handleCreateUser}
+              className="d-flex align-items-center"
+              style={{
+                background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                border: 'none',
+                borderRadius: '12px',
+                padding: '0.75rem 1.5rem',
+                fontWeight: '600',
+                boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+              onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+            >
+              <FaPlus className="me-2" />
+              Add User
+            </Button>
+          </div>
+        </EnhancedPageHeader>
 
         {/* Alerts */}
         {error && (

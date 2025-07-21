@@ -17,6 +17,7 @@ import {
 } from '../components/api';
 import SharedHeader from '../components/SharedHeader';
 import OrderForm from '../components/OrderForm';
+import EnhancedPageHeader from '../components/EnhancedPageHeader';
 
 const Orders = ({ user, userRole, onLogout }) => {
   // State management
@@ -251,36 +252,44 @@ const Orders = ({ user, userRole, onLogout }) => {
       />
       
       <Container fluid className="py-4">
-        {/* Header Section */}
-        <Row className="mb-4">
-          <Col>
-            <div className="d-flex justify-content-between align-items-center">
-              <div>
-                <h2 className="mb-1">
-                  <FaClipboardList className="me-2 text-primary" />
-                  OOX Furniture - Orders Management
-                </h2>
-                <p className="text-muted">
-                  {userRole === 'owner' && 'OOX Furniture full order oversight and management'}
-                  {userRole === 'admin' && 'OOX Furniture order administration and customer service'}  
-                  {userRole === 'warehouse' && 'OOX Furniture production tracking and fulfillment'}
-                </p>
-              </div>
-              <div className="d-flex gap-2">
-                <Button variant="outline-primary" onClick={fetchAllData}>
-                  <FaSync className="me-1" />
-                  Refresh
-                </Button>
-                {canCreate && (
-                  <Button variant="primary" onClick={handleCreateOrder}>
-                    <FaPlus className="me-1" />
-                    New Order
-                  </Button>
-                )}
-              </div>
+        {/* Enhanced Header */}
+        <EnhancedPageHeader
+          title="OOX Furniture - Orders Management"
+          subtitle={
+            userRole === 'owner' 
+              ? 'OOX Furniture full order oversight and management'
+              : userRole === 'admin' 
+              ? 'OOX Furniture order administration and customer service'
+              : 'OOX Furniture production tracking and fulfillment'
+          }
+          icon={FaClipboardList}
+          onRefresh={fetchAllData}
+          accentColor="#f59e0b"
+        >
+          {canCreate && (
+            <div className="d-flex gap-2 justify-content-end">
+              <Button 
+                variant="success" 
+                onClick={handleCreateOrder}
+                className="d-flex align-items-center"
+                style={{
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '0.75rem 1.5rem',
+                  fontWeight: '600',
+                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+                onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+              >
+                <FaPlus className="me-2" />
+                New Order
+              </Button>
             </div>
-          </Col>
-        </Row>
+          )}
+        </EnhancedPageHeader>
 
         {/* Alerts */}
         {error && (
