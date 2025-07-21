@@ -10,6 +10,7 @@ import Customers from './pages/Customers';
 import Users from './pages/Users';
 import Payments from './pages/Payments';
 import Deliveries from './pages/Deliveries';
+import Analytics from './pages/Analytics';
 import LoginPage from './pages/LoginPage';
 import './App.css';
 
@@ -189,6 +190,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['owner']}>
                 <Deliveries user={user} userRole="owner" onLogout={handleLogout} />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/owner/analytics" 
+            element={
+              <ProtectedRoute allowedRoles={['owner']}>
+                <Analytics user={user} userRole="owner" onLogout={handleLogout} />
               </ProtectedRoute>
             } 
           />

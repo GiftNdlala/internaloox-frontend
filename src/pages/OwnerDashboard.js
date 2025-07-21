@@ -241,6 +241,7 @@ const OwnerDashboard = ({ user, onLogout }) => {
         { key: 'orders', label: 'Orders', icon: FaClipboardList, isTab: false, route: '/owner/orders' },
         { key: 'payments', label: 'Payments', icon: FaMoneyBillWave, isTab: false, route: '/owner/payments' },
         { key: 'deliveries', label: 'Deliveries', icon: FaTruck, isTab: false, route: '/owner/deliveries' },
+        { key: 'analytics', label: 'Analytics', icon: FaChartBar, isTab: false, route: '/owner/analytics' },
       ].map(tab => (
         <Nav.Link
           key={tab.key}
@@ -319,15 +320,24 @@ const OwnerDashboard = ({ user, onLogout }) => {
                      <FaMoneyBillWave className="me-2" />
                      Payments
                    </Button>
-                   <Button
-                     variant="warning"
-                     size="lg"
-                     onClick={() => navigate('/owner/deliveries')}
-                     className="d-flex align-items-center"
-                   >
-                     <FaTruck className="me-2" />
-                     Deliveries
-                   </Button>
+                                       <Button
+                      variant="warning"
+                      size="lg"
+                      onClick={() => navigate('/owner/deliveries')}
+                      className="d-flex align-items-center"
+                    >
+                      <FaTruck className="me-2" />
+                      Deliveries
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="lg"
+                      onClick={() => navigate('/owner/analytics')}
+                      className="d-flex align-items-center"
+                    >
+                      <FaChartBar className="me-2" />
+                      Analytics
+                    </Button>
                 </div>
               </div>
             </Card.Body>
