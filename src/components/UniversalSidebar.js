@@ -173,7 +173,7 @@ const UniversalSidebar = ({ user, userRole, onLogout }) => {
 
   return (
     <>
-      {/* Mobile Menu Button - Fixed Position */}
+      {/* Mobile Menu Button - Enhanced Visibility */}
       <Button
         variant="light"
         onClick={handleShow}
@@ -182,18 +182,36 @@ const UniversalSidebar = ({ user, userRole, onLogout }) => {
           top: '20px',
           left: '20px',
           zIndex: 1030,
-          width: '50px',
-          height: '50px',
+          width: '56px',
+          height: '56px',
           borderRadius: '50%',
-          border: `2px solid ${getRoleColor()}`,
+          border: `3px solid ${getRoleColor()}`,
           backgroundColor: 'white',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          boxShadow: `0 6px 20px rgba(0,0,0,0.25), 0 0 0 4px rgba(${getRoleColor().replace('#', '')}, 0.1)`,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          transition: 'all 0.3s ease',
+          cursor: 'pointer'
+        }}
+        onMouseEnter={(e) => {
+          e.target.style.transform = 'scale(1.1)';
+          e.target.style.backgroundColor = getRoleColor();
+          e.target.querySelector('svg').style.color = 'white';
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.transform = 'scale(1)';
+          e.target.style.backgroundColor = 'white';
+          e.target.querySelector('svg').style.color = getRoleColor();
         }}
       >
-        <FaBars style={{ color: getRoleColor() }} />
+        <FaBars 
+          style={{ 
+            color: getRoleColor(), 
+            fontSize: '18px',
+            transition: 'color 0.3s ease'
+          }} 
+        />
       </Button>
 
       {/* Desktop Sidebar */}
@@ -213,35 +231,40 @@ const UniversalSidebar = ({ user, userRole, onLogout }) => {
           borderRight: `1px solid ${darkTheme.border}`
         }}
       >
-        {/* Collapse/Expand Toggle Button */}
+        {/* Enhanced Collapse/Expand Toggle Button */}
         <Button
           onClick={toggleCollapse}
           className="position-absolute"
           style={{
             top: '20px',
-            right: '-15px',
-            width: '30px',
-            height: '30px',
+            right: '-18px',
+            width: '36px',
+            height: '36px',
             borderRadius: '50%',
-            border: `2px solid ${darkTheme.border}`,
-            backgroundColor: darkTheme.primary,
-            color: 'white',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+            border: `3px solid ${getRoleColor()}`,
+            backgroundColor: 'white',
+            color: getRoleColor(),
+            boxShadow: `0 4px 16px rgba(0,0,0,0.25), 0 0 0 3px rgba(${getRoleColor().replace('#', '')}, 0.1)`,
             zIndex: 1021,
             padding: 0,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '12px',
-            transition: 'all 0.3s ease'
+            fontSize: '14px',
+            transition: 'all 0.3s ease',
+            cursor: 'pointer'
           }}
           onMouseEnter={(e) => {
             e.target.style.backgroundColor = getRoleColor();
+            e.target.style.color = 'white';
             e.target.style.transform = 'scale(1.1)';
+            e.target.style.boxShadow = `0 6px 20px rgba(0,0,0,0.35), 0 0 0 4px rgba(${getRoleColor().replace('#', '')}, 0.2)`;
           }}
           onMouseLeave={(e) => {
-            e.target.style.backgroundColor = darkTheme.primary;
+            e.target.style.backgroundColor = 'white';
+            e.target.style.color = getRoleColor();
             e.target.style.transform = 'scale(1)';
+            e.target.style.boxShadow = `0 4px 16px rgba(0,0,0,0.25), 0 0 0 3px rgba(${getRoleColor().replace('#', '')}, 0.1)`;
           }}
         >
           {isCollapsed ? <FaChevronRight /> : <FaChevronLeft />}
@@ -270,17 +293,54 @@ const UniversalSidebar = ({ user, userRole, onLogout }) => {
         style={{ width: '320px' }}
       >
         <Offcanvas.Header 
-          closeButton
           style={{ 
             background: darkTheme.primary,
             color: 'white',
-            borderBottom: `1px solid ${darkTheme.border}`
+            borderBottom: `1px solid ${darkTheme.border}`,
+            position: 'relative',
+            padding: '1rem'
           }}
         >
           <Offcanvas.Title className="d-flex align-items-center">
-            <FaCouch className="me-2" />
+            <FaCouch className="me-2" style={{ color: getRoleColor() }} />
             OOX Furniture
           </Offcanvas.Title>
+          
+          {/* Enhanced Close Button */}
+          <Button
+            onClick={handleClose}
+            style={{
+              position: 'absolute',
+              top: '15px',
+              right: '15px',
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              border: `2px solid ${getRoleColor()}`,
+              backgroundColor: 'white',
+              color: getRoleColor(),
+              boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '16px',
+              transition: 'all 0.3s ease',
+              cursor: 'pointer',
+              padding: 0
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = getRoleColor();
+              e.target.style.color = 'white';
+              e.target.style.transform = 'scale(1.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'white';
+              e.target.style.color = getRoleColor();
+              e.target.style.transform = 'scale(1)';
+            }}
+          >
+            ×
+          </Button>
         </Offcanvas.Header>
         <Offcanvas.Body 
           style={{ 
