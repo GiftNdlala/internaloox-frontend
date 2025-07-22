@@ -54,10 +54,14 @@ const Users = ({ user, userRole, onLogout }) => {
   // Load data on component mount
   useEffect(() => {
     fetchUsers();
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(fetchUsers, 30000);
+    // Auto-refresh every 2 minutes, but only when no modal is open
+    const interval = setInterval(() => {
+      if (!showUserModal && !showDetailsModal && !showDeleteModal) {
+        fetchUsers();
+      }
+    }, 120000); // Changed to 2 minutes (120000ms)
     return () => clearInterval(interval);
-  }, []);
+  }, [showUserModal, showDetailsModal, showDeleteModal]);
 
   const fetchUsers = async () => {
     try {
