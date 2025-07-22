@@ -81,19 +81,25 @@ const UniversalSidebar = ({ user, userRole, onLogout }) => {
           key: 'customers',
           label: 'Customers',
           icon: FaUsers,
-          path: '/admin/customers'
+          path: '/owner/customers'
         },
         {
           key: 'payments',
           label: 'Payments',
           icon: FaMoneyBillWave,
-          path: '/admin/payments'
+          path: '/owner/payments'
         },
         {
           key: 'deliveries',
           label: 'Deliveries',
           icon: FaTruck,
-          path: '/admin/deliveries'
+          path: '/owner/deliveries'
+        },
+        {
+          key: 'analytics',
+          label: 'Analytics',
+          icon: FaChartLine,
+          path: '/owner/analytics'
         }
       ],
       warehouse: [

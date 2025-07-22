@@ -165,8 +165,8 @@ function App() {
           <Route 
             path="/owner/customers" 
             element={
-              <ProtectedRoute allowedRoles={['owner']}>
-                <Customers user={user} userRole="owner" onLogout={handleLogout} />
+              <ProtectedRoute allowedRoles={['owner', 'admin']}>
+                <Customers user={user} userRole={user?.role || "owner"} onLogout={handleLogout} />
               </ProtectedRoute>
             } 
           />
@@ -181,24 +181,24 @@ function App() {
           <Route 
             path="/owner/payments" 
             element={
-              <ProtectedRoute allowedRoles={['owner']}>
-                <Payments user={user} userRole="owner" onLogout={handleLogout} />
+              <ProtectedRoute allowedRoles={['owner', 'admin']}>
+                <Payments user={user} userRole={user?.role || "owner"} onLogout={handleLogout} />
               </ProtectedRoute>
             } 
           />
           <Route 
             path="/owner/deliveries" 
             element={
-              <ProtectedRoute allowedRoles={['owner']}>
-                <Deliveries user={user} userRole="owner" onLogout={handleLogout} />
+              <ProtectedRoute allowedRoles={['owner', 'admin']}>
+                <Deliveries user={user} userRole={user?.role || "owner"} onLogout={handleLogout} />
               </ProtectedRoute>
             } 
           />
           <Route 
             path="/owner/analytics" 
             element={
-              <ProtectedRoute allowedRoles={['owner']}>
-                <Analytics user={user} userRole="owner" onLogout={handleLogout} />
+              <ProtectedRoute allowedRoles={['owner', 'admin']}>
+                <Analytics user={user} userRole={user?.role || "owner"} onLogout={handleLogout} />
               </ProtectedRoute>
             } 
           />

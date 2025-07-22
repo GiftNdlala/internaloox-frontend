@@ -243,8 +243,21 @@ const OwnerDashboard = ({ user, onLogout }) => {
   );
 
   // KPI Card Component
-  const KPICard = ({ title, value, change, icon: IconComponent, color, prefix = '', suffix = '' }) => (
-    <div className="oox-mobile-card">
+  const KPICard = ({ title, value, change, icon: IconComponent, color, prefix = '', suffix = '', onClick }) => (
+    <div 
+      className="oox-mobile-card" 
+      onClick={onClick}
+      style={{ 
+        cursor: onClick ? 'pointer' : 'default',
+        transition: 'all 0.3s ease',
+        ...(onClick && {
+          ':hover': {
+            transform: 'translateY(-2px)',
+            boxShadow: '0 8px 25px rgba(0,0,0,0.1)'
+          }
+        })
+      }}
+    >
       <div className="oox-mobile-flex-between oox-mobile-mb-2">
         <div>
           <div style={{ 
@@ -590,6 +603,7 @@ const OwnerDashboard = ({ user, onLogout }) => {
                   icon={FaMoneyBillWave}
                   color="#f59e0b"
                   prefix="R"
+                  onClick={() => navigate('/owner/payments')}
                 />
                 <KPICard
                   title="Total Orders"
@@ -597,6 +611,7 @@ const OwnerDashboard = ({ user, onLogout }) => {
                   change={8}
                   icon={FaClipboardList}
                   color="#3b82f6"
+                  onClick={() => navigate('/owner/orders')}
                 />
                 <KPICard
                   title="Team Members"
@@ -604,6 +619,7 @@ const OwnerDashboard = ({ user, onLogout }) => {
                   change={5}
                   icon={FaUsers}
                   color="#10b981"
+                  onClick={() => navigate('/owner/users')}
                 />
                 <KPICard
                   title="Today's Orders"
@@ -611,6 +627,7 @@ const OwnerDashboard = ({ user, onLogout }) => {
                   change={-2}
                   icon={FaCalendarCheck}
                   color="#8b5cf6"
+                  onClick={() => navigate('/owner/orders')}
                 />
               </div>
 
@@ -645,6 +662,13 @@ const OwnerDashboard = ({ user, onLogout }) => {
                   >
                     <FaUsers />
                     View Customers
+                  </button>
+                  <button
+                    onClick={() => navigate('/owner/payments')}
+                    className="oox-mobile-btn"
+                  >
+                    <FaMoneyBillWave />
+                    Payments
                   </button>
                   <button
                     onClick={() => navigate('/owner/analytics')}
