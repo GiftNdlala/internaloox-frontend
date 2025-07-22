@@ -99,6 +99,7 @@ const LoginPage = ({ onLogin }) => {
         body: JSON.stringify({
           username: formData.username,
           password: formData.password,
+          role: formData.role, // Include selected role in login request
         }),
       });
 
@@ -113,21 +114,20 @@ const LoginPage = ({ onLogin }) => {
       // Save tokens to localStorage
       localStorage.setItem('oox_token', data.access);
       localStorage.setItem('oox_refresh', data.refresh);
-      localStorage.setItem('oox_user', JSON.stringify(data.user));
+      
+      // Use the selected role from dropdown instead of backend role
+      const userDataWithSelectedRole = {
+        ...data.user,
+        role: formData.role // Override with selected role
+      };
+      
+      localStorage.setItem('oox_user', JSON.stringify(userDataWithSelectedRole));
 
-      // Fetch current user info with Authorization header
-      const userRes = await fetch(`${API_BASE}/users/current-user/`, {
-        headers: {
-          'Authorization': `Bearer ${data.access}`,
-        },
-      });
-      const userData = await userRes.json();
-
-      setSuccess('Welcome to OOX Furniture! Redirecting...');
-      onLogin(userData);
+      setSuccess(`Welcome to OOX Furniture ${formData.role.charAt(0).toUpperCase() + formData.role.slice(1)} Dashboard!`);
+      onLogin(userDataWithSelectedRole);
 
       setTimeout(() => {
-        navigate(`/${userData.role}`);
+        navigate(`/${formData.role}`);
       }, 1500);
     } catch (err) {
       setError('Network error. Please check your connection.');
@@ -136,34 +136,7 @@ const LoginPage = ({ onLogin }) => {
     }
   };
 
-  const handleDemoLogin = (role) => {
-    setLoading(true);
-    setError('');
-    setSuccess(`Welcome to OOX Furniture ${role.charAt(0).toUpperCase() + role.slice(1)} Dashboard!`);
-    
-    // Create mock user data based on role
-    const mockUserData = {
-      id: 1,
-      username: role,
-      email: `${role}@ooxfurniture.com`,
-      first_name: role.charAt(0).toUpperCase() + role.slice(1),
-      last_name: 'Manager',
-      role: role,
-      phone: '',
-      is_active: true
-    };
-    
-    setTimeout(() => {
-      localStorage.setItem('oox_user', JSON.stringify(mockUserData));
-      onLogin(mockUserData);
-      
-      setTimeout(() => {
-        navigate(`/${role}`);
-      }, 1000);
-      
-      setLoading(false);
-    }, 1500);
-  };
+
 
   const getRoleConfig = (role) => {
     const configs = {
@@ -505,76 +478,7 @@ const LoginPage = ({ onLogin }) => {
             </button>
           </form>
 
-          {/* Quick Access Section */}
-          <div style={{
-            borderTop: '1px solid rgba(0, 0, 0, 0.1)',
-            paddingTop: '1.5rem',
-            marginTop: '1.5rem'
-          }}>
-            <div className="oox-mobile-text-center oox-mobile-mb-3">
-              <h3 style={{
-                margin: 0,
-                color: '#374151',
-                fontSize: '1rem',
-                fontWeight: '600',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem'
-              }}>
-                <FaBolt style={{ color: '#f59e0b' }} />
-                OOX Quick Access
-                <FaBolt style={{ color: '#f59e0b' }} />
-              </h3>
-              <p style={{ 
-                color: '#6b7280', 
-                fontSize: '0.8rem', 
-                margin: '0.25rem 0 0 0' 
-              }}>
-                Instant dashboard access for demo
-              </p>
-            </div>
-            
-            <div className="oox-mobile-nav">
-              {['owner', 'admin', 'warehouse', 'delivery'].map((role) => {
-                const config = getRoleConfig(role);
-                const IconComponent = config.icon;
-                
-                return (
-                  <button
-                    key={role}
-                    onClick={() => handleDemoLogin(role)}
-                    disabled={loading}
-                    className="oox-mobile-nav-item"
-                    style={{
-                      border: 'none',
-                      background: 'white',
-                      cursor: 'pointer',
-                      opacity: loading ? 0.6 : 1
-                    }}
-                  >
-                    <div 
-                      className="oox-mobile-nav-icon"
-                      style={{ color: config.color }}
-                    >
-                      <IconComponent />
-                    </div>
-                    <div className="oox-mobile-nav-label" style={{ color: '#374151' }}>
-                      {config.title}
-                    </div>
-                    <div style={{ 
-                      fontSize: '0.7rem', 
-                      color: '#9ca3af',
-                      marginTop: '0.25rem',
-                      lineHeight: '1.2'
-                    }}>
-                      {config.description}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+
 
           {/* Footer */}
           <div className="oox-mobile-text-center" style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid rgba(0, 0, 0, 0.06)' }}>
