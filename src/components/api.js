@@ -23,7 +23,21 @@ async function apiRequest(endpoint, { method = 'GET', data, isForm = false } = {
   const res = await fetch(url, options);
   if (!res.ok) {
     let errMsg = 'Unknown error';
-    try { errMsg = (await res.json()).detail || res.statusText; } catch {}
+    try { 
+      const errorData = await res.json();
+      errMsg = errorData.error || errorData.detail || res.statusText;
+      
+      // For validation errors, provide more context
+      if (res.status === 400 && errorData.required_fields) {
+        errMsg += ` (Required: ${errorData.required_fields.join(', ')})`;
+      }
+      if (res.status === 400 && errorData.valid_roles) {
+        errMsg += ` (Valid roles: ${errorData.valid_roles.join(', ')})`;
+      }
+      if (res.status === 403 && errorData.required_role) {
+        errMsg += ` (Required role: ${errorData.required_role})`;
+      }
+    } catch {}
     throw new Error(errMsg);
   }
   return res.json();
@@ -52,7 +66,40 @@ export const deletePayment = (id) => apiRequest(`/payment-proofs/${id}/`, { meth
 export const getDashboardStats = () => apiRequest('/dashboard-stats/');
 // Users
 export const getUsers = () => apiRequest('/users/users/');
-export const createUser = (data) => apiRequest('/users/users/', { method: 'POST', data });
+
+/**
+ * Create a new user with enhanced security and validation
+ * 
+ * Endpoint: POST /api/users/create/
+ * Authorization: Bearer token required
+ * Access Control: Only users with 'owner' role can create users
+ * 
+ * @param {Object} data - User creation data
+ * @param {string} data.username - Required: Unique username
+ * @param {string} data.password - Required: User password
+ * @param {string} [data.email] - Optional: Unique email address
+ * @param {string} [data.role='delivery'] - Optional: User role (owner, admin, warehouse, delivery)
+ * @param {string} [data.first_name] - Optional: First name
+ * @param {string} [data.last_name] - Optional: Last name
+ * @param {string} [data.phone] - Optional: Phone number
+ * 
+ * @returns {Promise<Object>} Enhanced response with user data and permissions
+ * @example
+ * {
+ *   "success": true,
+ *   "message": "User \"john_doe\" created successfully with role \"Admin\"",
+ *   "user": {
+ *     "id": 9,
+ *     "username": "john_doe",
+ *     "email": "john@example.com",
+ *     "role": "admin",
+ *     "role_display": "Admin",
+ *     "permissions": { ... }
+ *   }
+ * }
+ */
+export const createUser = (data) => apiRequest('/users/create/', { method: 'POST', data });
+
 export const updateUser = (id, data) => apiRequest(`/users/users/${id}/`, { method: 'PUT', data });
 export const deleteUser = (id) => apiRequest(`/users/users/${id}/`, { method: 'DELETE' });
 

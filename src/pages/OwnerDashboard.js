@@ -33,7 +33,8 @@ const OwnerDashboard = ({ user, onLogout }) => {
     email: '',
     first_name: '',
     last_name: '',
-    role: 'admin',
+    phone: '',
+    role: 'delivery',
     password: '',
     is_active: true
   });
@@ -75,9 +76,10 @@ const OwnerDashboard = ({ user, onLogout }) => {
       setUserForm({
         username: user.username || '',
         email: user.email || '',
-        first_name: user.first_name || '',
-        last_name: user.last_name || '',
-        role: user.role || 'admin',
+              first_name: user.first_name || '',
+      last_name: user.last_name || '',
+      phone: user.phone || '',
+      role: user.role || 'delivery',
         password: '',
         is_active: user.is_active !== undefined ? user.is_active : true
       });
@@ -86,9 +88,10 @@ const OwnerDashboard = ({ user, onLogout }) => {
       setUserForm({
         username: '',
         email: '',
-        first_name: '',
-        last_name: '',
-        role: 'admin',
+              first_name: '',
+      last_name: '',
+      phone: '',
+      role: 'delivery',
         password: '',
         is_active: true
       });
@@ -107,12 +110,31 @@ const OwnerDashboard = ({ user, onLogout }) => {
   const handleUserSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Client-side validation
+      if (!editingUser) {
+        if (!userForm.username || !userForm.password) {
+          setError('Username and password are required');
+          return;
+        }
+        
+        const validRoles = ['owner', 'admin', 'warehouse', 'delivery'];
+        if (userForm.role && !validRoles.includes(userForm.role)) {
+          setError(`Invalid role: ${userForm.role}. Valid roles: ${validRoles.join(', ')}`);
+          return;
+        }
+      }
+      
       if (editingUser) {
         await updateUser(editingUser.id, userForm);
         setSuccess('User updated successfully!');
       } else {
-        await createUser(userForm);
-        setSuccess('User created successfully!');
+        const response = await createUser(userForm);
+        // Handle new API response format
+        if (response.success && response.user) {
+          setSuccess(`User "${response.user.username}" created successfully with role "${response.user.role_display}"`);
+        } else {
+          setSuccess('User created successfully!');
+        }
       }
       setShowUserModal(false);
       fetchDashboardData();
@@ -376,6 +398,22 @@ const OwnerDashboard = ({ user, onLogout }) => {
                   className="oox-mobile-form-input"
                   placeholder="Enter last name"
                   required
+                />
+              </div>
+            </Col>
+          </Row>
+          
+          <Row>
+            <Col md={12}>
+              <div className="oox-mobile-form-group">
+                <label className="oox-mobile-form-label">Phone Number</label>
+                <input
+                  name="phone"
+                  value={userForm.phone}
+                  onChange={handleUserFormChange}
+                  className="oox-mobile-form-input"
+                  placeholder="+1234567890"
+                  type="tel"
                 />
               </div>
             </Col>

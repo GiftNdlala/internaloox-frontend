@@ -34,6 +34,7 @@ const Users = ({ user, userRole, onLogout }) => {
     email: '',
     first_name: '',
     last_name: '',
+    phone: '',
     role: '',
     password: '',
     is_active: true
@@ -142,13 +143,20 @@ const Users = ({ user, userRole, onLogout }) => {
   };
 
   const handleCreateUser = () => {
+    // Check if current user has owner role
+    if (user?.role !== 'owner') {
+      setError('Only users with Owner role can create new users');
+      return;
+    }
+    
     setEditingUser(null);
     setUserForm({
       username: '',
       email: '',
       first_name: '',
       last_name: '',
-      role: '',
+      phone: '',
+      role: 'delivery', // Default to lowest role
       password: '',
       is_active: true
     });
@@ -162,6 +170,7 @@ const Users = ({ user, userRole, onLogout }) => {
       email: user.email || '',
       first_name: user.first_name || '',
       last_name: user.last_name || '',
+      phone: user.phone || '',
       role: user.role || '',
       password: '', // Don't pre-fill password for security
       is_active: user.is_active !== undefined ? user.is_active : true
@@ -200,12 +209,31 @@ const Users = ({ user, userRole, onLogout }) => {
         delete submitData.password;
       }
       
+      // Client-side validation
+      if (!editingUser) {
+        if (!submitData.username || !submitData.password) {
+          setError('Username and password are required');
+          return;
+        }
+        
+        const validRoles = ['owner', 'admin', 'warehouse', 'delivery'];
+        if (submitData.role && !validRoles.includes(submitData.role)) {
+          setError(`Invalid role: ${submitData.role}. Valid roles: ${validRoles.join(', ')}`);
+          return;
+        }
+      }
+      
       if (editingUser) {
         await updateUser(editingUser.id, submitData);
         setSuccess('User updated successfully');
       } else {
-        await createUser(submitData);
-        setSuccess('User created successfully');
+        const response = await createUser(submitData);
+        // Handle new API response format
+        if (response.success && response.user) {
+          setSuccess(`User "${response.user.username}" created successfully with role "${response.user.role_display}"`);
+        } else {
+          setSuccess('User created successfully');
+        }
       }
       setShowUserModal(false);
       fetchUsers();
@@ -288,13 +316,14 @@ const Users = ({ user, userRole, onLogout }) => {
           accentColor="#8b5cf6"
         >
           <div className="d-flex gap-2 justify-content-end">
-            <Button 
-              variant="primary" 
-              onClick={handleCreateUser}
-              className="d-flex align-items-center"
-              style={{
-                background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-                border: 'none',
+            {user?.role === 'owner' && (
+              <Button 
+                variant="primary" 
+                onClick={handleCreateUser}
+                className="d-flex align-items-center"
+                style={{
+                  background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                  border: 'none',
                 borderRadius: '12px',
                 padding: '0.75rem 1.5rem',
                 fontWeight: '600',
@@ -307,6 +336,7 @@ const Users = ({ user, userRole, onLogout }) => {
               <FaPlus className="me-2" />
               Add User
             </Button>
+            )}
           </div>
         </EnhancedPageHeader>
 
@@ -539,10 +569,12 @@ const Users = ({ user, userRole, onLogout }) => {
                   <p className="text-muted">
                     {searchTerm ? 'Try adjusting your search criteria' : 'No users have been added yet'}
                   </p>
-                  <Button variant="primary" onClick={handleCreateUser}>
-                    <FaPlus className="me-1" />
-                    Add First User
-                  </Button>
+                  {user?.role === 'owner' && (
+                    <Button variant="primary" onClick={handleCreateUser}>
+                      <FaPlus className="me-1" />
+                      Add First User
+                    </Button>
+                  )}
                 </div>
               )}
             </div>
@@ -641,6 +673,19 @@ const Users = ({ user, userRole, onLogout }) => {
                       value={userForm.last_name}
                       onChange={(e) => setUserForm({...userForm, last_name: e.target.value})}
                       placeholder="Last name"
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+              <Row>
+                <Col md={12}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Phone Number</Form.Label>
+                    <Form.Control
+                      type="tel"
+                      value={userForm.phone}
+                      onChange={(e) => setUserForm({...userForm, phone: e.target.value})}
+                      placeholder="+1234567890"
                     />
                   </Form.Group>
                 </Col>
