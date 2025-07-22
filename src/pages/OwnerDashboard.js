@@ -47,10 +47,14 @@ const OwnerDashboard = ({ user, onLogout }) => {
 
   useEffect(() => {
     fetchDashboardData();
-    // Auto-refresh every 30 seconds for live data
-    const interval = setInterval(fetchDashboardData, 30000);
+    // Auto-refresh every 2 minutes, but only when no modal is open
+    const interval = setInterval(() => {
+      if (!showUserModal) {
+        fetchDashboardData();
+      }
+    }, 120000); // Changed to 2 minutes (120000ms)
     return () => clearInterval(interval);
-  }, []);
+  }, [showUserModal]);
 
   const fetchDashboardData = async () => {
     try {

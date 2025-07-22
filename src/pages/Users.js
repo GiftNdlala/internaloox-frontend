@@ -154,6 +154,10 @@ const Users = ({ user, userRole, onLogout }) => {
       return;
     }
     
+    // Clear any previous errors
+    setError(null);
+    setSuccess(null);
+    
     setEditingUser(null);
     setUserForm({
       username: '',
@@ -170,6 +174,10 @@ const Users = ({ user, userRole, onLogout }) => {
   };
 
   const handleEditUser = (user) => {
+    // Clear any previous errors
+    setError(null);
+    setSuccess(null);
+    
     setEditingUser(user);
     setUserForm({
       username: user.username || '',
@@ -208,12 +216,15 @@ const Users = ({ user, userRole, onLogout }) => {
 
   const handleUserSubmit = async (e) => {
     e.preventDefault();
+    setError(null); // Clear any previous errors
+    
     try {
       const submitData = { ...userForm };
       
       // Don't send empty password on updates
       if (editingUser && !submitData.password) {
         delete submitData.password;
+        delete submitData.password_confirm;
       }
       
       // Client-side validation
@@ -247,7 +258,11 @@ const Users = ({ user, userRole, onLogout }) => {
           setSuccess('User created successfully');
         }
       }
+      
+      // Close modal and reset form
       setShowUserModal(false);
+      setEditingUser(null);
+      setError(null);
       fetchUsers();
     } catch (err) {
       setError('Failed to save user: ' + err.message);
@@ -631,7 +646,16 @@ const Users = ({ user, userRole, onLogout }) => {
         </Card>
 
         {/* User Form Modal */}
-        <Modal show={showUserModal} onHide={() => setShowUserModal(false)} size="lg">
+        <Modal 
+          show={showUserModal} 
+          onHide={() => {
+            setShowUserModal(false);
+            setError(null);
+            setSuccess(null);
+            setEditingUser(null);
+          }} 
+          size="lg"
+        >
           <Modal.Header closeButton>
             <Modal.Title>
               {editingUser ? 'Edit User' : 'Add New User'}
@@ -647,7 +671,6 @@ const Users = ({ user, userRole, onLogout }) => {
                       type="text"
                       value={userForm.username}
                       onChange={(e) => setUserForm({...userForm, username: e.target.value})}
-                      required
                       placeholder="Enter username"
                     />
                   </Form.Group>
@@ -659,7 +682,6 @@ const Users = ({ user, userRole, onLogout }) => {
                       type="email"
                       value={userForm.email}
                       onChange={(e) => setUserForm({...userForm, email: e.target.value})}
-                      required
                       placeholder="user@example.com"
                     />
                   </Form.Group>
@@ -709,7 +731,6 @@ const Users = ({ user, userRole, onLogout }) => {
                     <Form.Select
                       value={userForm.role}
                       onChange={(e) => setUserForm({...userForm, role: e.target.value})}
-                      required
                     >
                       <option value="">Select role...</option>
                       {Object.entries(roleConfig).map(([key, config]) => (
@@ -729,7 +750,6 @@ const Users = ({ user, userRole, onLogout }) => {
                       type="password"
                       value={userForm.password}
                       onChange={(e) => setUserForm({...userForm, password: e.target.value})}
-                      required={!editingUser}
                       placeholder={editingUser ? "Leave blank to keep current password" : "Enter password"}
                     />
                   </Form.Group>
@@ -744,7 +764,6 @@ const Users = ({ user, userRole, onLogout }) => {
                         type="password"
                         value={userForm.password_confirm}
                         onChange={(e) => setUserForm({...userForm, password_confirm: e.target.value})}
-                        required={!editingUser}
                         placeholder="Confirm password"
                       />
                     </Form.Group>
@@ -766,7 +785,15 @@ const Users = ({ user, userRole, onLogout }) => {
               </Row>
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="secondary" onClick={() => setShowUserModal(false)}>
+              <Button 
+                variant="secondary" 
+                onClick={() => {
+                  setShowUserModal(false);
+                  setError(null);
+                  setSuccess(null);
+                  setEditingUser(null);
+                }}
+              >
                 Cancel
               </Button>
               <Button variant="primary" type="submit">
