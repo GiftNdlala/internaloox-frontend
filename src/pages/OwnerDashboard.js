@@ -47,14 +47,9 @@ const OwnerDashboard = ({ user, onLogout }) => {
 
   useEffect(() => {
     fetchDashboardData();
-    // Auto-refresh every 2 minutes, but only when no modal is open
-    const interval = setInterval(() => {
-      if (!showUserModal) {
-        fetchDashboardData();
-      }
-    }, 120000); // Changed to 2 minutes (120000ms)
-    return () => clearInterval(interval);
-  }, [showUserModal]);
+    // Auto-refresh disabled for better user experience
+    // Users can manually refresh using the refresh button if needed
+  }, []);
 
   const fetchDashboardData = async () => {
     try {
@@ -119,8 +114,13 @@ const OwnerDashboard = ({ user, onLogout }) => {
     try {
       // Client-side validation
       if (!editingUser) {
-        if (!userForm.username || !userForm.password) {
-          setError('Username and password are required');
+        if (!userForm.username || userForm.username.trim() === '') {
+          setError('Username is required');
+          return;
+        }
+        
+        if (!userForm.password) {
+          setError('Password is required');
           return;
         }
         
@@ -385,7 +385,7 @@ const OwnerDashboard = ({ user, onLogout }) => {
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form onSubmit={handleUserSubmit}>
+        <Form onSubmit={handleUserSubmit} noValidate>
           <Row>
             <Col md={6}>
               <div className="oox-mobile-form-group">
@@ -396,7 +396,6 @@ const OwnerDashboard = ({ user, onLogout }) => {
                   onChange={handleUserFormChange}
                   className="oox-mobile-form-input"
                   placeholder="Enter first name"
-                  required
                 />
               </div>
             </Col>
@@ -409,7 +408,6 @@ const OwnerDashboard = ({ user, onLogout }) => {
                   onChange={handleUserFormChange}
                   className="oox-mobile-form-input"
                   placeholder="Enter last name"
-                  required
                 />
               </div>
             </Col>
@@ -441,7 +439,6 @@ const OwnerDashboard = ({ user, onLogout }) => {
                   onChange={handleUserFormChange}
                   className="oox-mobile-form-input"
                   placeholder="Enter username"
-                  required
                 />
               </div>
             </Col>
@@ -455,7 +452,6 @@ const OwnerDashboard = ({ user, onLogout }) => {
                   onChange={handleUserFormChange}
                   className="oox-mobile-form-input"
                   placeholder="Enter email"
-                  required
                 />
               </div>
             </Col>
@@ -470,7 +466,6 @@ const OwnerDashboard = ({ user, onLogout }) => {
                   value={userForm.role}
                   onChange={handleUserFormChange}
                   className="oox-mobile-form-input"
-                  required
                 >
                   <option value="admin">Admin</option>
                   <option value="warehouse">Warehouse</option>
@@ -489,7 +484,6 @@ const OwnerDashboard = ({ user, onLogout }) => {
                   onChange={handleUserFormChange}
                   className="oox-mobile-form-input"
                   placeholder="Enter password"
-                  required={!editingUser}
                 />
               </div>
             </Col>
@@ -507,7 +501,6 @@ const OwnerDashboard = ({ user, onLogout }) => {
                     onChange={handleUserFormChange}
                     className="oox-mobile-form-input"
                     placeholder="Confirm password"
-                    required={!editingUser}
                   />
                 </div>
               </Col>

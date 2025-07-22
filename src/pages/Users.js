@@ -54,14 +54,9 @@ const Users = ({ user, userRole, onLogout }) => {
   // Load data on component mount
   useEffect(() => {
     fetchUsers();
-    // Auto-refresh every 2 minutes, but only when no modal is open
-    const interval = setInterval(() => {
-      if (!showUserModal && !showDetailsModal && !showDeleteModal) {
-        fetchUsers();
-      }
-    }, 120000); // Changed to 2 minutes (120000ms)
-    return () => clearInterval(interval);
-  }, [showUserModal, showDetailsModal, showDeleteModal]);
+    // Auto-refresh disabled for better user experience
+    // Users can manually refresh using the refresh button if needed
+  }, []);
 
   const fetchUsers = async () => {
     try {
@@ -229,8 +224,13 @@ const Users = ({ user, userRole, onLogout }) => {
       
       // Client-side validation
       if (!editingUser) {
-        if (!submitData.username || !submitData.password) {
-          setError('Username and password are required');
+        if (!submitData.username || submitData.username.trim() === '') {
+          setError('Username is required');
+          return;
+        }
+        
+        if (!submitData.password) {
+          setError('Password is required');
           return;
         }
         
@@ -325,6 +325,35 @@ const Users = ({ user, userRole, onLogout }) => {
 
   return (
     <>
+      <style>
+        {`
+          /* Disable all form validation feedback to prevent vibrations */
+          input:invalid,
+          input:valid,
+          select:invalid,
+          select:valid,
+          textarea:invalid,
+          textarea:valid {
+            box-shadow: none !important;
+            border-color: #dee2e6 !important;
+          }
+          
+          /* Disable focus outline vibrations */
+          input:focus,
+          select:focus,
+          textarea:focus {
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+          }
+          
+          /* Disable any browser validation tooltips */
+          input::-webkit-validation-bubble-message,
+          input::-webkit-validation-bubble-arrow,
+          input::-webkit-validation-bubble-top-outer-arrow,
+          input::-webkit-validation-bubble-top-inner-arrow {
+            display: none !important;
+          }
+        `}
+      </style>
       <UniversalSidebar user={user} userRole={userRole} onLogout={onLogout} />
       <div className="main-content">
         <SharedHeader 
@@ -661,7 +690,7 @@ const Users = ({ user, userRole, onLogout }) => {
               {editingUser ? 'Edit User' : 'Add New User'}
             </Modal.Title>
           </Modal.Header>
-          <Form onSubmit={handleUserSubmit}>
+          <Form onSubmit={handleUserSubmit} noValidate>
             <Modal.Body>
               <Row>
                 <Col md={6}>

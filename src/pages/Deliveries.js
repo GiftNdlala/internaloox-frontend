@@ -49,9 +49,8 @@ const Deliveries = ({ user, userRole, onLogout }) => {
   // Load data on component mount
   useEffect(() => {
     fetchAllData();
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(fetchAllData, 30000);
-    return () => clearInterval(interval);
+    // Auto-refresh disabled for better user experience
+    // Users can manually refresh using the refresh button if needed
   }, []);
 
   const fetchAllData = async () => {

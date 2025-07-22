@@ -28,9 +28,8 @@ const Analytics = ({ user, userRole, onLogout }) => {
   // Load data on component mount
   useEffect(() => {
     fetchAllData();
-    // Auto-refresh every 60 seconds
-    const interval = setInterval(fetchAllData, 60000);
-    return () => clearInterval(interval);
+    // Auto-refresh disabled for better user experience
+    // Users can manually refresh using the refresh button if needed
   }, []);
 
   const fetchAllData = async () => {
