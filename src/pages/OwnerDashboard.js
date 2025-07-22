@@ -223,16 +223,16 @@ const OwnerDashboard = ({ user, onLogout }) => {
   const MobileNav = () => (
     <div className="oox-mobile-nav oox-animate-slideInLeft">
       {[
-        { key: 'overview', label: 'Dashboard', icon: FaChartBar },
-        { key: 'orders', label: 'Orders', icon: FaClipboardList },
-        { key: 'users', label: 'Team', icon: FaUserCog },
-        { key: 'customers', label: 'Customers', icon: FaUsers },
-        { key: 'payments', label: 'Payments', icon: FaMoneyBillWave },
-        { key: 'analytics', label: 'Analytics', icon: FaChartLine }
+        { key: 'overview', label: 'Dashboard', icon: FaChartBar, action: () => setActiveTab('overview') },
+        { key: 'orders', label: 'Orders', icon: FaClipboardList, action: () => navigate('/owner/orders') },
+        { key: 'users', label: 'Team', icon: FaUserCog, action: () => setActiveTab('users') },
+        { key: 'customers', label: 'Customers', icon: FaUsers, action: () => navigate('/owner/customers') },
+        { key: 'payments', label: 'Payments', icon: FaMoneyBillWave, action: () => navigate('/owner/payments') },
+        { key: 'analytics', label: 'Analytics', icon: FaChartLine, action: () => navigate('/owner/analytics') }
       ].map(tab => (
         <button
           key={tab.key}
-          onClick={() => setActiveTab(tab.key)}
+          onClick={tab.action}
           className={`oox-mobile-nav-item ${activeTab === tab.key ? 'active' : ''}`}
         >
           <tab.icon className="oox-mobile-nav-icon" />
