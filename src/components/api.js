@@ -23,9 +23,24 @@ async function apiRequest(endpoint, { method = 'GET', data, isForm = false } = {
   const res = await fetch(url, options);
   if (!res.ok) {
     let errMsg = 'Unknown error';
+    let errorData = {};
     try { 
-      const errorData = await res.json();
+      errorData = await res.json();
       errMsg = errorData.error || errorData.detail || res.statusText;
+      
+      // Handle Django validation errors (field-specific errors)
+      if (res.status === 400 && typeof errorData === 'object' && !errorData.error) {
+        const fieldErrors = [];
+        Object.keys(errorData).forEach(field => {
+          const fieldErrorArray = Array.isArray(errorData[field]) ? errorData[field] : [errorData[field]];
+          fieldErrorArray.forEach(error => {
+            fieldErrors.push(`${field}: ${error}`);
+          });
+        });
+        if (fieldErrors.length > 0) {
+          errMsg = fieldErrors.join('; ');
+        }
+      }
       
       // For validation errors, provide more context
       if (res.status === 400 && errorData.required_fields) {
@@ -38,7 +53,12 @@ async function apiRequest(endpoint, { method = 'GET', data, isForm = false } = {
         errMsg += ` (Required role: ${errorData.required_role})`;
       }
     } catch {}
-    throw new Error(errMsg);
+    
+    // Create enhanced error object
+    const error = new Error(errMsg);
+    error.status = res.status;
+    error.data = errorData;
+    throw error;
   }
   return res.json();
 }
@@ -70,35 +90,36 @@ export const getUsers = () => apiRequest('/users/users/');
 /**
  * Create a new user with enhanced security and validation
  * 
- * Endpoint: POST /api/users/create/
+ * Endpoint: POST /api/users/users/
  * Authorization: Bearer token required
  * Access Control: Only users with 'owner' role can create users
  * 
  * @param {Object} data - User creation data
  * @param {string} data.username - Required: Unique username
  * @param {string} data.password - Required: User password
+ * @param {string} data.password_confirm - Required: Password confirmation
  * @param {string} [data.email] - Optional: Unique email address
  * @param {string} [data.role='delivery'] - Optional: User role (owner, admin, warehouse, delivery)
  * @param {string} [data.first_name] - Optional: First name
  * @param {string} [data.last_name] - Optional: Last name
  * @param {string} [data.phone] - Optional: Phone number
  * 
- * @returns {Promise<Object>} Enhanced response with user data and permissions
+ * @returns {Promise<Object>} Enhanced response with user data
  * @example
  * {
  *   "success": true,
- *   "message": "User \"john_doe\" created successfully with role \"Admin\"",
+ *   "message": "User \"john_doe\" created successfully",
  *   "user": {
  *     "id": 9,
  *     "username": "john_doe",
  *     "email": "john@example.com",
  *     "role": "admin",
  *     "role_display": "Admin",
- *     "permissions": { ... }
+ *     "date_joined": "2025-07-22T15:30:00Z"
  *   }
  * }
  */
-export const createUser = (data) => apiRequest('/users/create/', { method: 'POST', data });
+export const createUser = (data) => apiRequest('/users/users/', { method: 'POST', data });
 
 export const updateUser = (id, data) => apiRequest(`/users/users/${id}/`, { method: 'PUT', data });
 export const deleteUser = (id) => apiRequest(`/users/users/${id}/`, { method: 'DELETE' });

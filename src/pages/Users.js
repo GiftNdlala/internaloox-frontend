@@ -37,6 +37,7 @@ const Users = ({ user, userRole, onLogout }) => {
     phone: '',
     role: '',
     password: '',
+    password_confirm: '',
     is_active: true
   });
 
@@ -158,6 +159,7 @@ const Users = ({ user, userRole, onLogout }) => {
       phone: '',
       role: 'delivery', // Default to lowest role
       password: '',
+      password_confirm: '',
       is_active: true
     });
     setShowUserModal(true);
@@ -173,6 +175,7 @@ const Users = ({ user, userRole, onLogout }) => {
       phone: user.phone || '',
       role: user.role || '',
       password: '', // Don't pre-fill password for security
+      password_confirm: '', // Don't pre-fill password confirmation
       is_active: user.is_active !== undefined ? user.is_active : true
     });
     setShowUserModal(true);
@@ -216,6 +219,11 @@ const Users = ({ user, userRole, onLogout }) => {
           return;
         }
         
+        if (submitData.password !== submitData.password_confirm) {
+          setError('Passwords do not match');
+          return;
+        }
+        
         const validRoles = ['owner', 'admin', 'warehouse', 'delivery'];
         if (submitData.role && !validRoles.includes(submitData.role)) {
           setError(`Invalid role: ${submitData.role}. Valid roles: ${validRoles.join(', ')}`);
@@ -230,7 +238,7 @@ const Users = ({ user, userRole, onLogout }) => {
         const response = await createUser(submitData);
         // Handle new API response format
         if (response.success && response.user) {
-          setSuccess(`User "${response.user.username}" created successfully with role "${response.user.role_display}"`);
+          setSuccess(response.message || `User "${response.user.username}" created successfully`);
         } else {
           setSuccess('User created successfully');
         }
@@ -723,6 +731,22 @@ const Users = ({ user, userRole, onLogout }) => {
                   </Form.Group>
                 </Col>
               </Row>
+              {!editingUser && (
+                <Row>
+                  <Col md={12}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Confirm Password *</Form.Label>
+                      <Form.Control
+                        type="password"
+                        value={userForm.password_confirm}
+                        onChange={(e) => setUserForm({...userForm, password_confirm: e.target.value})}
+                        required={!editingUser}
+                        placeholder="Confirm password"
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
+              )}
               <Row>
                 <Col md={12}>
                   <Form.Group className="mb-3">

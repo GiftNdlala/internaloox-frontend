@@ -36,6 +36,7 @@ const OwnerDashboard = ({ user, onLogout }) => {
     phone: '',
     role: 'delivery',
     password: '',
+    password_confirm: '',
     is_active: true
   });
 
@@ -76,11 +77,12 @@ const OwnerDashboard = ({ user, onLogout }) => {
       setUserForm({
         username: user.username || '',
         email: user.email || '',
-              first_name: user.first_name || '',
-      last_name: user.last_name || '',
-      phone: user.phone || '',
-      role: user.role || 'delivery',
+                      first_name: user.first_name || '',
+        last_name: user.last_name || '',
+        phone: user.phone || '',
+        role: user.role || 'delivery',
         password: '',
+        password_confirm: '',
         is_active: user.is_active !== undefined ? user.is_active : true
       });
     } else {
@@ -88,11 +90,12 @@ const OwnerDashboard = ({ user, onLogout }) => {
       setUserForm({
         username: '',
         email: '',
-              first_name: '',
-      last_name: '',
-      phone: '',
-      role: 'delivery',
+                      first_name: '',
+        last_name: '',
+        phone: '',
+        role: 'delivery',
         password: '',
+        password_confirm: '',
         is_active: true
       });
     }
@@ -117,6 +120,11 @@ const OwnerDashboard = ({ user, onLogout }) => {
           return;
         }
         
+        if (userForm.password !== userForm.password_confirm) {
+          setError('Passwords do not match');
+          return;
+        }
+        
         const validRoles = ['owner', 'admin', 'warehouse', 'delivery'];
         if (userForm.role && !validRoles.includes(userForm.role)) {
           setError(`Invalid role: ${userForm.role}. Valid roles: ${validRoles.join(', ')}`);
@@ -131,7 +139,7 @@ const OwnerDashboard = ({ user, onLogout }) => {
         const response = await createUser(userForm);
         // Handle new API response format
         if (response.success && response.user) {
-          setSuccess(`User "${response.user.username}" created successfully with role "${response.user.role_display}"`);
+          setSuccess(response.message || `User "${response.user.username}" created successfully`);
         } else {
           setSuccess('User created successfully!');
         }
@@ -482,6 +490,25 @@ const OwnerDashboard = ({ user, onLogout }) => {
               </div>
             </Col>
           </Row>
+          
+          {!editingUser && (
+            <Row>
+              <Col md={12}>
+                <div className="oox-mobile-form-group">
+                  <label className="oox-mobile-form-label">Confirm Password *</label>
+                  <input
+                    name="password_confirm"
+                    type="password"
+                    value={userForm.password_confirm}
+                    onChange={handleUserFormChange}
+                    className="oox-mobile-form-input"
+                    placeholder="Confirm password"
+                    required={!editingUser}
+                  />
+                </div>
+              </Col>
+            </Row>
+          )}
           
           <div className="oox-mobile-form-group">
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
