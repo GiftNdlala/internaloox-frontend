@@ -170,11 +170,12 @@ export const getTasksByOrder = () => apiRequest('/tasks/dashboard/tasks_by_order
 export const getSupervisorDashboard = () => apiRequest('/tasks/dashboard/supervisor_dashboard/');
 export const quickTaskAssign = (data) => apiRequest('/tasks/dashboard/quick_task_assign/', { method: 'POST', data });
 export const getTaskAssignmentData = () => apiRequest('/tasks/dashboard/task_assignment_data/');
-export const getRealTimeUpdates = () => apiRequest('/tasks/dashboard/real_time_updates/');
+// Moved getRealTimeUpdates function to avoid duplication
 
 // Notifications
 export const getUnreadNotifications = () => apiRequest('/tasks/notifications/unread/');
 export const markNotificationRead = (id) => apiRequest(`/tasks/notifications/${id}/mark_read/`, { method: 'POST' });
+export const markAllNotificationsRead = () => apiRequest('/tasks/notifications/mark_all_read/', { method: 'POST' });
 
 // Order-Task Management
 export const getWarehouseOrders = () => apiRequest('/orders/warehouse_orders/');
@@ -223,6 +224,10 @@ export const stopTaskTimer = (taskId) => apiRequest(`/tasks/tasks/${taskId}/stop
 export const pollForUpdates = (lastUpdate = null) => {
   const endpoint = lastUpdate ? `/tasks/dashboard/updates/?since=${lastUpdate}` : '/tasks/dashboard/updates/';
   return apiRequest(endpoint);
+};
+
+export const getRealTimeUpdates = (params = '') => {
+  return apiRequest(`/tasks/dashboard/real_time_updates/${params}`);
 };
 
 // Utility Functions for Warehouse Dashboard
