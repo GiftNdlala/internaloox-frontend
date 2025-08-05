@@ -15,9 +15,13 @@ import {
   getWorkerDashboard, getSupervisorDashboard, getUnreadNotifications,
   getWarehouseDashboard, getLowStockAlerts
 } from '../components/api';
+import WarehouseNavbar from '../components/warehouse/WarehouseNavbar';
 import TaskCard from '../components/warehouse/TaskCard';
 import OrderTaskAssignment from '../components/warehouse/OrderTaskAssignment';
 import StockEntry from '../components/warehouse/StockEntry';
+import TaskManagement from '../components/warehouse/TaskManagement';
+import WarehouseOrders from '../components/warehouse/WarehouseOrders';
+import WorkerOrderTasks from '../components/warehouse/WorkerOrderTasks';
 
 const WarehouseDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
@@ -38,7 +42,12 @@ const WarehouseDashboard = ({ user, onLogout }) => {
   const [lowStockAlerts, setLowStockAlerts] = useState([]);
   
   // UI State
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState(() => {
+    // Set default tab based on user role
+    if (user?.role === 'warehouse_worker') return 'my-tasks';
+    if (['owner', 'admin', 'warehouse_manager'].includes(user?.role)) return 'overview';
+    return 'overview';
+  });
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showTaskAssignment, setShowTaskAssignment] = useState(false);
   const [showOrderDetail, setShowOrderDetail] = useState(false);

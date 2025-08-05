@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Container, Alert } from 'react-bootstrap';
 import AdminDashboard from './components/admin/AdminDashboard';
 import WarehouseDashboard from './pages/WarehouseDashboard';
+import EnhancedWarehouseDashboard from './pages/EnhancedWarehouseDashboard';
 import DeliveryDashboard from './pages/DeliveryDashboard';
 import OwnerDashboard from './pages/OwnerDashboard';
 import Orders from './pages/Orders';
@@ -120,7 +121,7 @@ function App() {
             path="/warehouse" 
             element={
               <ProtectedRoute allowedRoles={['warehouse', 'owner', 'admin']}>
-                <WarehouseDashboard user={user} onLogout={handleLogout} />
+                <EnhancedWarehouseDashboard user={user} onLogout={handleLogout} />
               </ProtectedRoute>
             } 
           />

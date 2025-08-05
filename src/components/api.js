@@ -154,8 +154,7 @@ export const deleteOrderItem = (id) => apiRequest(`/order-items/${id}/`, { metho
 export const getTasks = () => apiRequest('/tasks/tasks/');
 export const getTask = (id) => apiRequest(`/tasks/tasks/${id}/`);
 export const createTask = (data) => apiRequest('/tasks/tasks/', { method: 'POST', data });
-export const updateTask = (id, data) => apiRequest(`/tasks/tasks/${id}/`, { method: 'PUT', data });
-export const deleteTask = (id) => apiRequest(`/tasks/tasks/${id}/`, { method: 'DELETE' });
+// Moved updateTask and deleteTask functions to avoid duplication
 
 // Task Actions (Start/Pause/Resume/Complete)
 export const taskAction = (taskId, action, data = {}) => 
@@ -204,8 +203,8 @@ export const getMaterialCategories = () => apiRequest('/inventory/material-categ
 export const getSuppliers = () => apiRequest('/inventory/suppliers/');
 
 // Task Types and Templates
-export const getTaskTypes = () => apiRequest('/tasks/task-types/');
-export const getTaskTemplates = () => apiRequest('/tasks/task-templates/');
+// Moved getTaskTypes function to avoid duplication
+// Moved getTaskTemplates function to avoid duplication
 
 // Worker Productivity
 export const getWorkerProductivity = (workerId = null) => {
@@ -229,6 +228,22 @@ export const pollForUpdates = (lastUpdate = null) => {
 export const getRealTimeUpdates = (params = '') => {
   return apiRequest(`/tasks/dashboard/real_time_updates/${params}`);
 };
+
+// Task Management API Endpoints
+export const getTaskTypes = () => apiRequest('/tasks/task_types/');
+export const getTaskTemplates = () => apiRequest('/tasks/templates/');
+export const createTaskInOrder = (orderId, taskData) => 
+  apiRequest(`/orders/${orderId}/create_task/`, { method: 'POST', data: taskData });
+export const updateTask = (taskId, taskData) => 
+  apiRequest(`/tasks/tasks/${taskId}/`, { method: 'PUT', data: taskData });
+export const deleteTask = (taskId) => 
+  apiRequest(`/tasks/tasks/${taskId}/`, { method: 'DELETE' });
+export const getTasksByStatus = (status) => 
+  apiRequest(`/tasks/tasks/?status=${status}`);
+export const assignWorkerToTask = (taskId, workerId) => 
+  apiRequest(`/tasks/tasks/${taskId}/assign_worker/`, { method: 'POST', data: { worker_id: workerId } });
+export const bulkAssignTasks = (taskIds, workerId) => 
+  apiRequest('/tasks/tasks/bulk_assign/', { method: 'POST', data: { task_ids: taskIds, worker_id: workerId } });
 
 // Utility Functions for Warehouse Dashboard
 export const warehouseAPI = {
