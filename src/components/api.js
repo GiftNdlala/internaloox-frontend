@@ -144,4 +144,138 @@ export const getOrderItems = (orderId = null) => {
 };
 export const createOrderItem = (data) => apiRequest('/order-items/', { method: 'POST', data });
 export const updateOrderItem = (id, data) => apiRequest(`/order-items/${id}/`, { method: 'PUT', data });
-export const deleteOrderItem = (id) => apiRequest(`/order-items/${id}/`, { method: 'DELETE' }); 
+export const deleteOrderItem = (id) => apiRequest(`/order-items/${id}/`, { method: 'DELETE' });
+
+// =====================================
+// WAREHOUSE DASHBOARD API ENDPOINTS
+// =====================================
+
+// Task Management System
+export const getTasks = () => apiRequest('/tasks/tasks/');
+export const getTask = (id) => apiRequest(`/tasks/tasks/${id}/`);
+export const createTask = (data) => apiRequest('/tasks/tasks/', { method: 'POST', data });
+export const updateTask = (id, data) => apiRequest(`/tasks/tasks/${id}/`, { method: 'PUT', data });
+export const deleteTask = (id) => apiRequest(`/tasks/tasks/${id}/`, { method: 'DELETE' });
+
+// Task Actions (Start/Pause/Resume/Complete)
+export const taskAction = (taskId, action, data = {}) => 
+  apiRequest(`/tasks/tasks/${taskId}/action/`, { method: 'POST', data: { action, ...data } });
+
+// Worker Dashboard
+export const getWorkerDashboard = () => apiRequest('/tasks/dashboard/worker_dashboard/');
+export const getMyTasks = () => apiRequest('/tasks/tasks/my_tasks/');
+export const getTasksByOrder = () => apiRequest('/tasks/dashboard/tasks_by_order/');
+
+// Supervisor Dashboard  
+export const getSupervisorDashboard = () => apiRequest('/tasks/dashboard/supervisor_dashboard/');
+export const quickTaskAssign = (data) => apiRequest('/tasks/dashboard/quick_task_assign/', { method: 'POST', data });
+export const getTaskAssignmentData = () => apiRequest('/tasks/dashboard/task_assignment_data/');
+export const getRealTimeUpdates = () => apiRequest('/tasks/dashboard/real_time_updates/');
+
+// Notifications
+export const getUnreadNotifications = () => apiRequest('/tasks/notifications/unread/');
+export const markNotificationRead = (id) => apiRequest(`/tasks/notifications/${id}/mark_read/`, { method: 'POST' });
+
+// Order-Task Management
+export const getWarehouseOrders = () => apiRequest('/orders/warehouse_orders/');
+export const getOrderDetailsForTasks = (orderId) => apiRequest(`/orders/${orderId}/order_details_for_tasks/`);
+export const assignTasksToOrder = (orderId, data) => 
+  apiRequest(`/orders/${orderId}/assign_tasks_to_order/`, { method: 'POST', data });
+
+// Inventory Management
+export const getMaterials = () => apiRequest('/inventory/materials/');
+export const getMaterial = (id) => apiRequest(`/inventory/materials/${id}/`);
+export const createMaterial = (data) => apiRequest('/inventory/materials/', { method: 'POST', data });
+export const updateMaterial = (id, data) => apiRequest(`/inventory/materials/${id}/`, { method: 'PUT', data });
+
+// Warehouse Inventory Dashboard
+export const getWarehouseDashboard = () => apiRequest('/inventory/materials/warehouse_dashboard/');
+export const quickStockEntry = (data) => apiRequest('/inventory/materials/quick_stock_entry/', { method: 'POST', data });
+export const getStockLocations = () => apiRequest('/inventory/materials/stock_locations/');
+export const getLowStockAlerts = () => apiRequest('/inventory/materials/low_stock/');
+
+// Stock Movements
+export const getStockMovements = () => apiRequest('/inventory/stock-movements/');
+export const createStockMovement = (data) => apiRequest('/inventory/stock-movements/', { method: 'POST', data });
+
+// Material Categories & Suppliers
+export const getMaterialCategories = () => apiRequest('/inventory/material-categories/');
+export const getSuppliers = () => apiRequest('/inventory/suppliers/');
+
+// Task Types and Templates
+export const getTaskTypes = () => apiRequest('/tasks/task-types/');
+export const getTaskTemplates = () => apiRequest('/tasks/task-templates/');
+
+// Worker Productivity
+export const getWorkerProductivity = (workerId = null) => {
+  const endpoint = workerId ? `/tasks/productivity/${workerId}/` : '/tasks/productivity/';
+  return apiRequest(endpoint);
+};
+
+// Time Tracking
+export const getTaskTimeSessions = (taskId) => apiRequest(`/tasks/tasks/${taskId}/time_sessions/`);
+export const startTaskTimer = (taskId) => apiRequest(`/tasks/tasks/${taskId}/start_timer/`, { method: 'POST' });
+export const pauseTaskTimer = (taskId) => apiRequest(`/tasks/tasks/${taskId}/pause_timer/`, { method: 'POST' });
+export const resumeTaskTimer = (taskId) => apiRequest(`/tasks/tasks/${taskId}/resume_timer/`, { method: 'POST' });
+export const stopTaskTimer = (taskId) => apiRequest(`/tasks/tasks/${taskId}/stop_timer/`, { method: 'POST' });
+
+// Real-time Updates (WebSocket fallback with polling)
+export const pollForUpdates = (lastUpdate = null) => {
+  const endpoint = lastUpdate ? `/tasks/dashboard/updates/?since=${lastUpdate}` : '/tasks/dashboard/updates/';
+  return apiRequest(endpoint);
+};
+
+// Utility Functions for Warehouse Dashboard
+export const warehouseAPI = {
+  // Get complete dashboard data based on user role
+  getDashboardData: async (userRole) => {
+    switch (userRole) {
+      case 'warehouse':
+        return await getWorkerDashboard();
+      case 'admin':
+      case 'owner':
+        return await getSupervisorDashboard();
+      default:
+        return await getWorkerDashboard();
+    }
+  },
+
+  // Handle task actions with error handling
+  handleTaskAction: async (taskId, action, additionalData = {}) => {
+    try {
+      const result = await taskAction(taskId, action, additionalData);
+      return { success: true, data: result };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Get orders ready for task assignment
+  getOrdersForTaskAssignment: async () => {
+    const orders = await getWarehouseOrders();
+    return orders.filter(order => 
+      order.production_status === 'not_started' || 
+      order.production_status === 'in_production'
+    );
+  },
+
+  // Assign multiple tasks to an order
+  assignOrderTasks: async (orderId, tasks) => {
+    try {
+      const result = await assignTasksToOrder(orderId, { tasks });
+      return { success: true, data: result };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Get real-time dashboard updates
+  getUpdates: async (lastUpdateTime = null) => {
+    try {
+      const updates = await pollForUpdates(lastUpdateTime);
+      return { success: true, data: updates };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+}; 
