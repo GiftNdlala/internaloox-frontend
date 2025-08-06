@@ -30,11 +30,11 @@ const WarehouseNavbar = ({
   };
 
   const canManageTasks = () => {
-    return ['owner', 'admin', 'warehouse_manager'].includes(user?.role);
+    return ['owner', 'admin', 'warehouse_manager', 'warehouse'].includes(user?.role);
   };
 
   const canViewAnalytics = () => {
-    return ['owner', 'admin', 'warehouse_manager'].includes(user?.role);
+    return ['owner', 'admin', 'warehouse_manager', 'warehouse'].includes(user?.role);
   };
 
   const canManageInventory = () => {

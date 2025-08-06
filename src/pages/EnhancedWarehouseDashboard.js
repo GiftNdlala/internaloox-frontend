@@ -43,8 +43,9 @@ const EnhancedWarehouseDashboard = ({ user, onLogout }) => {
   
   // UI State - Role-based default tab
   const [activeTab, setActiveTab] = useState(() => {
+    console.log('Setting default tab for role:', user?.role);
     if (user?.role === 'warehouse_worker') return 'my-tasks';
-    if (['owner', 'admin', 'warehouse_manager'].includes(user?.role)) return 'overview';
+    if (['owner', 'admin', 'warehouse_manager', 'warehouse'].includes(user?.role)) return 'overview';
     return 'overview';
   });
   
@@ -81,11 +82,13 @@ const EnhancedWarehouseDashboard = ({ user, onLogout }) => {
 
   // Role-based access control
   const canManageTasks = () => {
-    return ['owner', 'admin', 'warehouse_manager'].includes(user?.role);
+    // Debug: Log the user role
+    console.log('Current user role:', user?.role);
+    return ['owner', 'admin', 'warehouse_manager', 'warehouse'].includes(user?.role);
   };
 
   const canViewAnalytics = () => {
-    return ['owner', 'admin', 'warehouse_manager'].includes(user?.role);
+    return ['owner', 'admin', 'warehouse_manager', 'warehouse'].includes(user?.role);
   };
 
   const canManageInventory = () => {
