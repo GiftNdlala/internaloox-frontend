@@ -22,6 +22,7 @@ import StockEntry from '../components/warehouse/StockEntry';
 import TaskManagement from '../components/warehouse/TaskManagement';
 import WarehouseOrders from '../components/warehouse/WarehouseOrders';
 import WorkerOrderTasks from '../components/warehouse/WorkerOrderTasks';
+import VERSION from '../version';
 
 const EnhancedWarehouseDashboard = ({ user, onLogout, showNavbar = true }) => {
   const navigate = useNavigate();
@@ -653,9 +654,12 @@ const EnhancedWarehouseDashboard = ({ user, onLogout, showNavbar = true }) => {
       {/* Last Update Indicator */}
       {lastUpdate && (
         <div className="position-fixed bottom-0 end-0 p-3">
-          <small className="text-muted bg-white px-2 py-1 rounded shadow-sm">
-            Last updated: {new Date(lastUpdate).toLocaleTimeString()}
-          </small>
+          <div className="d-flex flex-column align-items-end gap-1">
+            <small className="text-muted bg-white px-2 py-1 rounded shadow-sm">
+              Last updated: {new Date(lastUpdate).toLocaleTimeString()}
+            </small>
+            <small className="text-muted bg-white px-2 py-1 rounded shadow-sm">Build: {VERSION}</small>
+          </div>
         </div>
       )}
 
