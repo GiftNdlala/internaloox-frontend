@@ -471,13 +471,22 @@ const EnhancedWarehouseDashboard = ({ user, onLogout }) => {
               <FaBoxes className="me-2 text-primary" />
               Inventory Management
             </h4>
-            <Button 
-              variant="primary" 
-              onClick={() => setShowStockEntry(true)}
-            >
-              <FaPlus className="me-2" />
-              Quick Stock Entry
-            </Button>
+            <div className="d-flex gap-2">
+              <Button 
+                variant="outline-success" 
+                onClick={() => navigate('/warehouse/products/new')}
+              >
+                <FaPlus className="me-2" />
+                Add Product
+              </Button>
+              <Button 
+                variant="primary" 
+                onClick={() => setShowStockEntry(true)}
+              >
+                <FaPlus className="me-2" />
+                Quick Stock Entry
+              </Button>
+            </div>
           </div>
         </Col>
       </Row>

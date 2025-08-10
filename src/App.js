@@ -14,6 +14,7 @@ import Payments from './pages/Payments';
 import Deliveries from './pages/Deliveries';
 import Analytics from './pages/Analytics';
 import LoginPage from './pages/LoginPage';
+import AddProduct from './pages/AddProduct';
 import './App.css';
 import './styles/MobileFirst.css';
 
@@ -121,10 +122,20 @@ function App() {
           <Route 
             path="/warehouse" 
             element={
-              <ProtectedRoute allowedRoles={['warehouse', 'owner', 'admin']}>
+              <ProtectedRoute allowedRoles={['warehouse', 'warehouse_manager', 'owner', 'admin']}>
                 <TestWarehouseDashboard user={user} onLogout={handleLogout} />
               </ProtectedRoute>
             } 
+          />
+
+          {/* Add Product (Warehouse Manager view) */}
+          <Route
+            path="/warehouse/products/new"
+            element={
+              <ProtectedRoute allowedRoles={['warehouse', 'warehouse_manager', 'owner', 'admin']}>
+                <AddProduct user={user} />
+              </ProtectedRoute>
+            }
           />
           
           {/* Delivery Dashboard Route */}

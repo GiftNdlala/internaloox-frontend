@@ -86,8 +86,11 @@ const TestWarehouseDashboard = ({ user, onLogout }) => {
       case 'inventory':
         return (
           <Card>
-            <Card.Header>
-              <h5>Inventory Management</h5>
+            <Card.Header className="d-flex justify-content-between align-items-center">
+              <h5 className="mb-0">Inventory Management</h5>
+              <Button variant="outline-success" onClick={() => window.location.assign('/warehouse/products/new')}>
+                Add Product
+              </Button>
             </Card.Header>
             <Card.Body>
               <p>Inventory features will be displayed here.</p>
