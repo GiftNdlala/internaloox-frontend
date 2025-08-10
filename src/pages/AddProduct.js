@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Form, Button, InputGroup, Alert, Badge, Spinner } from 'react-bootstrap';
 import { FaBoxOpen, FaPalette, FaCouch, FaPlus, FaTrash, FaArrowLeft, FaCheckCircle } from 'react-icons/fa';
 import { createProduct, getColors, getFabrics } from '../components/api';
+import SharedHeader from '../components/SharedHeader';
 
 const initialForm = {
   name: '',
@@ -158,6 +159,7 @@ const AddProduct = ({ user }) => {
 
   return (
     <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
+      <SharedHeader user={user} onLogout={() => navigate('/login')} dashboardType={user?.role === 'owner' ? 'owner' : user?.role || 'warehouse'} />
       <Container className="py-4">
         <Button variant="link" className="mb-3" onClick={() => navigate(-1)}>
           <FaArrowLeft className="me-2" /> Back

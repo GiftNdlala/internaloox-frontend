@@ -125,7 +125,7 @@ function App() {
             path="/warehouse" 
             element={
               <ProtectedRoute allowedRoles={['warehouse', 'warehouse_manager', 'owner', 'admin']}>
-                <TestWarehouseDashboard user={user} onLogout={handleLogout} />
+                <EnhancedWarehouseDashboard user={user} onLogout={handleLogout} />
               </ProtectedRoute>
             } 
           />
