@@ -11,6 +11,7 @@ import UniversalSidebar from '../components/UniversalSidebar';
 import EnhancedPageHeader from '../components/EnhancedPageHeader';
 import SharedHeader from '../components/SharedHeader';
 import { getOrders, getCustomers, getUsers, getDashboardStats } from '../components/api';
+import { getWarehouseDashboard, getLowStockAlerts, getWarehouseOrders, getTasksByStatus } from '../components/api';
 
 const Analytics = ({ user, userRole, onLogout }) => {
   const navigate = useNavigate();
@@ -21,6 +22,11 @@ const Analytics = ({ user, userRole, onLogout }) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  // Warehouse analytics state
+  const [whInventory, setWhInventory] = useState({ total_materials: 0, in_stock: 0 });
+  const [whLowStock, setWhLowStock] = useState([]);
+  const [whOrders, setWhOrders] = useState([]);
+  const [whTaskCounts, setWhTaskCounts] = useState({ assigned: 0, started: 0, completed: 0 });
 
   // Filter states
   const [dateRange, setDateRange] = useState('30'); // days
@@ -43,6 +49,25 @@ const Analytics = ({ user, userRole, onLogout }) => {
       setOrders(ordersData.results || ordersData);
       setCustomers(customersData.results || customersData);
       setUsers(usersData.results || usersData);
+      // Warehouse analytics in parallel
+      try {
+        const [inv, low, ord] = await Promise.all([
+          getWarehouseDashboard(),
+          getLowStockAlerts(),
+          getWarehouseOrders()
+        ]);
+        setWhInventory(inv || { total_materials: 0, in_stock: 0 });
+        setWhLowStock(low?.alerts || []);
+        const ordList = Array.isArray(ord?.orders) ? ord.orders : (Array.isArray(ord) ? ord : []);
+        setWhOrders(ordList);
+        const [assigned, started, completed] = await Promise.all([
+          getTasksByStatus('assigned').catch(() => []),
+          getTasksByStatus('started').catch(() => []),
+          getTasksByStatus('completed').catch(() => [])
+        ]);
+        const count = (res) => Array.isArray(res?.results) ? res.results.length : (Array.isArray(res) ? res.length : 0);
+        setWhTaskCounts({ assigned: count(assigned), started: count(started), completed: count(completed) });
+      } catch {}
       setError('');
     } catch (err) {
       setError('Failed to load analytics data: ' + err.message);
@@ -472,6 +497,111 @@ const Analytics = ({ user, userRole, onLogout }) => {
                   <h4 className="text-primary">{orderStats.total}</h4>
                   <p className="text-muted mb-0">Total Orders</p>
                 </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+
+        {/* Warehouse Analytics */}
+        <Row className="mb-4">
+          <Col md={3}>
+            <Card className="border-0 shadow-sm h-100">
+              <Card.Body className="text-center">
+                <FaBoxes size={36} className="text-primary mb-2" />
+                <h4 className="mb-1">{whInventory.total_materials || 0}</h4>
+                <small className="text-muted">Total Materials</small>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col md={3}>
+            <Card className="border-0 shadow-sm h-100">
+              <Card.Body className="text-center">
+                <FaBoxes size={36} className="text-success mb-2" />
+                <h4 className="mb-1">{whInventory.in_stock || 0}</h4>
+                <small className="text-muted">Materials In Stock</small>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col md={3}>
+            <Card className="border-0 shadow-sm h-100">
+              <Card.Body className="text-center">
+                <FaExclamationTriangle size={32} className="text-warning mb-2" />
+                <h4 className="mb-1">{whLowStock.length}</h4>
+                <small className="text-muted">Low Stock Alerts</small>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col md={3}>
+            <Card className="border-0 shadow-sm h-100">
+              <Card.Body className="text-center">
+                <FaClipboardList size={32} className="text-info mb-2" />
+                <h4 className="mb-1">{whTaskCounts.started}</h4>
+                <small className="text-muted">Active Tasks</small>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+        <Row className="mb-4">
+          <Col md={6}>
+            <Card className="border-0 shadow-sm h-100">
+              <Card.Header className="bg-white border-bottom d-flex justify-content-between align-items-center">
+                <h6 className="mb-0">Low Stock (Top 8)</h6>
+                <Badge bg={whLowStock.length ? 'warning' : 'secondary'}>{whLowStock.length}</Badge>
+              </Card.Header>
+              <Card.Body className="p-0">
+                <Table responsive hover className="mb-0">
+                  <thead>
+                    <tr>
+                      <th>Material</th>
+                      <th>Current</th>
+                      <th>Threshold</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {whLowStock.slice(0, 8).map(a => (
+                      <tr key={a.id}>
+                        <td>{a.material_name}</td>
+                        <td>{a.current_stock} {a.unit}</td>
+                        <td>{a.threshold}</td>
+                      </tr>
+                    ))}
+                    {whLowStock.length === 0 && <tr><td colSpan={3} className="text-center text-muted py-3">None</td></tr>}
+                  </tbody>
+                </Table>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col md={6}>
+            <Card className="border-0 shadow-sm h-100">
+              <Card.Header className="bg-white border-bottom d-flex justify-content-between align-items-center">
+                <h6 className="mb-0">Orders Snapshot</h6>
+                <Badge bg="success">Ready: {whOrders.filter(o => o.production_status === 'ready_for_delivery').length}</Badge>
+              </Card.Header>
+              <Card.Body className="p-0">
+                <Table responsive hover className="mb-0">
+                  <thead>
+                    <tr>
+                      <th>Order #</th>
+                      <th>Customer</th>
+                      <th>Production</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {whOrders.slice(0, 8).map(o => (
+                      <tr key={o.id}>
+                        <td>{o.order_number}</td>
+                        <td>{o.customer_name}</td>
+                        <td>
+                          <Badge bg={
+                            o.production_status === 'ready_for_delivery' ? 'success' :
+                            o.production_status === 'in_production' ? 'warning' : 'secondary'
+                          }>{o.production_status}</Badge>
+                        </td>
+                      </tr>
+                    ))}
+                    {whOrders.length === 0 && <tr><td colSpan={3} className="text-center text-muted py-3">No orders</td></tr>}
+                  </tbody>
+                </Table>
               </Card.Body>
             </Card>
           </Col>
