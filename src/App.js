@@ -154,6 +154,7 @@ function App() {
             >
               <Route index element={<EnhancedWarehouseDashboard user={user} onLogout={handleLogout} showNavbar={false} />} />
               <Route path="products" element={<WarehouseProducts />} />
+              <Route path="products/new" element={<AddProduct user={user} />} />
               <Route path="stock" element={<WarehouseStock />} />
               {/* Keep existing inventory routes accessible under warehouse */}
               <Route path="inventory/materials" element={<InventoryManagement />} />
