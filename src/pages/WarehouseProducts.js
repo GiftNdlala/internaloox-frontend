@@ -16,9 +16,28 @@ const WarehouseProducts = () => {
       setLoading(true);
       setError('');
       try {
-        const data = await getProducts();
-        const list = Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []);
-        setProducts(list);
+        // Fetch first page
+        const first = await getProducts();
+        const firstList = Array.isArray(first?.results) ? first.results : (Array.isArray(first) ? first : []);
+        const combined = [...firstList];
+
+        // If paginated, fetch all remaining pages using next links
+        let nextUrl = first?.next || null;
+        const token = localStorage.getItem('oox_token');
+        const API_BASE = process.env.REACT_APP_API_BASE || 'https://internaloox-1.onrender.com/api';
+        while (nextUrl) {
+          // Normalize to absolute URL
+          const absoluteUrl = nextUrl.startsWith('http') ? nextUrl : `${API_BASE}${nextUrl}`;
+          const res = await fetch(absoluteUrl, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+          if (!res.ok) break;
+          const page = await res.json();
+          const pageList = Array.isArray(page?.results) ? page.results : (Array.isArray(page) ? page : []);
+          combined.push(...pageList);
+          nextUrl = page?.next || null;
+        }
+        setProducts(combined);
       } catch (e) {
         setError(e?.message || 'Failed to load products');
       } finally {
