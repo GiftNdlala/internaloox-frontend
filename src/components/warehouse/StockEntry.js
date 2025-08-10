@@ -120,6 +120,7 @@ const StockEntry = ({
           material_id: entry.material_id,
           quantity: entry.movement_type === 'out' ? -entry.quantity : entry.quantity,
           location_id: entry.location_id,
+          location: entry.location_id, // alias for backend location field
           movement_type: entry.movement_type,
           reason: entry.reason,
           batch_number: entry.batch_number,
