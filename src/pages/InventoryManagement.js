@@ -18,7 +18,7 @@ const defaultMaterial = {
   description: ''
 };
 
-const UNITS = ['units', 'metres', 'boards', 'rolls', 'kilograms', 'litres'];
+const UNITS = ['units', 'metres', 'meters', 'boards', 'rolls', 'kilograms', 'kg', 'litres', 'liters'];
 
 const InventoryManagement = () => {
   const [materials, setMaterials] = useState([]);

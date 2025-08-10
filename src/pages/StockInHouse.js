@@ -60,7 +60,7 @@ const StockInHouse = () => {
     setSaving(true);
     try {
       const payload = {
-        material_id: Number(form.material_id),
+        material: Number(form.material_id),
         direction: form.direction, // 'in' | 'out'
         quantity: Number(form.quantity),
         unit_cost: form.direction === 'in' ? Number(form.unit_cost) : null,
@@ -172,17 +172,20 @@ const StockInHouse = () => {
                   {movements.length === 0 ? (
                     <tr><td colSpan={7} className="text-center text-muted py-4">No movements</td></tr>
                   ) : (
-                    movements.map((mv) => (
-                      <tr key={mv.id}>
-                        <td>{getMaterialName(mv.material_id)}</td>
-                        <td>{mv.direction === 'in' ? <Badge bg="success"><FaArrowDown className="me-1" />In</Badge> : <Badge bg="warning" text="dark"><FaArrowUp className="me-1" />Out</Badge>}</td>
-                        <td>{mv.quantity} {getMaterialUnit(mv.material_id)}</td>
-                        <td>{mv.unit_cost != null ? `R ${Number(mv.unit_cost).toFixed(2)}` : '-'}</td>
-                        <td>{mv.unit_cost != null ? `R ${(Number(mv.unit_cost) * Number(mv.quantity)).toFixed(2)}` : '-'}</td>
-                        <td className="text-truncate" style={{ maxWidth: 260 }}>{mv.note || '-'}</td>
-                        <td>{mv.created_at || '-'}</td>
-                      </tr>
-                    ))
+                    movements.map((mv) => {
+                      const mid = mv.material_id ?? mv.material;
+                      return (
+                        <tr key={mv.id}>
+                          <td>{getMaterialName(mid)}</td>
+                          <td>{mv.direction === 'in' ? <Badge bg="success"><FaArrowDown className="me-1" />In</Badge> : <Badge bg="warning" text="dark"><FaArrowUp className="me-1" />Out</Badge>}</td>
+                          <td>{mv.quantity} {getMaterialUnit(mid)}</td>
+                          <td>{mv.unit_cost != null ? `R ${Number(mv.unit_cost).toFixed(2)}` : '-'}</td>
+                          <td>{mv.unit_cost != null ? `R ${(Number(mv.unit_cost) * Number(mv.quantity)).toFixed(2)}` : '-'}</td>
+                          <td className="text-truncate" style={{ maxWidth: 260 }}>{mv.note || '-'}</td>
+                          <td>{mv.created_at || '-'}</td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </Table>
