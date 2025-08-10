@@ -97,9 +97,8 @@ const WarehouseNavbar = ({
           {formatTime(currentTime)}
         </div>
 
-        <Navbar.Toggle aria-controls="warehouse-navbar-nav" />
-        
-        <Navbar.Collapse id="warehouse-navbar-nav">
+        {/* Always-visible navigation (no collapse) */}
+        <div className="d-flex w-100 align-items-center" id="warehouse-navbar-nav">
           {/* Main Navigation */}
           <Nav className="me-auto">
             <Nav.Link 
@@ -236,7 +235,7 @@ const WarehouseNavbar = ({
           </Nav>
 
           {/* Right Side Navigation */}
-          <Nav className="align-items-center">
+          <Nav className="align-items-center ms-auto">
             {/* Notifications */}
             <div className="me-3">
               <NotificationBell />
@@ -298,7 +297,7 @@ const WarehouseNavbar = ({
               </NavDropdown.Item>
             </NavDropdown>
           </Nav>
-        </Navbar.Collapse>
+        </div>
       </Container>
 
       <style jsx>{`
