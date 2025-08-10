@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { Navbar, Nav, NavDropdown, Badge, Button, Container } from 'react-bootstrap';
 import { 
   FaWarehouse, FaTasks, FaBoxes, FaUsers, FaChartBar, 
@@ -18,6 +19,14 @@ const WarehouseNavbar = ({
 }) => {
   const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const pathname = location.pathname || '';
+  const isOverview = pathname.endsWith('/warehouse');
+  const isInventory = pathname.includes('/warehouse/inventory');
+  const isProducts = pathname.includes('/warehouse/products');
+  const isStock = pathname.includes('/warehouse/stock');
+  const isOrders = pathname.includes('/warehouse/orders');
 
   const getRoleDisplayName = (role) => {
     const roleNames = {
@@ -94,7 +103,7 @@ const WarehouseNavbar = ({
           {/* Main Navigation */}
           <Nav className="me-auto">
             <Nav.Link 
-              active={activeTab === 'overview'}
+              active={isOverview || activeTab === 'overview'}
               onClick={() => {
                 onTabChange?.('overview');
                 navigate('/warehouse');
@@ -109,7 +118,7 @@ const WarehouseNavbar = ({
             {/* Task Management - Admin/Owner/Manager only */}
             {canManageTasks() && (
               <Nav.Link 
-                active={activeTab === 'task-management'}
+                active={isOverview && activeTab === 'task-management'}
                 onClick={() => {
                   onTabChange?.('task-management');
                   navigate('/warehouse');
@@ -125,7 +134,7 @@ const WarehouseNavbar = ({
             {/* My Tasks - Workers only */}
             {user?.role === 'warehouse_worker' && (
               <Nav.Link 
-                active={activeTab === 'my-tasks'}
+                active={isOverview && activeTab === 'my-tasks'}
                 onClick={() => {
                   onTabChange?.('my-tasks');
                   navigate('/warehouse');
@@ -141,7 +150,7 @@ const WarehouseNavbar = ({
             {/* Inventory */}
             {canManageInventory() && (
               <Nav.Link 
-                active={activeTab === 'inventory'}
+                active={isInventory}
                 onClick={() => {
                   onTabChange?.('inventory');
                   navigate('/warehouse/inventory/materials');
@@ -156,6 +165,7 @@ const WarehouseNavbar = ({
 
             {/* Products */}
             <Nav.Link 
+              active={isProducts}
               onClick={() => {
                 navigate('/warehouse/products');
                 setExpanded(false);
@@ -168,6 +178,7 @@ const WarehouseNavbar = ({
 
             {/* Stock Management */}
             <Nav.Link 
+              active={isStock}
               onClick={() => {
                 navigate('/warehouse/stock');
                 setExpanded(false);
@@ -178,10 +189,23 @@ const WarehouseNavbar = ({
               <span>Stock</span>
             </Nav.Link>
 
+            {/* Orders */}
+            <Nav.Link 
+              active={isOrders}
+              onClick={() => {
+                navigate('/warehouse/orders');
+                setExpanded(false);
+              }}
+              className="d-flex align-items-center"
+            >
+              <FaClipboardList className="me-2" />
+              <span>Orders</span>
+            </Nav.Link>
+
             {/* Analytics - Management only */}
             {canViewAnalytics() && (
               <Nav.Link 
-                active={activeTab === 'analytics'}
+                active={isOverview && activeTab === 'analytics'}
                 onClick={() => {
                   onTabChange?.('analytics');
                   navigate('/warehouse');
@@ -197,7 +221,7 @@ const WarehouseNavbar = ({
             {/* Workers - Management only */}
             {canManageTasks() && (
               <Nav.Link 
-                active={activeTab === 'workers'}
+                active={isOverview && activeTab === 'workers'}
                 onClick={() => {
                   onTabChange?.('workers');
                   navigate('/warehouse');
