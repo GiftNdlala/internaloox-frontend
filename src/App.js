@@ -23,6 +23,7 @@ import WarehouseProducts from './pages/WarehouseProducts';
 import WarehouseStock from './pages/WarehouseStock';
 import WarehouseWorkers from './pages/WarehouseWorkers';
 import WorkerDashboard from './pages/WorkerDashboard';
+import WarehouseAnalytics from './pages/WarehouseAnalytics';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -158,6 +159,7 @@ function App() {
               <Route path="stock" element={<WarehouseStock />} />
               <Route path="workers" element={<WarehouseWorkers currentUser={user} />} />
               <Route path="worker" element={<WorkerDashboard />} />
+              <Route path="analytics" element={<WarehouseAnalytics />} />
               {/* Keep existing inventory routes accessible under warehouse */}
               <Route path="inventory/materials" element={<InventoryManagement />} />
               <Route path="inventory/stock-in-house" element={<StockInHouse />} />
