@@ -99,7 +99,7 @@ const LoginPage = ({ onLogin }) => {
         body: JSON.stringify({
           username: formData.username,
           password: formData.password,
-          role: formData.role, // Include selected role in login request
+          // Do not send client-selected role; trust backend role
         }),
       });
 
@@ -115,19 +115,34 @@ const LoginPage = ({ onLogin }) => {
       localStorage.setItem('oox_token', data.access);
       localStorage.setItem('oox_refresh', data.refresh);
       
-      // Use the selected role from dropdown instead of backend role
-      const userDataWithSelectedRole = {
-        ...data.user,
-        role: formData.role // Override with selected role
-      };
-      
-      localStorage.setItem('oox_user', JSON.stringify(userDataWithSelectedRole));
+      // Trust backend-provided user.role
+      const backendUser = data.user || {};
+      localStorage.setItem('oox_user', JSON.stringify(backendUser));
 
-      setSuccess(`Welcome to OOX Furniture ${formData.role.charAt(0).toUpperCase() + formData.role.slice(1)} Dashboard!`);
-      onLogin(userDataWithSelectedRole);
+      const role = backendUser.role;
+      const prettyRole = role ? role.charAt(0).toUpperCase() + role.slice(1) : 'Dashboard';
+      setSuccess(`Welcome to OOX Furniture ${prettyRole}!`);
+      onLogin(backendUser);
+
+      const getDefaultRouteForRole = (role) => {
+        switch (role) {
+          case 'owner':
+            return '/owner';
+          case 'admin':
+            return '/admin';
+          case 'delivery':
+            return '/delivery';
+          case 'warehouse':
+          case 'warehouse_manager':
+          case 'warehouse_worker':
+            return '/warehouse';
+          default:
+            return '/login';
+        }
+      };
 
       setTimeout(() => {
-        navigate(`/${formData.role}`);
+        navigate(getDefaultRouteForRole(role));
       }, 1500);
     } catch (err) {
       setError('Network error. Please check your connection.');
