@@ -133,9 +133,10 @@ const LoginPage = ({ onLogin }) => {
             return '/admin';
           case 'delivery':
             return '/delivery';
+          case 'warehouse_worker':
+            return '/warehouse/worker';
           case 'warehouse':
           case 'warehouse_manager':
-          case 'warehouse_worker':
             return '/warehouse';
           default:
             return '/login';

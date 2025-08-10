@@ -169,6 +169,9 @@ export const taskAction = (taskId, action, data = {}) =>
 
 // Worker Dashboard
 export const getWorkerDashboard = () => apiRequest('/tasks/dashboard/worker_dashboard/');
+export const quickStartNextTask = () => apiRequest('/tasks/dashboard/quick_start_next_task/', { method: 'POST' });
+export const quickPauseActiveTask = (data = {}) => apiRequest('/tasks/dashboard/quick_pause_active_task/', { method: 'POST', data });
+export const quickCompleteActiveTask = (data = {}) => apiRequest('/tasks/dashboard/quick_complete_active_task/', { method: 'POST', data });
 export const getMyTasks = () => apiRequest('/tasks/tasks/my_tasks/');
 export const getTasksByOrder = () => apiRequest('/tasks/dashboard/tasks_by_order/');
 
