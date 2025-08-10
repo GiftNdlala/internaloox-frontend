@@ -159,7 +159,7 @@ export const createTask = (data) => apiRequest('/tasks/tasks/', { method: 'POST'
 
 // Task Actions (Start/Pause/Resume/Complete)
 export const taskAction = (taskId, action, data = {}) => 
-  apiRequest(`/tasks/tasks/${taskId}/action/`, { method: 'POST', data: { action, ...data } });
+  apiRequest(`/tasks/tasks/${taskId}/perform_action/`, { method: 'POST', data: { action, ...data } });
 
 // Worker Dashboard
 export const getWorkerDashboard = () => apiRequest('/tasks/dashboard/worker_dashboard/');
@@ -173,7 +173,12 @@ export const getTaskAssignmentData = () => apiRequest('/tasks/dashboard/task_ass
 // Moved getRealTimeUpdates function to avoid duplication
 
 // Notifications
-export const getUnreadNotifications = () => apiRequest('/tasks/notifications/unread/');
+export const getUnreadNotifications = async () => {
+  const data = await apiRequest('/tasks/notifications/');
+  // Normalize and filter unread
+  const items = Array.isArray(data) ? data : (Array.isArray(data?.results) ? data.results : []);
+  return items.filter(n => !n.is_read);
+};
 export const markNotificationRead = (id) => apiRequest(`/tasks/notifications/${id}/mark_read/`, { method: 'POST' });
 export const markAllNotificationsRead = () => apiRequest('/tasks/notifications/mark_all_read/', { method: 'POST' });
 
