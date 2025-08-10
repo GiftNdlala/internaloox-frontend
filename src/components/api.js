@@ -317,3 +317,22 @@ export const warehouseAPI = {
     }
   }
 }; 
+
+// Approval Queue (manager/admin)
+export const getPendingApprovalTasks = async () => {
+  try {
+    // Preferred: status filter
+    const res = await apiRequest(`/tasks/tasks/?status=pending_review`);
+    return Array.isArray(res?.results) ? res.results : (Array.isArray(res) ? res : []);
+  } catch (e) {
+    // Fallback endpoint if provided by backend
+    try {
+      const res2 = await apiRequest(`/tasks/tasks/pending_approval/`);
+      return Array.isArray(res2?.results) ? res2.results : (Array.isArray(res2) ? res2 : []);
+    } catch {
+      return [];
+    }
+  }
+};
+export const managerAction = (taskId, action, data = {}) => 
+  apiRequest(`/tasks/tasks/${taskId}/manager_action/`, { method: 'POST', data: { action, ...data } }); 

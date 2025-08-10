@@ -24,6 +24,7 @@ import WarehouseStock from './pages/WarehouseStock';
 import WarehouseWorkers from './pages/WarehouseWorkers';
 import WorkerDashboard from './pages/WorkerDashboard';
 import WarehouseAnalytics from './pages/WarehouseAnalytics';
+import ApprovalQueue from './pages/ApprovalQueue';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -160,6 +161,7 @@ function App() {
               <Route path="workers" element={<WarehouseWorkers currentUser={user} />} />
               <Route path="worker" element={<WorkerDashboard />} />
               <Route path="analytics" element={<WarehouseAnalytics />} />
+              <Route path="approvals" element={<ProtectedRoute allowedRoles={['owner','admin','warehouse_manager']}><ApprovalQueue /></ProtectedRoute>} />
               {/* Keep existing inventory routes accessible under warehouse */}
               <Route path="inventory/materials" element={<InventoryManagement />} />
               <Route path="inventory/stock-in-house" element={<StockInHouse />} />
