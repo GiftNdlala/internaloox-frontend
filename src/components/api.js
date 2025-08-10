@@ -86,6 +86,12 @@ export const deletePayment = (id) => apiRequest(`/payment-proofs/${id}/`, { meth
 export const getDashboardStats = () => apiRequest('/dashboard-stats/');
 // Users
 export const getUsers = () => apiRequest('/users/users/');
+export const getUsersQuery = (query = '') => {
+  const qs = query ? (query.startsWith('?') ? query : `?${query}`) : '';
+  return apiRequest(`/users/users/${qs}`);
+};
+// Optional helper to fetch tasks filtered by worker (requires backend support)
+export const getTasksByWorker = (workerId) => apiRequest(`/tasks/tasks/?assigned_worker=${workerId}`);
 
 /**
  * Create a new user with enhanced security and validation

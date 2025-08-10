@@ -27,6 +27,7 @@ const WarehouseNavbar = ({
   const isProducts = pathname.includes('/warehouse/products');
   const isStock = pathname.includes('/warehouse/stock');
   const isOrders = pathname.includes('/warehouse/orders');
+  const isWorkers = pathname.includes('/warehouse/workers');
 
   const getRoleDisplayName = (role) => {
     const roleNames = {
@@ -220,10 +221,10 @@ const WarehouseNavbar = ({
             {/* Workers - Management only */}
             {canManageTasks() && (
               <Nav.Link 
-                active={isOverview && activeTab === 'workers'}
+                active={isWorkers}
                 onClick={() => {
                   onTabChange?.('workers');
-                  navigate('/warehouse');
+                  navigate('/warehouse/workers');
                   setExpanded(false);
                 }}
                 className="d-flex align-items-center"

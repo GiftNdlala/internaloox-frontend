@@ -27,7 +27,7 @@ const LoginPage = ({ onLogin }) => {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
-    role: 'admin',
+    role: 'admin', // view-as role for testing dashboards
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -99,7 +99,7 @@ const LoginPage = ({ onLogin }) => {
         body: JSON.stringify({
           username: formData.username,
           password: formData.password,
-          // Do not send client-selected role; trust backend role
+          selected_role: formData.role, // hint for backend; frontend uses for routing after login
         }),
       });
 
@@ -115,9 +115,10 @@ const LoginPage = ({ onLogin }) => {
       localStorage.setItem('oox_token', data.access);
       localStorage.setItem('oox_refresh', data.refresh);
       
-      // Trust backend-provided user.role
+      // Trust backend-provided user.role; store selected view-as role for routing
       const backendUser = data.user || {};
       localStorage.setItem('oox_user', JSON.stringify(backendUser));
+      localStorage.setItem('oox_selected_role', formData.role || '');
 
       const role = backendUser.role;
       const prettyRole = role ? role.charAt(0).toUpperCase() + role.slice(1) : 'Dashboard';
@@ -142,7 +143,9 @@ const LoginPage = ({ onLogin }) => {
       };
 
       setTimeout(() => {
-        navigate(getDefaultRouteForRole(role));
+        const viewAs = localStorage.getItem('oox_selected_role');
+        const targetRole = viewAs && backendUser.role === 'owner' ? viewAs : role;
+        navigate(getDefaultRouteForRole(targetRole));
       }, 1500);
     } catch (err) {
       setError('Network error. Please check your connection.');
