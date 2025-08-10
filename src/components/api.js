@@ -128,6 +128,7 @@ export const deleteUser = (id) => apiRequest(`/users/users/${id}/`, { method: 'D
 export const getProducts = () => apiRequest('/products/');
 export const getColors = () => apiRequest('/colors/');
 export const getFabrics = () => apiRequest('/fabrics/');
+export const createProduct = (data) => apiRequest('/products/', { method: 'POST', data });
 
 // MVP: Reference Boards
 export const getColorReferences = () => apiRequest('/color-references/');
