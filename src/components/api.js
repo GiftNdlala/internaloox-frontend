@@ -173,6 +173,8 @@ export const quickStartNextTask = () => apiRequest('/tasks/dashboard/quick_start
 export const quickPauseActiveTask = (data = {}) => apiRequest('/tasks/dashboard/quick_pause_active_task/', { method: 'POST', data });
 export const quickCompleteActiveTask = (data = {}) => apiRequest('/tasks/dashboard/quick_complete_active_task/', { method: 'POST', data });
 export const getMyTasks = () => apiRequest('/tasks/tasks/my_tasks/');
+export const workerAction = (taskId, action, data = {}) => 
+  apiRequest(`/tasks/tasks/${taskId}/worker_action/`, { method: 'POST', data: { action, ...data } });
 export const getTasksByOrder = () => apiRequest('/tasks/dashboard/tasks_by_order/');
 
 // Supervisor Dashboard  

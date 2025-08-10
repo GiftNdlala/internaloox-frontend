@@ -1,98 +1,160 @@
-import React, { useEffect, useState } from 'react';
-import { Card, Button, Spinner, Alert, Row, Col, Badge } from 'react-bootstrap';
-import { getWorkerDashboard, quickStartNextTask, quickPauseActiveTask, quickCompleteActiveTask } from '../components/api';
+import React, { useEffect, useRef, useState } from 'react';
+import { Card, Button, Spinner, Alert, Row, Col, Badge, ListGroup } from 'react-bootstrap';
+import { getMyTasks, workerAction } from '../components/api';
 
 const WorkerDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [data, setData] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const timerRef = useRef(null);
+  const [elapsed, setElapsed] = useState(0);
 
   const load = async () => {
     setLoading(true);
     setError('');
     try {
-      const d = await getWorkerDashboard();
+      const d = await getMyTasks();
       setData(d);
+      if (d?.summary?.currently_running?.time_elapsed) {
+        setElapsed(d.summary.currently_running.time_elapsed);
+      } else {
+        setElapsed(0);
+      }
     } catch (e) {
       setError(e?.message || 'Failed to load worker dashboard');
     } finally { setLoading(false); }
   };
 
-  useEffect(() => { load(); const i = setInterval(load, 15000); return () => clearInterval(i); }, []);
+  useEffect(() => { load(); }, []);
 
-  const handleStartNext = async () => {
-    setSubmitting(true);
-    try { await quickStartNextTask(); await load(); } catch (e) { alert(e?.message || 'Failed'); } finally { setSubmitting(false); }
+  // simple local timer when a task is running
+  useEffect(() => {
+    if (data?.summary?.currently_running) {
+      if (!timerRef.current) {
+        timerRef.current = setInterval(() => setElapsed(prev => prev + 1), 1000);
+      }
+    } else if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+      setElapsed(0);
+    }
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [data?.summary?.currently_running]);
+
+  const fmtTime = (s) => {
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    return `${h}h ${m}m ${sec}s`;
   };
-  const handlePause = async () => {
+
+  const doAction = async (taskId, action, extra = {}) => {
     setSubmitting(true);
-    try { await quickPauseActiveTask({ reason: 'Manual pause' }); await load(); } catch (e) { alert(e?.message || 'Failed'); } finally { setSubmitting(false); }
-  };
-  const handleComplete = async () => {
-    setSubmitting(true);
-    const notes = window.prompt('Completion notes (optional):') || '';
-    try { await quickCompleteActiveTask({ completion_notes: notes }); await load(); } catch (e) { alert(e?.message || 'Failed'); } finally { setSubmitting(false); }
+    try {
+      await workerAction(taskId, action, extra);
+      await load();
+    } catch (e) {
+      alert(e?.message || 'Action failed');
+    } finally { setSubmitting(false); }
   };
 
   if (loading) return <div className="text-center py-5"><Spinner animation="border"/></div>;
   if (error) return <Alert variant="danger">{error}</Alert>;
 
-  const info = data?.worker_info || {};
-  const summary = data?.task_summary || {};
-  const active = data?.active_task || null;
-  const nextTask = data?.next_task || null;
-  const quick = data?.quick_actions || {};
+  const summary = data?.summary || {};
+  const assignedTasks = data?.assigned_tasks || [];
+  const activeTasks = data?.active_tasks || [];
+  const recentCompleted = data?.completed_tasks || [];
+  const running = summary.currently_running || null;
 
   return (
     <div className="worker-dashboard">
+      <Row className="g-3 mb-3">
+        <Col md={4}><Card><Card.Body className="text-center"><div className="text-muted">Assigned</div><div className="fs-3 fw-bold">{summary.assigned_count || 0}</div></Card.Body></Card></Col>
+        <Col md={4}><Card><Card.Body className="text-center"><div className="text-muted">Active</div><div className="fs-3 fw-bold">{summary.active_count || 0}</div></Card.Body></Card></Col>
+        <Col md={4}><Card><Card.Body className="text-center"><div className="text-muted">Completed Today</div><div className="fs-3 fw-bold">{summary.completed_today || 0}</div></Card.Body></Card></Col>
+      </Row>
+
       <Row className="g-3">
         <Col md={6}>
-          <Card>
+          <Card className="border-warning">
+            <Card.Header>Current Task</Card.Header>
             <Card.Body>
-              <div className="d-flex justify-content-between align-items-center">
+              {running ? (
                 <div>
-                  <h5 className="mb-1">Welcome, {info.name || info.username || 'Worker'}</h5>
-                  <div className="text-muted">Role: {info.role}</div>
+                  <div className="fw-semibold">{running.title}</div>
+                  <div className="text-muted">Elapsed: {fmtTime(elapsed)}</div>
+                  <div className="mt-3 d-flex gap-2">
+                    <Button variant="warning" disabled={submitting} onClick={() => doAction(running.id, 'pause', { reason: 'Manual pause' })}>Pause</Button>
+                    <Button variant="primary" disabled={submitting} onClick={() => doAction(running.id, 'complete', { completion_notes: '' })}>Complete</Button>
+                    <Button variant="outline-danger" disabled={submitting} onClick={() => doAction(running.id, 'flag', { reason: 'Issue' })}>Flag</Button>
+                  </div>
                 </div>
-                <Badge bg="primary">ID: {info.employee_id || '-'}</Badge>
-              </div>
+              ) : <div className="text-muted">No current running task</div>}
             </Card.Body>
           </Card>
         </Col>
         <Col md={6}>
-          <Row className="g-3">
-            <Col xs={6}><Card><Card.Body className="text-center"><div className="text-muted">Total</div><div className="fs-3 fw-bold">{summary.total_tasks||0}</div></Card.Body></Card></Col>
-            <Col xs={6}><Card><Card.Body className="text-center"><div className="text-muted">In Progress</div><div className="fs-3 fw-bold">{summary.in_progress||0}</div></Card.Body></Card></Col>
-          </Row>
+          <Card className="border-info">
+            <Card.Header>Assigned Tasks</Card.Header>
+            <ListGroup variant="flush">
+              {assignedTasks.slice(0,5).map(t => (
+                <ListGroup.Item key={t.id} className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <div className="fw-semibold">{t.title}</div>
+                    <small className="text-muted">Due: {t.due_date ? new Date(t.due_date).toLocaleString() : '-'}</small>
+                  </div>
+                  <div className="d-flex gap-2">
+                    <Button size="sm" variant="success" disabled={submitting} onClick={() => doAction(t.id, 'start')}>Start</Button>
+                    <Button size="sm" variant="outline-danger" disabled={submitting} onClick={() => doAction(t.id, 'flag', { reason: 'Issue' })}>Flag</Button>
+                  </div>
+                </ListGroup.Item>
+              ))}
+              {assignedTasks.length === 0 && <ListGroup.Item className="text-muted">No assigned tasks</ListGroup.Item>}
+            </ListGroup>
+          </Card>
         </Col>
-        <Col md={6}><Card className="border-warning"><Card.Body>
-          <h6 className="mb-2">Current Task</h6>
-          {active ? (
-            <div>
-              <div className="fw-semibold">{active.title} <Badge bg="warning" className="text-dark ms-2">{active.priority}</Badge></div>
-              <div className="text-muted">Order: {active.order_number}</div>
-              <div className="mt-3 d-flex gap-2">
-                {quick.can_pause && <Button variant="warning" onClick={handlePause} disabled={submitting}>Pause</Button>}
-                {quick.can_complete_active || quick.can_complete ? (
-                  <Button variant="primary" onClick={handleComplete} disabled={submitting}>Complete</Button>
-                ) : null}
-              </div>
-            </div>
-          ) : <div className="text-muted">No active task</div>}
-        </Card.Body></Card></Col>
-        <Col md={6}><Card className="border-info"><Card.Body>
-          <h6 className="mb-2">Next Task</h6>
-          {nextTask ? (
-            <div>
-              <div className="fw-semibold">{nextTask.title} <Badge bg="info" className="ms-2">{nextTask.priority}</Badge></div>
-              <div className="text-muted">Order: {nextTask.order_number}</div>
-              <div className="mt-3">
-                {quick.can_start_task && <Button variant="success" onClick={handleStartNext} disabled={submitting}>Start Next Task</Button>}
-              </div>
-            </div>
-          ) : <div className="text-muted">No next task assigned</div>}
-        </Card.Body></Card></Col>
+      </Row>
+
+      <Row className="g-3 mt-3">
+        <Col md={6}>
+          <Card>
+            <Card.Header>Active Tasks</Card.Header>
+            <ListGroup variant="flush">
+              {activeTasks.slice(0,5).map(t => (
+                <ListGroup.Item key={t.id} className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <div className="fw-semibold">{t.title}</div>
+                    <small className="text-muted">Status: {t.status}</small>
+                  </div>
+                  <div className="d-flex gap-2">
+                    {t.status === 'paused' && <Button size="sm" variant="success" disabled={submitting} onClick={() => doAction(t.id, 'resume')}>Resume</Button>}
+                    {t.status === 'started' && <Button size="sm" variant="warning" disabled={submitting} onClick={() => doAction(t.id, 'pause', { reason: 'Manual pause' })}>Pause</Button>}
+                    <Button size="sm" variant="primary" disabled={submitting} onClick={() => doAction(t.id, 'complete', { completion_notes: '' })}>Complete</Button>
+                  </div>
+                </ListGroup.Item>
+              ))}
+              {activeTasks.length === 0 && <ListGroup.Item className="text-muted">No active tasks</ListGroup.Item>}
+            </ListGroup>
+          </Card>
+        </Col>
+        <Col md={6}>
+          <Card>
+            <Card.Header>Recently Completed</Card.Header>
+            <ListGroup variant="flush">
+              {recentCompleted.slice(0,5).map(t => (
+                <ListGroup.Item key={t.id} className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <div className="fw-semibold">{t.title}</div>
+                    <small className="text-muted">Completed</small>
+                  </div>
+                </ListGroup.Item>
+              ))}
+              {recentCompleted.length === 0 && <ListGroup.Item className="text-muted">No completed tasks</ListGroup.Item>}
+            </ListGroup>
+          </Card>
+        </Col>
       </Row>
     </div>
   );
