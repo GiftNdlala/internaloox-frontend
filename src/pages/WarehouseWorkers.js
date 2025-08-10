@@ -95,11 +95,16 @@ const WarehouseWorkers = ({ currentUser }) => {
     try {
       if (editingUser) {
         const payload = { ...form };
-        if (!payload.password) delete payload.password;
+        if (!payload.password) {
+          delete payload.password;
+        } else {
+          payload.password_confirm = form.confirmPassword;
+        }
         delete payload.confirmPassword;
         await updateUser(editingUser.id, payload);
       } else {
         const payload = { ...form };
+        payload.password_confirm = form.confirmPassword;
         delete payload.confirmPassword;
         await createUser(payload);
       }
