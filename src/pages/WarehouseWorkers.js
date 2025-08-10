@@ -21,7 +21,7 @@ const WarehouseWorkers = ({ currentUser }) => {
 
   const [showEdit, setShowEdit] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
-  const [form, setForm] = useState({ username: '', password: '', role: 'warehouse_worker', first_name: '', last_name: '', email: '' });
+  const [form, setForm] = useState({ username: '', password: '', confirmPassword: '', role: 'warehouse_worker', first_name: '', last_name: '', email: '' });
   const [submitting, setSubmitting] = useState(false);
 
   const [showHistory, setShowHistory] = useState(false);
@@ -53,13 +53,13 @@ const WarehouseWorkers = ({ currentUser }) => {
 
   const openCreate = () => {
     setEditingUser(null);
-    setForm({ username: '', password: '', role: allowedRoles[0] || 'warehouse_worker', first_name: '', last_name: '', email: '' });
+    setForm({ username: '', password: '', confirmPassword: '', role: allowedRoles[0] || 'warehouse_worker', first_name: '', last_name: '', email: '' });
     setShowEdit(true);
   };
 
   const openEdit = (u) => {
     setEditingUser(u);
-    setForm({ username: u.username, password: '', role: u.role, first_name: u.first_name||'', last_name: u.last_name||'', email: u.email||'' });
+    setForm({ username: u.username, password: '', confirmPassword: '', role: u.role, first_name: u.first_name||'', last_name: u.last_name||'', email: u.email||'' });
     setShowEdit(true);
   };
 
@@ -74,12 +74,34 @@ const WarehouseWorkers = ({ currentUser }) => {
   };
 
   const handleSave = async () => {
+    // Frontend confirm-password validation when setting/updating password
+    if (!editingUser) {
+      if (!form.password || form.password.length < 4) {
+        alert('Password is required (min 4 chars)');
+        return;
+      }
+      if (form.password !== form.confirmPassword) {
+        alert('Passwords do not match');
+        return;
+      }
+    } else if (form.password) {
+      if (form.password !== form.confirmPassword) {
+        alert('Passwords do not match');
+        return;
+      }
+    }
+
     setSubmitting(true);
     try {
       if (editingUser) {
-        await updateUser(editingUser.id, { ...form, password: form.password || undefined });
+        const payload = { ...form };
+        if (!payload.password) delete payload.password;
+        delete payload.confirmPassword;
+        await updateUser(editingUser.id, payload);
       } else {
-        await createUser(form);
+        const payload = { ...form };
+        delete payload.confirmPassword;
+        await createUser(payload);
       }
       setShowEdit(false);
       await loadUsers();
@@ -179,6 +201,10 @@ const WarehouseWorkers = ({ currentUser }) => {
             <div className="mb-3">
               <Form.Label>Password {editingUser ? '(leave blank to keep)' : ''}</Form.Label>
               <Form.Control type="password" value={form.password} onChange={(e)=>setForm({...form, password: e.target.value})} />
+            </div>
+            <div className="mb-3">
+              <Form.Label>Confirm Password {editingUser ? '(leave blank if unchanged)' : ''}</Form.Label>
+              <Form.Control type="password" value={form.confirmPassword} onChange={(e)=>setForm({...form, confirmPassword: e.target.value})} />
             </div>
             <div className="mb-3">
               <Form.Label>First Name</Form.Label>
