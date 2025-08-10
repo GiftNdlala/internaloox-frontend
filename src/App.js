@@ -224,8 +224,8 @@ function App() {
             <Route 
               path="/warehouse/orders" 
               element={
-                <ProtectedRoute allowedRoles={['warehouse', 'warehouse_worker', 'owner', 'admin']}>
-                  <Orders user={user} userRole="warehouse" onLogout={handleLogout} />
+                <ProtectedRoute allowedRoles={['warehouse', 'warehouse_worker', 'warehouse_manager', 'owner', 'admin']}>
+                  <Orders user={user} userRole={user?.role || 'warehouse'} onLogout={handleLogout} />
                 </ProtectedRoute>
               } 
             />
