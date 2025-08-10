@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useContext } from 'react';
 import { getRealTimeUpdates } from '../components/api';
-import { useWarehouse } from '../contexts/WarehouseContext';
+import { WarehouseContext } from '../contexts/WarehouseContext';
 
 export const useRealTimeUpdates = (interval = 30000) => {
   const [updates, setUpdates] = useState({
@@ -10,7 +10,8 @@ export const useRealTimeUpdates = (interval = 30000) => {
   });
   const [lastCheck, setLastCheck] = useState(null);
   const intervalRef = useRef();
-  const { addNotification } = useWarehouse();
+  const warehouseCtx = useContext(WarehouseContext);
+  const addNotification = warehouseCtx?.addNotification || (() => {});
 
   const fetchUpdates = async () => {
     try {

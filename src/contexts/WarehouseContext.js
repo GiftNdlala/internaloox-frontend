@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer } from 'react';
 
-const WarehouseContext = createContext();
+export const WarehouseContext = createContext();
 
 const warehouseReducer = (state, action) => {
   switch (action.type) {

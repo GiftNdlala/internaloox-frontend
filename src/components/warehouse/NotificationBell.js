@@ -1,15 +1,17 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import { Button, Dropdown, Badge, ListGroup } from 'react-bootstrap';
 import { FaBell, FaCheck, FaTrash, FaExclamationTriangle, FaInfo, FaCheckCircle } from 'react-icons/fa';
 import { useRealTimeUpdates } from '../../hooks/useRealTimeUpdates';
-import { useWarehouse } from '../../contexts/WarehouseContext';
+import { WarehouseContext } from '../../contexts/WarehouseContext';
 import { markNotificationRead, markAllNotificationsRead } from '../api';
 
 const NotificationBell = () => {
   const [show, setShow] = useState(false);
   const dropdownRef = useRef(null);
   const { updates } = useRealTimeUpdates();
-  const { notifications, markNotificationRead: markLocalRead } = useWarehouse();
+  const warehouseCtx = useContext(WarehouseContext);
+  const notifications = Array.isArray(warehouseCtx?.notifications) ? warehouseCtx.notifications : [];
+  const markLocalRead = warehouseCtx?.markNotificationRead || (() => {});
 
   // Get unread count
   const unreadCount = notifications.filter(n => !n.is_read).length;
