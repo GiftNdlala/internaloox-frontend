@@ -42,7 +42,8 @@ const WarehouseNavbar = ({
   };
 
   const canManageTasks = () => {
-    return ['owner', 'admin', 'warehouse_manager', 'warehouse'].includes(user?.role);
+    // Restrict Workers link to owner, admin, warehouse_manager
+    return ['owner', 'admin', 'warehouse_manager'].includes(user?.role);
   };
 
   const canViewAnalytics = () => {
@@ -202,22 +203,6 @@ const WarehouseNavbar = ({
               <span>Orders</span>
             </Nav.Link>
 
-            {/* Analytics - Management only */}
-            {canViewAnalytics() && (
-              <Nav.Link 
-                active={isOverview && activeTab === 'analytics'}
-                onClick={() => {
-                  onTabChange?.('analytics');
-                  navigate('/warehouse');
-                  setExpanded(false);
-                }}
-                className="d-flex align-items-center"
-              >
-                <FaChartBar className="me-2" />
-                <span>Analytics</span>
-              </Nav.Link>
-            )}
-
             {/* Workers - Management only */}
             {canManageTasks() && (
               <Nav.Link 
@@ -231,6 +216,22 @@ const WarehouseNavbar = ({
               >
                 <FaUsers className="me-2" />
                 <span>Workers</span>
+              </Nav.Link>
+            )}
+
+            {/* Analytics - Management only */}
+            {['owner', 'admin', 'warehouse_manager', 'warehouse'].includes(user?.role) && (
+              <Nav.Link 
+                active={isOverview && activeTab === 'analytics'}
+                onClick={() => {
+                  onTabChange?.('analytics');
+                  navigate('/warehouse');
+                  setExpanded(false);
+                }}
+                className="d-flex align-items-center"
+              >
+                <FaChartBar className="me-2" />
+                <span>Analytics</span>
               </Nav.Link>
             )}
           </Nav>
