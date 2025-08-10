@@ -141,7 +141,10 @@ const AddProduct = ({ user }) => {
       // Reset form after brief delay
       setTimeout(() => {
         setForm(initialForm);
-        navigate('/warehouse');
+        const role = user?.role;
+        if (role === 'owner') navigate('/owner');
+        else if (role === 'admin') navigate('/admin');
+        else navigate('/warehouse');
       }, 1000);
     } catch (err) {
       setApiError(err?.message || 'Failed to create product');

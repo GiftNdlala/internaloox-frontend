@@ -193,6 +193,7 @@ export const getMaterials = () => apiRequest('/inventory/materials/');
 export const getMaterial = (id) => apiRequest(`/inventory/materials/${id}/`);
 export const createMaterial = (data) => apiRequest('/inventory/materials/', { method: 'POST', data });
 export const updateMaterial = (id, data) => apiRequest(`/inventory/materials/${id}/`, { method: 'PUT', data });
+export const deleteMaterial = (id) => apiRequest(`/inventory/materials/${id}/`, { method: 'DELETE' });
 
 // Warehouse Inventory Dashboard
 export const getWarehouseDashboard = () => apiRequest('/inventory/materials/warehouse_dashboard/');

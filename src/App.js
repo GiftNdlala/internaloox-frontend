@@ -15,6 +15,8 @@ import Deliveries from './pages/Deliveries';
 import Analytics from './pages/Analytics';
 import LoginPage from './pages/LoginPage';
 import AddProduct from './pages/AddProduct';
+import InventoryManagement from './pages/InventoryManagement';
+import StockInHouse from './pages/StockInHouse';
 import './App.css';
 import './styles/MobileFirst.css';
 
@@ -134,6 +136,26 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['warehouse', 'warehouse_manager', 'owner', 'admin']}>
                 <AddProduct user={user} />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Inventory Management */}
+          <Route
+            path="/warehouse/inventory/materials"
+            element={
+              <ProtectedRoute allowedRoles={['warehouse', 'warehouse_manager', 'owner', 'admin']}>
+                <InventoryManagement />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Stock In-House Management */}
+          <Route
+            path="/warehouse/inventory/stock-in-house"
+            element={
+              <ProtectedRoute allowedRoles={['warehouse', 'warehouse_manager', 'owner', 'admin']}>
+                <StockInHouse />
               </ProtectedRoute>
             }
           />

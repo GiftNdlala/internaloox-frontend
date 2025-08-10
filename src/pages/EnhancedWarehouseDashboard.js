@@ -91,6 +91,19 @@ const EnhancedWarehouseDashboard = ({ user, onLogout }) => {
     return ['owner', 'admin', 'warehouse_manager', 'warehouse'].includes(user?.role);
   };
 
+  const getOrdersPathForRole = () => {
+    if (user?.role === 'owner') return '/owner/orders';
+    if (user?.role === 'admin') return '/admin/orders';
+    if (user?.role === 'warehouse' || user?.role === 'warehouse_worker' || user?.role === 'warehouse_manager') return '/warehouse/orders';
+    return '/';
+  };
+
+  const getAnalyticsPathForRole = () => {
+    if (user?.role === 'owner' || user?.role === 'admin') return '/owner/analytics';
+    // No direct analytics route for warehouse/delivery; fallback to overview
+    return '/warehouse';
+  };
+
   const canManageInventory = () => {
     return ['owner', 'admin', 'warehouse_manager', 'warehouse_worker', 'warehouse'].includes(user?.role);
   };
@@ -254,7 +267,7 @@ const EnhancedWarehouseDashboard = ({ user, onLogout }) => {
               <FaChartBar size={50} className="text-muted mb-3" />
               <h5>Analytics Dashboard</h5>
               <p className="text-muted mb-4">Comprehensive warehouse analytics and reporting</p>
-              <Button variant="primary" onClick={() => navigate('/analytics')}>
+              <Button variant="primary" onClick={() => navigate(getAnalyticsPathForRole())}>
                 View Full Analytics
               </Button>
             </Card.Body>
@@ -450,7 +463,7 @@ const EnhancedWarehouseDashboard = ({ user, onLogout }) => {
               </p>
               <Button 
                 variant="outline-primary" 
-                onClick={() => navigate('/orders')}
+                onClick={() => navigate(getOrdersPathForRole())}
               >
                 View All Orders
               </Button>
@@ -478,6 +491,18 @@ const EnhancedWarehouseDashboard = ({ user, onLogout }) => {
               >
                 <FaPlus className="me-2" />
                 Add Product
+              </Button>
+              <Button 
+                variant="outline-primary" 
+                onClick={() => navigate('/warehouse/inventory/materials')}
+              >
+                Manage Materials
+              </Button>
+              <Button 
+                variant="outline-warning" 
+                onClick={() => navigate('/warehouse/inventory/stock-in-house')}
+              >
+                Update Stock In-House
               </Button>
               <Button 
                 variant="primary" 
