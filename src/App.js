@@ -19,6 +19,7 @@ import InventoryManagement from './pages/InventoryManagement';
 import StockInHouse from './pages/StockInHouse';
 import './App.css';
 import './styles/MobileFirst.css';
+import { WarehouseProvider } from './contexts/WarehouseContext';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -66,6 +67,24 @@ function App() {
     return children;
   };
 
+  // Map roles to their default dashboard route
+  const getDefaultRouteForRole = (role) => {
+    switch (role) {
+      case 'owner':
+        return '/owner';
+      case 'admin':
+        return '/admin';
+      case 'delivery':
+        return '/delivery';
+      case 'warehouse':
+      case 'warehouse_manager':
+      case 'warehouse_worker':
+        return '/warehouse';
+      default:
+        return '/login';
+    }
+  };
+
   if (loading) {
     return (
       <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
@@ -77,181 +96,183 @@ function App() {
   }
 
   return (
-    <Router>
-      <div className="App">
-        {error && (
-          <Alert 
-            variant="danger" 
-            dismissible 
-            onClose={() => setError(null)}
-            className="position-fixed top-0 start-50 translate-middle-x mt-3"
-            style={{ zIndex: 9999 }}
-          >
-            {error}
-          </Alert>
-        )}
-        
-        <Routes>
-          {/* Login Route */}
-          <Route 
-            path="/login" 
-            element={
-              user ? <Navigate to={`/${user.role}`} replace /> : <LoginPage onLogin={handleLogin} />
-            } 
-          />
+    <WarehouseProvider>
+      <Router>
+        <div className="App">
+          {error && (
+            <Alert 
+              variant="danger" 
+              dismissible 
+              onClose={() => setError(null)}
+              className="position-fixed top-0 start-50 translate-middle-x mt-3"
+              style={{ zIndex: 9999 }}
+            >
+              {error}
+            </Alert>
+          )}
           
-          {/* Owner Dashboard Route */}
-          <Route 
-            path="/owner" 
-            element={
-              <ProtectedRoute allowedRoles={['owner']}>
-                <OwnerDashboard user={user} onLogout={handleLogout} />
-              </ProtectedRoute>
-            } 
-          />
-          
-          {/* Admin Dashboard Route */}
-          <Route 
-            path="/admin" 
-            element={
-              <ProtectedRoute allowedRoles={['admin', 'owner']}>
-                <AdminDashboard user={user} onLogout={handleLogout} />
-              </ProtectedRoute>
-            } 
-          />
-          
-          {/* Warehouse Dashboard Route */}
-          <Route 
-            path="/warehouse" 
-            element={
-              <ProtectedRoute allowedRoles={['warehouse', 'warehouse_manager', 'owner', 'admin']}>
-                <EnhancedWarehouseDashboard user={user} onLogout={handleLogout} />
-              </ProtectedRoute>
-            } 
-          />
+          <Routes>
+            {/* Login Route */}
+            <Route 
+              path="/login" 
+              element={
+                user ? <Navigate to={getDefaultRouteForRole(user.role)} replace /> : <LoginPage onLogin={handleLogin} />
+              } 
+            />
+            
+            {/* Owner Dashboard Route */}
+            <Route 
+              path="/owner" 
+              element={
+                <ProtectedRoute allowedRoles={['owner']}>
+                  <OwnerDashboard user={user} onLogout={handleLogout} />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Admin Dashboard Route */}
+            <Route 
+              path="/admin" 
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'owner']}>
+                  <AdminDashboard user={user} onLogout={handleLogout} />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Warehouse Dashboard Route */}
+            <Route 
+              path="/warehouse" 
+              element={
+                <ProtectedRoute allowedRoles={['warehouse', 'warehouse_manager', 'warehouse_worker', 'owner', 'admin']}>
+                  <EnhancedWarehouseDashboard user={user} onLogout={handleLogout} />
+                </ProtectedRoute>
+              } 
+            />
 
-          {/* Add Product (Warehouse Manager view) */}
-          <Route
-            path="/warehouse/products/new"
-            element={
-              <ProtectedRoute allowedRoles={['warehouse', 'warehouse_manager', 'owner', 'admin']}>
-                <AddProduct user={user} />
-              </ProtectedRoute>
-            }
-          />
+            {/* Add Product (Warehouse Manager view) */}
+            <Route
+              path="/warehouse/products/new"
+              element={
+                <ProtectedRoute allowedRoles={['warehouse', 'warehouse_manager', 'owner', 'admin', 'warehouse_worker']}>
+                  <AddProduct user={user} />
+                </ProtectedRoute>
+              }
+            />
 
-          {/* Inventory Management */}
-          <Route
-            path="/warehouse/inventory/materials"
-            element={
-              <ProtectedRoute allowedRoles={['warehouse', 'warehouse_manager', 'owner', 'admin']}>
-                <InventoryManagement />
-              </ProtectedRoute>
-            }
-          />
+            {/* Inventory Management */}
+            <Route
+              path="/warehouse/inventory/materials"
+              element={
+                <ProtectedRoute allowedRoles={['warehouse', 'warehouse_manager', 'owner', 'admin', 'warehouse_worker']}>
+                  <InventoryManagement />
+                </ProtectedRoute>
+              }
+            />
 
-          {/* Stock In-House Management */}
-          <Route
-            path="/warehouse/inventory/stock-in-house"
-            element={
-              <ProtectedRoute allowedRoles={['warehouse', 'warehouse_manager', 'owner', 'admin']}>
-                <StockInHouse />
-              </ProtectedRoute>
-            }
-          />
-          
-          {/* Delivery Dashboard Route */}
-          <Route 
-            path="/delivery" 
-            element={
-              <ProtectedRoute allowedRoles={['delivery', 'owner', 'admin']}>
-                <DeliveryDashboard user={user} onLogout={handleLogout} />
-              </ProtectedRoute>
-            } 
-          />
+            {/* Stock In-House Management */}
+            <Route
+              path="/warehouse/inventory/stock-in-house"
+              element={
+                <ProtectedRoute allowedRoles={['warehouse', 'warehouse_manager', 'owner', 'admin', 'warehouse_worker']}>
+                  <StockInHouse />
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* Delivery Dashboard Route */}
+            <Route 
+              path="/delivery" 
+              element={
+                <ProtectedRoute allowedRoles={['delivery', 'owner', 'admin']}>
+                  <DeliveryDashboard user={user} onLogout={handleLogout} />
+                </ProtectedRoute>
+              } 
+            />
 
-          {/* Orders Routes - Shared across roles */}
-          <Route 
-            path="/owner/orders" 
-            element={
-              <ProtectedRoute allowedRoles={['owner']}>
-                <Orders user={user} userRole="owner" onLogout={handleLogout} />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/admin/orders" 
-            element={
-              <ProtectedRoute allowedRoles={['admin', 'owner']}>
-                <Orders user={user} userRole="admin" onLogout={handleLogout} />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/warehouse/orders" 
-            element={
-              <ProtectedRoute allowedRoles={['warehouse', 'owner', 'admin']}>
-                <Orders user={user} userRole="warehouse" onLogout={handleLogout} />
-              </ProtectedRoute>
-            } 
-          />
+            {/* Orders Routes - Shared across roles */}
+            <Route 
+              path="/owner/orders" 
+              element={
+                <ProtectedRoute allowedRoles={['owner']}>
+                  <Orders user={user} userRole="owner" onLogout={handleLogout} />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/orders" 
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'owner']}>
+                  <Orders user={user} userRole="admin" onLogout={handleLogout} />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/warehouse/orders" 
+              element={
+                <ProtectedRoute allowedRoles={['warehouse', 'warehouse_worker', 'owner', 'admin']}>
+                  <Orders user={user} userRole="warehouse" onLogout={handleLogout} />
+                </ProtectedRoute>
+              } 
+            />
 
-          {/* Owner Management Routes */}
-          <Route 
-            path="/owner/customers" 
-            element={
-              <ProtectedRoute allowedRoles={['owner', 'admin']}>
-                <Customers user={user} userRole={user?.role || "owner"} onLogout={handleLogout} />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/owner/users" 
-            element={
-              <ProtectedRoute allowedRoles={['owner']}>
-                <Users user={user} userRole="owner" onLogout={handleLogout} />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/owner/payments" 
-            element={
-              <ProtectedRoute allowedRoles={['owner', 'admin']}>
-                <Payments user={user} userRole={user?.role || "owner"} onLogout={handleLogout} />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/owner/deliveries" 
-            element={
-              <ProtectedRoute allowedRoles={['owner', 'admin']}>
-                <Deliveries user={user} userRole={user?.role || "owner"} onLogout={handleLogout} />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/owner/analytics" 
-            element={
-              <ProtectedRoute allowedRoles={['owner', 'admin']}>
-                <Analytics user={user} userRole={user?.role || "owner"} onLogout={handleLogout} />
-              </ProtectedRoute>
-            } 
-          />
-          
-          {/* Root Route - Always show login page */}
-          <Route 
-            path="/" 
-            element={<LoginPage onLogin={handleLogin} />} 
-          />
-          
-          {/* Catch all route - redirect to login */}
-          <Route 
-            path="*" 
-            element={<Navigate to="/login" replace />} 
-          />
-        </Routes>
-      </div>
-    </Router>
+            {/* Owner Management Routes */}
+            <Route 
+              path="/owner/customers" 
+              element={
+                <ProtectedRoute allowedRoles={['owner', 'admin']}>
+                  <Customers user={user} userRole={user?.role || "owner"} onLogout={handleLogout} />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/owner/users" 
+              element={
+                <ProtectedRoute allowedRoles={['owner']}>
+                  <Users user={user} userRole="owner" onLogout={handleLogout} />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/owner/payments" 
+              element={
+                <ProtectedRoute allowedRoles={['owner', 'admin']}>
+                  <Payments user={user} userRole={user?.role || "owner"} onLogout={handleLogout} />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/owner/deliveries" 
+              element={
+                <ProtectedRoute allowedRoles={['owner', 'admin']}>
+                  <Deliveries user={user} userRole={user?.role || "owner"} onLogout={handleLogout} />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/owner/analytics" 
+              element={
+                <ProtectedRoute allowedRoles={['owner', 'admin']}>
+                  <Analytics user={user} userRole={user?.role || "owner"} onLogout={handleLogout} />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Root Route - Always show login page */}
+            <Route 
+              path="/" 
+              element={<LoginPage onLogin={handleLogin} />} 
+            />
+            
+            {/* Catch all route - redirect to login */}
+            <Route 
+              path="*" 
+              element={<Navigate to="/login" replace />} 
+            />
+          </Routes>
+        </div>
+      </Router>
+    </WarehouseProvider>
   );
 }
 
