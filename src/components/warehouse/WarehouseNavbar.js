@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Navbar, Nav, NavDropdown, Badge, Button, Container } from 'react-bootstrap';
 import { 
   FaWarehouse, FaTasks, FaBoxes, FaUsers, FaChartBar, 
@@ -16,6 +17,7 @@ const WarehouseNavbar = ({
   currentTime 
 }) => {
   const [expanded, setExpanded] = useState(false);
+  const navigate = useNavigate();
 
   const getRoleDisplayName = (role) => {
     const roleNames = {
@@ -70,7 +72,7 @@ const WarehouseNavbar = ({
     >
       <Container fluid>
         {/* Brand */}
-        <Navbar.Brand className="d-flex align-items-center">
+        <Navbar.Brand className="d-flex align-items-center" onClick={() => { navigate('/warehouse'); setExpanded(false); }} style={{ cursor: 'pointer' }}>
           <FaWarehouse className="me-2 text-primary" size={24} />
           <div>
             <div className="fw-bold text-primary">OOX Warehouse</div>
@@ -94,7 +96,8 @@ const WarehouseNavbar = ({
             <Nav.Link 
               active={activeTab === 'overview'}
               onClick={() => {
-                onTabChange('overview');
+                onTabChange?.('overview');
+                navigate('/warehouse');
                 setExpanded(false);
               }}
               className="d-flex align-items-center"
@@ -108,7 +111,8 @@ const WarehouseNavbar = ({
               <Nav.Link 
                 active={activeTab === 'task-management'}
                 onClick={() => {
-                  onTabChange('task-management');
+                  onTabChange?.('task-management');
+                  navigate('/warehouse');
                   setExpanded(false);
                 }}
                 className="d-flex align-items-center"
@@ -123,7 +127,8 @@ const WarehouseNavbar = ({
               <Nav.Link 
                 active={activeTab === 'my-tasks'}
                 onClick={() => {
-                  onTabChange('my-tasks');
+                  onTabChange?.('my-tasks');
+                  navigate('/warehouse');
                   setExpanded(false);
                 }}
                 className="d-flex align-items-center"
@@ -138,7 +143,8 @@ const WarehouseNavbar = ({
               <Nav.Link 
                 active={activeTab === 'inventory'}
                 onClick={() => {
-                  onTabChange('inventory');
+                  onTabChange?.('inventory');
+                  navigate('/warehouse/inventory/materials');
                   setExpanded(false);
                 }}
                 className="d-flex align-items-center"
@@ -148,12 +154,37 @@ const WarehouseNavbar = ({
               </Nav.Link>
             )}
 
+            {/* Products */}
+            <Nav.Link 
+              onClick={() => {
+                navigate('/warehouse/products');
+                setExpanded(false);
+              }}
+              className="d-flex align-items-center"
+            >
+              <FaIndustry className="me-2" />
+              <span>Products</span>
+            </Nav.Link>
+
+            {/* Stock Management */}
+            <Nav.Link 
+              onClick={() => {
+                navigate('/warehouse/stock');
+                setExpanded(false);
+              }}
+              className="d-flex align-items-center"
+            >
+              <FaBoxes className="me-2" />
+              <span>Stock</span>
+            </Nav.Link>
+
             {/* Analytics - Management only */}
             {canViewAnalytics() && (
               <Nav.Link 
                 active={activeTab === 'analytics'}
                 onClick={() => {
-                  onTabChange('analytics');
+                  onTabChange?.('analytics');
+                  navigate('/warehouse');
                   setExpanded(false);
                 }}
                 className="d-flex align-items-center"
@@ -168,7 +199,8 @@ const WarehouseNavbar = ({
               <Nav.Link 
                 active={activeTab === 'workers'}
                 onClick={() => {
-                  onTabChange('workers');
+                  onTabChange?.('workers');
+                  navigate('/warehouse');
                   setExpanded(false);
                 }}
                 className="d-flex align-items-center"

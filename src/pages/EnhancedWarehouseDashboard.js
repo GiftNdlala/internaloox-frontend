@@ -23,7 +23,7 @@ import TaskManagement from '../components/warehouse/TaskManagement';
 import WarehouseOrders from '../components/warehouse/WarehouseOrders';
 import WorkerOrderTasks from '../components/warehouse/WorkerOrderTasks';
 
-const EnhancedWarehouseDashboard = ({ user, onLogout }) => {
+const EnhancedWarehouseDashboard = ({ user, onLogout, showNavbar = true }) => {
   const navigate = useNavigate();
   
   // Core State
@@ -555,14 +555,16 @@ const EnhancedWarehouseDashboard = ({ user, onLogout }) => {
   if (loading) {
     return (
       <div className="warehouse-dashboard">
-        <WarehouseNavbar 
-          user={user}
-          onLogout={onLogout}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          notifications={notifications}
-          currentTime={currentTime}
-        />
+        {showNavbar && (
+          <WarehouseNavbar 
+            user={user}
+            onLogout={onLogout}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            notifications={notifications}
+            currentTime={currentTime}
+          />
+        )}
         <Container fluid className="d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
           <div className="text-center">
             <Spinner animation="border" variant="primary" style={{ width: '3rem', height: '3rem' }} />
@@ -576,14 +578,16 @@ const EnhancedWarehouseDashboard = ({ user, onLogout }) => {
   return (
     <div className="warehouse-dashboard" style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
       {/* Enhanced Navbar */}
-      <WarehouseNavbar 
-        user={user}
-        onLogout={onLogout}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        notifications={notifications}
-        currentTime={currentTime}
-      />
+      {showNavbar && (
+        <WarehouseNavbar 
+          user={user}
+          onLogout={onLogout}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          notifications={notifications}
+          currentTime={currentTime}
+        />
+      )}
       
       {/* Main Content */}
       <Container fluid className="p-4">

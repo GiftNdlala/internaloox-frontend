@@ -20,6 +20,9 @@ import StockInHouse from './pages/StockInHouse';
 import './App.css';
 import './styles/MobileFirst.css';
 import { WarehouseProvider } from './contexts/WarehouseContext';
+import WarehouseLayout from './layouts/WarehouseLayout';
+import WarehouseProducts from './pages/WarehouseProducts';
+import WarehouseStock from './pages/WarehouseStock';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -142,13 +145,21 @@ function App() {
             
             {/* Warehouse Dashboard Route */}
             <Route 
-              path="/warehouse" 
+              path="/warehouse/*" 
               element={
                 <ProtectedRoute allowedRoles={['warehouse', 'warehouse_manager', 'warehouse_worker', 'owner', 'admin']}>
-                  <EnhancedWarehouseDashboard user={user} onLogout={handleLogout} />
+                  <WarehouseLayout user={user} onLogout={handleLogout} />
                 </ProtectedRoute>
-              } 
-            />
+              }
+            >
+              <Route index element={<EnhancedWarehouseDashboard user={user} onLogout={handleLogout} showNavbar={false} />} />
+              <Route path="products" element={<WarehouseProducts />} />
+              <Route path="stock" element={<WarehouseStock />} />
+              {/* Keep existing inventory routes accessible under warehouse */}
+              <Route path="inventory/materials" element={<InventoryManagement />} />
+              <Route path="inventory/stock-in-house" element={<StockInHouse />} />
+              <Route path="orders" element={<Orders user={user} userRole="warehouse" onLogout={handleLogout} />} />
+            </Route>
 
             {/* Add Product (Warehouse Manager view) */}
             <Route
