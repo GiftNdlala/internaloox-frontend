@@ -7,6 +7,10 @@
     { "src": "/logo192.png", "dest": "/logo192.png" },
     { "src": "/logo512.png", "dest": "/logo512.png" },
     { "src": "/robots.txt", "dest": "/robots.txt" },
+    
+    { "src": "/index.html", "headers": { "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" }, "dest": "/index.html" },
+    { "src": "/(.*)\.html", "headers": { "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" }, "dest": "/$1.html" },
+
     { "src": "/.*", "dest": "/index.html" }
   ]
 }
