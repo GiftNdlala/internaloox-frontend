@@ -69,6 +69,20 @@ export const getOrder = (id) => apiRequest(`/orders/${id}/`);
 export const createOrder = (data) => apiRequest('/orders/', { method: 'POST', data });
 export const updateOrder = (id, data) => apiRequest(`/orders/${id}/`, { method: 'PUT', data });
 export const deleteOrder = (id) => apiRequest(`/orders/${id}/`, { method: 'DELETE' });
+// Order workflow helpers
+export const getWorkflowDashboard = () => apiRequest('/orders/workflow_dashboard/');
+export const getOrderManagementData = () => apiRequest('/orders/management_data/');
+export const advanceOrderWorkflow = (orderId) => apiRequest(`/orders/${orderId}/advance_workflow/`, { method: 'POST' });
+export const assignOrder = (orderId, assignment_type, assigned_user_id) => 
+  apiRequest(`/orders/${orderId}/assign/`, { method: 'POST', data: { assignment_type, assigned_user_id } });
+export const patchOrderStatus = (orderId, data) => apiRequest(`/orders/${orderId}/update_status/`, { method: 'PATCH', data });
+export const cancelOrder = (orderId, reason) => apiRequest(`/orders/${orderId}/cancel/`, { method: 'POST', data: { reason } });
+
+// Role dashboards
+export const getOwnerOrdersDashboard = () => apiRequest('/orders/owner_dashboard/');
+export const getAdminOrdersDashboard = () => apiRequest('/orders/admin_dashboard/');
+export const getWarehouseOrdersDashboard = () => apiRequest('/orders/warehouse_dashboard/');
+export const getDeliveryOrdersDashboard = () => apiRequest('/orders/delivery_dashboard/');
 
 // Customers
 export const getCustomers = () => apiRequest('/customers/');

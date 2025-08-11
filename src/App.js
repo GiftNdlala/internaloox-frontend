@@ -25,6 +25,7 @@ import WarehouseWorkers from './pages/WarehouseWorkers';
 import WorkerDashboard from './pages/WorkerDashboard';
 import WarehouseAnalytics from './pages/WarehouseAnalytics';
 import ApprovalQueue from './pages/ApprovalQueue';
+import OrdersWorkflowDashboard from './pages/OrdersWorkflowDashboard';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -274,6 +275,14 @@ function App() {
                   <Analytics user={user} userRole={user?.role || "owner"} onLogout={handleLogout} />
                 </ProtectedRoute>
               } 
+            />
+            <Route
+              path="/owner/workflow"
+              element={
+                <ProtectedRoute allowedRoles={['owner','admin']}>
+                  <OrdersWorkflowDashboard />
+                </ProtectedRoute>
+              }
             />
             
             {/* Root Route - Always show login page */}
