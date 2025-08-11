@@ -145,6 +145,38 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            <Route 
+              path="/admin/customers" 
+              element={
+                <ProtectedRoute allowedRoles={['admin','owner']}>
+                  <Customers user={user} userRole="admin" onLogout={handleLogout} />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="/admin/payments" 
+              element={
+                <ProtectedRoute allowedRoles={['admin','owner']}>
+                  <Payments user={user} userRole="admin" onLogout={handleLogout} />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="/admin/deliveries" 
+              element={
+                <ProtectedRoute allowedRoles={['admin','owner']}>
+                  <Deliveries user={user} userRole="admin" onLogout={handleLogout} />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="/admin/warehouse" 
+              element={
+                <ProtectedRoute allowedRoles={['admin','owner']}>
+                  <WarehouseAnalytics />
+                </ProtectedRoute>
+              }
+            />
             
             {/* Warehouse Dashboard Route */}
             <Route 
@@ -226,14 +258,7 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-            <Route 
-              path="/warehouse/orders" 
-              element={
-                <ProtectedRoute allowedRoles={['warehouse', 'warehouse_worker', 'warehouse_manager', 'owner', 'admin']}>
-                  <Orders user={user} userRole={user?.role || 'warehouse'} onLogout={handleLogout} />
-                </ProtectedRoute>
-              } 
-            />
+
 
             {/* Owner Management Routes */}
             <Route 
@@ -280,7 +305,7 @@ function App() {
               path="/owner/workflow"
               element={
                 <ProtectedRoute allowedRoles={['owner','admin']}>
-                  <OrdersWorkflowDashboard />
+                  <OrdersWorkflowDashboard user={user} onLogout={handleLogout} userRole={user?.role || 'owner'} />
                 </ProtectedRoute>
               }
             />

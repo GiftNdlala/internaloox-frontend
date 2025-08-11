@@ -14,6 +14,9 @@ import {
   createOrder, updateOrder, deleteOrder, advanceOrderWorkflow
 } from '../components/api';
 import OrderForm from '../components/OrderForm';
+import SharedHeader from '../components/SharedHeader';
+import UniversalSidebar from '../components/UniversalSidebar';
+import { getOrderManagementData, patchOrderStatus } from '../components/api';
 
 const Orders = ({ user, userRole, onLogout }) => {
   // State management
@@ -29,6 +32,9 @@ const Orders = ({ user, userRole, onLogout }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [editingOrder, setEditingOrder] = useState(null);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [statusForm, setStatusForm] = useState({ order_status: '', production_status: '' });
+  const [statusOptions, setStatusOptions] = useState({ order_statuses: [], production_statuses: [] });
 
   // Filter and search states
   const [searchTerm, setSearchTerm] = useState('');
@@ -45,6 +51,18 @@ const Orders = ({ user, userRole, onLogout }) => {
   // Load data on component mount
   useEffect(() => {
     fetchAllData();
+    // Load management options for status editing
+    (async () => {
+      try {
+        const mgmt = await getOrderManagementData();
+        setStatusOptions({
+          order_statuses: mgmt?.status_options?.order_statuses || [],
+          production_statuses: mgmt?.status_options?.production_statuses || []
+        });
+      } catch (_) {
+        // optional
+      }
+    })();
   }, []);
 
   const fetchAllData = async () => {
@@ -128,7 +146,11 @@ const Orders = ({ user, userRole, onLogout }) => {
   };
 
   // Manager should not be able to create new orders
-  const handleCreateOrder = () => {};
+  const handleCreateOrder = () => {
+    if (!canCreate) return;
+    setEditingOrder(null);
+    setShowOrderModal(true);
+  };
 
   const handleEditOrder = (order) => {
     setEditingOrder(order);
@@ -182,6 +204,28 @@ const Orders = ({ user, userRole, onLogout }) => {
       setSuccess(`Order ${order.order_number} flagged as delayed`);
       fetchAllData();
     } catch (e) { setError(e?.message || 'Failed to delay'); }
+  };
+
+  // Manual Status Change
+  const openStatusModal = (order) => {
+    if (!canEdit) return;
+    setSelectedOrder(order);
+    setStatusForm({
+      order_status: order.order_status || '',
+      production_status: order.production_status || ''
+    });
+    setShowStatusModal(true);
+  };
+  const submitStatusChange = async (e) => {
+    e?.preventDefault?.();
+    try {
+      await patchOrderStatus(selectedOrder.id, statusForm);
+      setShowStatusModal(false);
+      setSuccess('Status updated');
+      fetchAllData();
+    } catch (e) {
+      setError(e?.message || 'Failed to update status');
+    }
   };
 
   const getStatusBadge = (status, type = 'order') => {
@@ -251,8 +295,8 @@ const Orders = ({ user, userRole, onLogout }) => {
       </Container>
     );
   }
-
-  return (
+ 
+  const content = (
     <Container fluid className="py-3">
       <Card className="mb-3">
         <Card.Body>
@@ -325,8 +369,16 @@ const Orders = ({ user, userRole, onLogout }) => {
                     <tr key={order.id}>
                       <td>{order.order_number}</td>
                       <td>{order.customer?.name || order.customer_name}</td>
-                      <td>{getStatusBadge(order.order_status, 'order')}</td>
-                      <td>{getStatusBadge(order.production_status, 'production')}</td>
+                      <td>
+                        <span role="button" onClick={() => openStatusModal(order)}>
+                          {getStatusBadge(order.order_status, 'order')}
+                        </span>
+                      </td>
+                      <td>
+                        <span role="button" onClick={() => openStatusModal(order)}>
+                          {getStatusBadge(order.production_status, 'production')}
+                        </span>
+                      </td>
                       <td>{formatCurrency(order.total_amount)}</td>
                       <td>{formatDate(order.created_at)}</td>
                       <td className="text-end">
@@ -436,8 +488,61 @@ const Orders = ({ user, userRole, onLogout }) => {
               </Modal.Footer>
             </Modal>
           )}
+
+          {/* Status Change Modal */}
+          {canEdit && (
+            <Modal show={showStatusModal} onHide={() => setShowStatusModal(false)}>
+              <Modal.Header closeButton>
+                <Modal.Title>Change Order Status</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <Form onSubmit={submitStatusChange}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Order Status</Form.Label>
+                    <Form.Select
+                      value={statusForm.order_status}
+                      onChange={(e)=>setStatusForm({...statusForm, order_status: e.target.value})}
+                    >
+                      <option value="">-- Select --</option>
+                      {statusOptions.order_statuses.map(opt => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Production Status</Form.Label>
+                    <Form.Select
+                      value={statusForm.production_status}
+                      onChange={(e)=>setStatusForm({...statusForm, production_status: e.target.value})}
+                    >
+                      <option value="">-- Select --</option>
+                      {statusOptions.production_statuses.map(opt => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+                </Form>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={()=>setShowStatusModal(false)}>Cancel</Button>
+                <Button variant="primary" onClick={submitStatusChange}>Update</Button>
+              </Modal.Footer>
+            </Modal>
+          )}
     </Container>
   );
+  if (userRole === 'owner' || userRole === 'admin') {
+    return (
+      <>
+        <UniversalSidebar user={user} userRole={userRole} onLogout={onLogout} />
+        <div className="main-content">
+          <SharedHeader user={user} onLogout={onLogout} dashboardType={userRole} />
+          {content}
+        </div>
+      </>
+    );
+  }
+  return content;
 };
 
 export default Orders;

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Row, Col, Spinner, Alert, Badge, Button, ListGroup, Modal, Form } from 'react-bootstrap';
 import { getWorkflowDashboard, getOrderManagementData, advanceOrderWorkflow, assignOrder } from '../components/api';
+import SharedHeader from '../components/SharedHeader';
+import UniversalSidebar from '../components/UniversalSidebar';
 
 const StageColumn = ({ title, count, orders, onAdvance }) => (
   <Card className="h-100">
@@ -23,7 +25,7 @@ const StageColumn = ({ title, count, orders, onAdvance }) => (
   </Card>
 );
 
-const OrdersWorkflowDashboard = () => {
+const OrdersWorkflowDashboard = ({ user, onLogout, userRole = 'owner' }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [data, setData] = useState(null);
@@ -61,8 +63,8 @@ const OrdersWorkflowDashboard = () => {
 
   const stages = data?.workflow_stages || {};
 
-  return (
-    <div>
+  const content = (
+    <div className="p-3">
       <Row className="g-3">
         <Col md={4}><StageColumn title="New" count={stages.new_orders?.count} orders={stages.new_orders?.orders} onAdvance={onAdvance} /></Col>
         <Col md={4}><StageColumn title="Paid" count={stages.paid_orders?.count} orders={stages.paid_orders?.orders} onAdvance={onAdvance} /></Col>
@@ -102,6 +104,15 @@ const OrdersWorkflowDashboard = () => {
         </Modal.Footer>
       </Modal>
     </div>
+  );
+  return (
+    <>
+      <UniversalSidebar user={user} userRole={userRole} onLogout={onLogout} />
+      <div className="main-content">
+        <SharedHeader user={user} onLogout={onLogout} dashboardType={userRole} />
+        {content}
+      </div>
+    </>
   );
 };
 

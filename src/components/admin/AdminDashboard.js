@@ -380,10 +380,22 @@ const AdminDashboard = ({ user, onLogout }) => {
                   </Button>
                   <Button 
                     variant="outline-primary" 
-                    onClick={() => setActiveTab('orders')}
+                    onClick={() => navigate('/admin/customers')}
                   >
                     <FaPlus className="me-1" />
                     Add Customer
+                  </Button>
+                  <Button 
+                    variant="outline-secondary"
+                    onClick={() => navigate('/admin/deliveries')}
+                  >
+                    Deliveries
+                  </Button>
+                  <Button 
+                    variant="outline-success"
+                    onClick={() => navigate('/admin/warehouse')}
+                  >
+                    Warehouse Overview
                   </Button>
                 </div>
               </div>
@@ -532,7 +544,13 @@ const AdminDashboard = ({ user, onLogout }) => {
             <h5 className="mb-0">Reports & Analytics</h5>
           </Card.Header>
           <Card.Body>
-            <ReportsTable />
+            <div className="text-muted mb-3">Warehouse reports only</div>
+            <ReportsTable reports={orders.map(o=>({
+              id: o.id,
+              name: `Order ${o.order_number} • ${o.production_status || o.order_status}`,
+              value: o.total_amount || '-',
+              date: new Date(o.created_at).toLocaleDateString()
+            }))} loading={loading} />
           </Card.Body>
         </Card>
       )}
