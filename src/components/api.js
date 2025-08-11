@@ -72,6 +72,7 @@ export const deleteOrder = (id) => apiRequest(`/orders/${id}/`, { method: 'DELET
 // Order workflow helpers
 export const getWorkflowDashboard = () => apiRequest('/orders/workflow_dashboard/');
 export const getOrderManagementData = () => apiRequest('/orders/management_data/');
+export const getOrderStatusOptions = () => apiRequest('/orders/status_options/');
 export const advanceOrderWorkflow = (orderId) => apiRequest(`/orders/${orderId}/advance_workflow/`, { method: 'POST' });
 export const assignOrder = (orderId, assignment_type, assigned_user_id) => 
   apiRequest(`/orders/${orderId}/assign/`, { method: 'POST', data: { assignment_type, assigned_user_id } });

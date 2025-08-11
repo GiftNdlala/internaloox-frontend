@@ -17,6 +17,7 @@ import OrderForm from '../components/OrderForm';
 import SharedHeader from '../components/SharedHeader';
 import UniversalSidebar from '../components/UniversalSidebar';
 import { getOrderManagementData, patchOrderStatus } from '../components/api';
+import { getOrderStatusOptions } from '../components/api';
 
 const Orders = ({ user, userRole, onLogout }) => {
   // State management
@@ -54,7 +55,7 @@ const Orders = ({ user, userRole, onLogout }) => {
     // Load management options for status editing
     (async () => {
       try {
-        const mgmt = await getOrderManagementData();
+        const mgmt = await getOrderManagementData().catch(() => null);
         const defaultOrderStatuses = [
           { value: 'deposit_pending', label: 'Deposit Pending' },
           { value: 'deposit_paid', label: 'Deposit Paid' },
@@ -70,8 +71,16 @@ const Orders = ({ user, userRole, onLogout }) => {
           { value: 'ready_for_delivery', label: 'Ready for Delivery' }
         ];
 
-        const fetchedOrderStatuses = mgmt?.status_options?.order_statuses;
-        const fetchedProductionStatuses = mgmt?.status_options?.production_statuses;
+        let fetchedOrderStatuses = mgmt?.status_options?.order_statuses;
+        let fetchedProductionStatuses = mgmt?.status_options?.production_statuses;
+
+        if (!Array.isArray(fetchedOrderStatuses) || fetchedOrderStatuses.length === 0 || !Array.isArray(fetchedProductionStatuses) || fetchedProductionStatuses.length === 0) {
+          try {
+            const statusOpts = await getOrderStatusOptions();
+            fetchedOrderStatuses = statusOpts?.order_statuses;
+            fetchedProductionStatuses = statusOpts?.production_statuses;
+          } catch {}
+        }
 
         setStatusOptions({
           order_statuses: Array.isArray(fetchedOrderStatuses) && fetchedOrderStatuses.length > 0 ? fetchedOrderStatuses : defaultOrderStatuses,
