@@ -88,10 +88,9 @@ const TaskManagement = ({ user }) => {
   const loadInitialData = async () => {
     setLoading(true);
     try {
-      const [typesData, workersData, templatesData] = await Promise.all([
+      const [typesData, workersData] = await Promise.all([
         getTaskTypes(),
-        getUsersQuery('role=warehouse_worker,warehouse_manager,warehouse'),
-        getTaskTemplates()
+        getUsersQuery('role=warehouse_worker,warehouse_manager,warehouse')
       ]);
       // Normalize task types (support arrays under different keys)
       const typesArr = (Array.isArray(typesData?.task_types) && typesData.task_types)
@@ -113,7 +112,17 @@ const TaskManagement = ({ user }) => {
         role: w.role || ''
       }));
       setWorkers(normalizedWorkers);
-      setTemplates(templatesData.templates || []);
+      // Load templates non-blocking
+      try {
+        const templatesData = await getTaskTemplates();
+        const templatesArr = (templatesData?.templates && Array.isArray(templatesData.templates) && templatesData.templates)
+          || (Array.isArray(templatesData?.results) && templatesData.results)
+          || (Array.isArray(templatesData) && templatesData)
+          || [];
+        setTemplates(templatesArr);
+      } catch (e) {
+        // Templates not critical for assignment; ignore failure
+      }
     } catch (err) {
       setError('Failed to load initial data: ' + err.message);
     } finally {
