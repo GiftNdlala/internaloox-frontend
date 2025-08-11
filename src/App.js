@@ -26,6 +26,7 @@ import WorkerDashboard from './pages/WorkerDashboard';
 import WarehouseAnalytics from './pages/WarehouseAnalytics';
 import ApprovalQueue from './pages/ApprovalQueue';
 import OrdersWorkflowDashboard from './pages/OrdersWorkflowDashboard';
+import AdminWarehouseOverview from './pages/AdminWarehouseOverview';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -173,7 +174,7 @@ function App() {
               path="/admin/warehouse" 
               element={
                 <ProtectedRoute allowedRoles={['admin','owner']}>
-                  <WarehouseAnalytics />
+                  <AdminWarehouseOverview user={user} onLogout={handleLogout} />
                 </ProtectedRoute>
               }
             />

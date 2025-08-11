@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Card, Table, Button, Modal, Form, Alert, Badge, Tabs, Tab, InputGroup, ButtonGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Container, Row, Col, Card, Table, Button, Modal, Form, Alert, Badge, Tabs, Tab, InputGroup, ButtonGroup, OverlayTrigger, Tooltip, Spinner } from 'react-bootstrap';
 import {
   FaMoneyBillWave, FaPlus, FaEdit, FaTrash, FaEye, FaCheck, FaExclamationTriangle,
   FaSearch, FaDownload, FaReceipt, FaChartLine, FaFileInvoice, FaWallet, 
@@ -9,7 +9,7 @@ import {
 import UniversalSidebar from '../components/UniversalSidebar';
 import EnhancedPageHeader from '../components/EnhancedPageHeader';
 import SharedHeader from '../components/SharedHeader';
-import { getPayments, getOrders, getCustomers, createPayment, updatePayment, deletePayment, updateOrder } from '../components/api';
+import { getPayments, getOrders, getCustomers, createPayment, updatePayment, deletePayment, updateOrderPayment, markPaymentOverdue, getPaymentsDashboard } from '../components/api';
 
 const Payments = ({ user, userRole, onLogout }) => {
   const navigate = useNavigate();
@@ -17,6 +17,7 @@ const Payments = ({ user, userRole, onLogout }) => {
   // State management
   const [orders, setOrders] = useState([]);
   const [customers, setCustomers] = useState([]);
+  const [payDash, setPayDash] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -56,12 +57,14 @@ const Payments = ({ user, userRole, onLogout }) => {
   const fetchAllData = async () => {
     try {
       setLoading(true);
-      const [ordersData, customersData] = await Promise.all([
+      const [ordersData, customersData, dashboardData] = await Promise.all([
         getOrders(),
-        getCustomers()
+        getCustomers(),
+        getPaymentsDashboard().catch(()=>null)
       ]);
       setOrders(ordersData.results || ordersData);
       setCustomers(customersData.results || customersData);
+      if (dashboardData) setPayDash(dashboardData);
       setError('');
     } catch (err) {
       setError('Failed to load data: ' + err.message);
@@ -167,13 +170,20 @@ const Payments = ({ user, userRole, onLogout }) => {
         payment_notes: paymentForm.payment_notes
       };
 
-      await updateOrder(selectedOrder.id, updateData);
+      await updateOrderPayment(selectedOrder.id, updateData);
       setSuccess('Payment information updated successfully');
       setShowPaymentModal(false);
       fetchAllData();
     } catch (err) {
       setError('Failed to update payment: ' + err.message);
     }
+  };
+  const handleMarkOverdue = async (order) => {
+    try {
+      await markPaymentOverdue(order.id);
+      setSuccess('Marked as overdue');
+      fetchAllData();
+    } catch (e) { setError(e?.message || 'Failed to mark overdue'); }
   };
 
   const getSortIcon = (field) => {
@@ -224,7 +234,16 @@ const Payments = ({ user, userRole, onLogout }) => {
     };
   };
 
-  const stats = getPaymentStats();
+  const stats = payDash ? {
+    total: payDash.statistics?.total_orders ?? orders.length,
+    pending: payDash.statistics?.payment_status_counts?.pending ?? orders.filter(o=>o.payment_status==='pending').length,
+    partial: payDash.statistics?.payment_status_counts?.partial ?? orders.filter(o=>o.payment_status==='partial').length,
+    paid: payDash.statistics?.payment_status_counts?.paid ?? orders.filter(o=>o.payment_status==='paid').length,
+    overdue: payDash.statistics?.payment_status_counts?.overdue ?? orders.filter(o=>o.payment_status==='overdue').length,
+    totalRevenue: payDash.statistics?.financial?.total_revenue ?? orders.reduce((s,o)=>s+(+o.total_amount||0),0),
+    totalDeposits: payDash.statistics?.financial?.total_deposits ?? orders.reduce((s,o)=>s+(+o.deposit_amount||0),0),
+    totalBalance: payDash.statistics?.financial?.total_balance ?? orders.reduce((s,o)=>s+(+o.balance_amount||0),0),
+  } : getPaymentStats();
 
   if (loading && orders.length === 0) {
     return (
@@ -538,6 +557,13 @@ const Payments = ({ user, userRole, onLogout }) => {
                               <FaFileInvoice />
                             </Button>
                           </OverlayTrigger>
+                          {(userRole === 'owner' || userRole === 'admin') && (
+                            <OverlayTrigger placement="top" overlay={<Tooltip>Mark Overdue</Tooltip>}>
+                              <Button variant="outline-warning" onClick={() => handleMarkOverdue(order)}>
+                                <FaExclamationTriangle />
+                              </Button>
+                            </OverlayTrigger>
+                          )}
                         </ButtonGroup>
                       </td>
                     </tr>

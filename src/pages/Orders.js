@@ -504,9 +504,11 @@ const Orders = ({ user, userRole, onLogout }) => {
                       onChange={(e)=>setStatusForm({...statusForm, order_status: e.target.value})}
                     >
                       <option value="">-- Select --</option>
-                      {statusOptions.order_statuses.map(opt => (
-                        <option key={opt} value={opt}>{opt}</option>
-                      ))}
+                      {statusOptions.order_statuses.map(opt => {
+                        const val = typeof opt === 'string' ? opt : opt.value;
+                        const label = typeof opt === 'string' ? opt : (opt.label || opt.value);
+                        return <option key={val} value={val}>{label}</option>;
+                      })}
                     </Form.Select>
                   </Form.Group>
                   <Form.Group className="mb-3">
@@ -516,9 +518,11 @@ const Orders = ({ user, userRole, onLogout }) => {
                       onChange={(e)=>setStatusForm({...statusForm, production_status: e.target.value})}
                     >
                       <option value="">-- Select --</option>
-                      {statusOptions.production_statuses.map(opt => (
-                        <option key={opt} value={opt}>{opt}</option>
-                      ))}
+                      {statusOptions.production_statuses.map(opt => {
+                        const val = typeof opt === 'string' ? opt : opt.value;
+                        const label = typeof opt === 'string' ? opt : (opt.label || opt.value);
+                        return <option key={val} value={val}>{label}</option>;
+                      })}
                     </Form.Select>
                   </Form.Group>
                 </Form>

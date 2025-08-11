@@ -77,12 +77,17 @@ export const assignOrder = (orderId, assignment_type, assigned_user_id) =>
   apiRequest(`/orders/${orderId}/assign/`, { method: 'POST', data: { assignment_type, assigned_user_id } });
 export const patchOrderStatus = (orderId, data) => apiRequest(`/orders/${orderId}/update_status/`, { method: 'PATCH', data });
 export const cancelOrder = (orderId, reason) => apiRequest(`/orders/${orderId}/cancel/`, { method: 'POST', data: { reason } });
+// Payments dashboard and updates
+export const getPaymentsDashboard = () => apiRequest('/orders/payments_dashboard/');
+export const updateOrderPayment = (orderId, data) => apiRequest(`/orders/${orderId}/update_payment/`, { method: 'PATCH', data });
+export const markPaymentOverdue = (orderId) => apiRequest(`/orders/${orderId}/mark_overdue/`, { method: 'POST' });
 
 // Role dashboards
 export const getOwnerOrdersDashboard = () => apiRequest('/orders/owner_dashboard/');
 export const getAdminOrdersDashboard = () => apiRequest('/orders/admin_dashboard/');
 export const getWarehouseOrdersDashboard = () => apiRequest('/orders/warehouse_dashboard/');
 export const getDeliveryOrdersDashboard = () => apiRequest('/orders/delivery_dashboard/');
+export const getAdminWarehouseOverview = () => apiRequest('/orders/admin_warehouse_overview/');
 
 // Customers
 export const getCustomers = () => apiRequest('/customers/');
