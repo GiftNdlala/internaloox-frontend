@@ -11,7 +11,7 @@ import {
 } from 'react-icons/fa';
 import { 
   getOrders, getCustomers, getProducts, 
-  createOrder, updateOrder, deleteOrder
+  createOrder, updateOrder, deleteOrder, advanceOrderWorkflow
 } from '../components/api';
 import OrderForm from '../components/OrderForm';
 
@@ -339,6 +339,11 @@ const Orders = ({ user, userRole, onLogout }) => {
                               <Button variant="outline-primary" onClick={() => handleEditOrder(order)}><FaEdit /></Button>
                             </OverlayTrigger>
                           )}
+                          {canEdit && (
+                            <OverlayTrigger placement="top" overlay={<Tooltip>Advance Workflow</Tooltip>}>
+                              <Button variant="outline-secondary" onClick={async ()=>{ try { await advanceOrderWorkflow(order.id); fetchAllData(); } catch(e){ setError(e?.message||'Advance failed'); } }}>Next</Button>
+                            </OverlayTrigger>
+                          )}
                           {canDelete && (
                             <OverlayTrigger placement="top" overlay={<Tooltip>Delete</Tooltip>}>
                               <Button variant="outline-danger" onClick={() => handleDeleteOrder(order)}><FaTrash /></Button>
@@ -399,6 +404,18 @@ const Orders = ({ user, userRole, onLogout }) => {
                   onSubmit={handleOrderSubmit}
                   loading={loading}
                   isEdit={!!editingOrder}
+                  initialData={editingOrder ? {
+                    customerName: editingOrder.customer?.name || editingOrder.customer_name || '',
+                    customerPhone: editingOrder.customer?.phone || '',
+                    customerEmail: editingOrder.customer?.email || '',
+                    customerAddress: editingOrder.customer?.address || '',
+                    expectedDeliveryDate: editingOrder.expected_delivery_date || editingOrder.delivery_deadline || '',
+                    adminNotes: editingOrder.admin_notes || '',
+                    depositAmount: editingOrder.deposit_amount ?? '',
+                    paymentStatus: editingOrder.payment_status || 'deposit_only',
+                    orderStatus: editingOrder.order_status || 'pending',
+                  } : null}
+                  initialItems={editingOrder?.items || []}
                 />
               </Modal.Body>
             </Modal>
