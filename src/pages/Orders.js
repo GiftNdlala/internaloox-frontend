@@ -55,7 +55,21 @@ const Orders = ({ user, userRole, onLogout }) => {
     // Load management options for status editing
     (async () => {
       try {
-        const mgmt = await getOrderManagementData().catch(() => null);
+        // Primary: status_options endpoint
+        let fetchedOrderStatuses;
+        let fetchedProductionStatuses;
+        try {
+          const statusOpts = await getOrderStatusOptions();
+          fetchedOrderStatuses = statusOpts?.order_statuses;
+          fetchedProductionStatuses = statusOpts?.production_statuses;
+        } catch {}
+
+        // Fallback: management_data if needed
+        if (!Array.isArray(fetchedOrderStatuses) || fetchedOrderStatuses.length === 0 || !Array.isArray(fetchedProductionStatuses) || fetchedProductionStatuses.length === 0) {
+          const mgmt = await getOrderManagementData().catch(() => null);
+          fetchedOrderStatuses = fetchedOrderStatuses && fetchedOrderStatuses.length ? fetchedOrderStatuses : mgmt?.status_options?.order_statuses;
+          fetchedProductionStatuses = fetchedProductionStatuses && fetchedProductionStatuses.length ? fetchedProductionStatuses : mgmt?.status_options?.production_statuses;
+        }
         const defaultOrderStatuses = [
           { value: 'deposit_pending', label: 'Deposit Pending' },
           { value: 'deposit_paid', label: 'Deposit Paid' },
@@ -68,20 +82,9 @@ const Orders = ({ user, userRole, onLogout }) => {
         const defaultProductionStatuses = [
           { value: 'not_started', label: 'Not Started' },
           { value: 'in_production', label: 'In Production' },
-          { value: 'ready_for_delivery', label: 'Ready for Delivery' }
+          { value: 'completed', label: 'Completed' }
         ];
-
-        let fetchedOrderStatuses = mgmt?.status_options?.order_statuses;
-        let fetchedProductionStatuses = mgmt?.status_options?.production_statuses;
-
-        if (!Array.isArray(fetchedOrderStatuses) || fetchedOrderStatuses.length === 0 || !Array.isArray(fetchedProductionStatuses) || fetchedProductionStatuses.length === 0) {
-          try {
-            const statusOpts = await getOrderStatusOptions();
-            fetchedOrderStatuses = statusOpts?.order_statuses;
-            fetchedProductionStatuses = statusOpts?.production_statuses;
-          } catch {}
-        }
-
+ 
         setStatusOptions({
           order_statuses: Array.isArray(fetchedOrderStatuses) && fetchedOrderStatuses.length > 0 ? fetchedOrderStatuses : defaultOrderStatuses,
           production_statuses: Array.isArray(fetchedProductionStatuses) && fetchedProductionStatuses.length > 0 ? fetchedProductionStatuses : defaultProductionStatuses
@@ -101,7 +104,7 @@ const Orders = ({ user, userRole, onLogout }) => {
           production_statuses: [
             { value: 'not_started', label: 'Not Started' },
             { value: 'in_production', label: 'In Production' },
-            { value: 'ready_for_delivery', label: 'Ready for Delivery' }
+            { value: 'completed', label: 'Completed' }
           ]
         });
       }
@@ -235,8 +238,8 @@ const Orders = ({ user, userRole, onLogout }) => {
   // Manager actions: mark ready or delay
   const markReadyForDelivery = async (order) => {
     try {
-      await updateOrder(order.id, { order_status: 'confirmed', production_status: 'ready_for_delivery' });
-      setSuccess(`Order ${order.order_number} marked as ready for delivery`);
+      await patchOrderStatus(order.id, { order_status: 'order_ready' });
+      setSuccess(`Order ${order.order_number} marked as ready`);
       fetchAllData();
     } catch (e) { setError(e?.message || 'Failed to update'); }
   };
@@ -368,7 +371,7 @@ const Orders = ({ user, userRole, onLogout }) => {
                 <option value="all">All Production</option>
                 <option value="not_started">Not Started</option>
                 <option value="in_production">In Production</option>
-                <option value="ready_for_delivery">Ready</option>
+                <option value="completed">Completed</option>
               </Form.Select>
             </Col>
             <Col className="text-end">
