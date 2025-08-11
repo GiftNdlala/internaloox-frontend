@@ -268,7 +268,10 @@ export const getRealTimeUpdates = (params = '') => {
 };
 
 // Task Management API Endpoints
-export const getTaskTypes = () => apiRequest('/tasks/task_types/');
+export const getTaskTypes = (query = '') => {
+  const qs = query ? (query.startsWith('?') ? query : `?${query}`) : '';
+  return apiRequest(`/tasks/task_types/${qs}`);
+};
 export const getTaskTemplates = () => apiRequest('/tasks/templates/');
 export const createTaskInOrder = (orderId, taskData) => 
   apiRequest(`/orders/${orderId}/create_task/`, { method: 'POST', data: taskData });

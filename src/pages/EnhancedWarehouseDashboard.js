@@ -49,6 +49,13 @@ const EnhancedWarehouseDashboard = ({ user, onLogout, showNavbar = true }) => {
     if (['owner', 'admin', 'warehouse_manager', 'warehouse'].includes(user?.role)) return 'overview';
     return 'overview';
   });
+  // Sync tab from URL param
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab) setActiveTab(tab);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showTaskAssignment, setShowTaskAssignment] = useState(false);

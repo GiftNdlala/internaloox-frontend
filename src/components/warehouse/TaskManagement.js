@@ -89,7 +89,7 @@ const TaskManagement = ({ user }) => {
     setLoading(true);
     try {
       const [typesData, workersData] = await Promise.all([
-        getTaskTypes(),
+        getTaskTypes('is_active=true'),
         getUsersQuery('role=warehouse_worker,warehouse_manager,warehouse')
       ]);
       // Normalize task types (support arrays under different keys)
@@ -111,7 +111,11 @@ const TaskManagement = ({ user }) => {
         username: w.username || '',
         role: w.role || ''
       }));
-      setWorkers(normalizedWorkers);
+      // If current user is a warehouse_manager, show only workers (warehouse_worker or legacy warehouse)
+      const visibleWorkers = (user?.role === 'warehouse_manager')
+        ? normalizedWorkers.filter(w => w.role === 'warehouse_worker' || w.role === 'warehouse')
+        : normalizedWorkers;
+      setWorkers(visibleWorkers);
       // Load templates non-blocking
       try {
         const templatesData = await getTaskTemplates();

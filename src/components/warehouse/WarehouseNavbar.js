@@ -122,7 +122,7 @@ const WarehouseNavbar = ({
                 active={isOverview && activeTab === 'task-management'}
                 onClick={() => {
                   onTabChange?.('task-management');
-                  navigate('/warehouse');
+                  navigate('/warehouse?tab=task-management');
                   setExpanded(false);
                 }}
                 className="d-flex align-items-center"
