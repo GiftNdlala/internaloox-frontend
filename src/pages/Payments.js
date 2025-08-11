@@ -312,6 +312,7 @@ const Payments = ({ user, userRole, onLogout }) => {
 
         {/* Financial Stats Cards */}
         <Row className="mb-4">
+          {userRole === 'owner' && (
           <Col md={3}>
             <Card className="border-0 shadow-sm">
               <Card.Body className="text-center">
@@ -320,13 +321,13 @@ const Payments = ({ user, userRole, onLogout }) => {
                 <p className="text-muted mb-0">Total Revenue</p>
               </Card.Body>
             </Card>
-          </Col>
+          </Col>) }
           <Col md={3}>
             <Card className="border-0 shadow-sm">
               <Card.Body className="text-center">
                 <FaWallet size={40} className="text-info mb-2" />
-                <h3 className="mb-1 text-info">{formatCurrency(stats.totalDeposits)}</h3>
-                <p className="text-muted mb-0">Total Deposits</p>
+                <h3 className="mb-1 text-info">{formatCurrency(filteredOrders.reduce((s,o)=>s+(+o.deposit_amount||0),0))}</h3>
+                <p className="text-muted mb-0">Deposits (Visible Orders)</p>
               </Card.Body>
             </Card>
           </Col>
@@ -334,8 +335,8 @@ const Payments = ({ user, userRole, onLogout }) => {
             <Card className="border-0 shadow-sm">
               <Card.Body className="text-center">
                 <FaExchangeAlt size={40} className="text-warning mb-2" />
-                <h3 className="mb-1 text-warning">{formatCurrency(stats.totalBalance)}</h3>
-                <p className="text-muted mb-0">Outstanding Balance</p>
+                <h3 className="mb-1 text-warning">{formatCurrency(filteredOrders.reduce((s,o)=>s+(+o.balance_amount||0),0))}</h3>
+                <p className="text-muted mb-0">Outstanding (Visible Orders)</p>
               </Card.Body>
             </Card>
           </Col>
@@ -343,8 +344,8 @@ const Payments = ({ user, userRole, onLogout }) => {
             <Card className="border-0 shadow-sm">
               <Card.Body className="text-center">
                 <FaFileInvoice size={40} className="text-primary mb-2" />
-                <h3 className="mb-1">{stats.total}</h3>
-                <p className="text-muted mb-0">Total Orders</p>
+                <h3 className="mb-1">{filteredOrders.length}</h3>
+                <p className="text-muted mb-0">Orders (Visible)</p>
               </Card.Body>
             </Card>
           </Col>

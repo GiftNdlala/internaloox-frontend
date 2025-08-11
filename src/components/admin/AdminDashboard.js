@@ -312,9 +312,9 @@ const AdminDashboard = ({ user, onLogout }) => {
       {[
         { key: 'overview', label: 'Overview', icon: FaChartBar, isTab: true },
         { key: 'orders', label: 'Orders', icon: FaClipboardList, isTab: false, route: '/admin/orders' },
-        { key: 'customers', label: 'Customers', icon: FaFileAlt, isTab: true },
-        { key: 'payments', label: 'Payments', icon: FaMoneyBillWave, isTab: true },
-        { key: 'reports', label: 'Reports', icon: FaFileAlt, isTab: true },
+        { key: 'customers', label: 'Customers', icon: FaFileAlt, isTab: false, route: '/admin/customers' },
+        { key: 'payments', label: 'Payments', icon: FaMoneyBillWave, isTab: false, route: '/admin/payments' },
+        { key: 'reports', label: 'Reports', icon: FaFileAlt, isTab: false, route: '/admin/warehouse' },
       ].map(tab => (
         <Nav.Link
           key={tab.key}

@@ -307,19 +307,21 @@ const Analytics = ({ user, userRole, onLogout }) => {
 
         {/* Key Performance Indicators */}
         <Row className="mb-4">
-          <Col md={3}>
-            <Card className="border-0 shadow-sm h-100">
-              <Card.Body className="text-center">
-                <FaMoneyBillWave size={40} className="text-success mb-3" />
-                <h3 className="text-success mb-1">{formatCurrency(financial.totalRevenue)}</h3>
-                <p className="text-muted mb-2">Total Revenue</p>
-                                 <div className="d-flex align-items-center justify-content-center">
-                   <FaArrowUp className="text-success me-1" size={14} />
-                   <small className="text-success">+12% vs last period</small>
-                 </div>
-              </Card.Body>
-            </Card>
-          </Col>
+                    {userRole === 'owner' && (
+            <Col md={3}>
+              <Card className="border-0 shadow-sm h-100">
+                <Card.Body className="text-center">
+                  <FaMoneyBillWave size={40} className="text-success mb-3" />
+                  <h3 className="text-success mb-1">{formatCurrency(financial.totalRevenue)}</h3>
+                  <p className="text-muted mb-2">Total Revenue</p>
+                  <div className="d-flex align-items-center justify-content-center">
+                    <FaArrowUp className="text-success me-1" size={14} />
+                    <small className="text-success">+12% vs last period</small>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          )}
           <Col md={3}>
             <Card className="border-0 shadow-sm h-100">
               <Card.Body className="text-center">
@@ -385,6 +387,7 @@ const Analytics = ({ user, userRole, onLogout }) => {
               </Card.Header>
               <Card.Body>
                 <Row>
+                  {userRole === 'owner' && (
                   <Col md={6}>
                     <div className="mb-4">
                       <div className="d-flex justify-content-between align-items-center mb-2">
@@ -398,48 +401,30 @@ const Analytics = ({ user, userRole, onLogout }) => {
                         <span className="text-muted">Collected</span>
                         <span className="fw-bold text-info">{formatCurrency(financial.paidRevenue)}</span>
                       </div>
-                      <ProgressBar 
-                        variant="info" 
-                        now={(financial.paidRevenue / financial.totalRevenue) * 100} 
-                        height={8} 
-                      />
+                      <ProgressBar variant="info" now={75} height={8} />
                     </div>
                     <div className="mb-4">
                       <div className="d-flex justify-content-between align-items-center mb-2">
                         <span className="text-muted">Outstanding</span>
                         <span className="fw-bold text-warning">{formatCurrency(financial.outstandingBalance)}</span>
                       </div>
-                      <ProgressBar 
-                        variant="warning" 
-                        now={(financial.outstandingBalance / financial.totalRevenue) * 100} 
-                        height={8} 
-                      />
+                      <ProgressBar variant="warning" now={50} height={8} />
                     </div>
-                  </Col>
+                  </Col>)}
                   <Col md={6}>
-                    <div className="mb-3">
-                      <div className="d-flex justify-content-between align-items-center">
-                        <span className="text-muted">Collection Rate</span>
-                        <Badge bg="success" className="fs-6">{formatPercentage(financial.collectionRate)}</Badge>
+                    <div className="mb-4">
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <span className="text-muted">Avg Order Value</span>
+                        <span className="fw-bold text-secondary">{formatCurrency(financial.averageOrderValue)}</span>
                       </div>
+                      <ProgressBar variant="secondary" now={65} height={8} />
                     </div>
-                    <div className="mb-3">
-                      <div className="d-flex justify-content-between align-items-center">
-                        <span className="text-muted">Average Order Value</span>
-                        <span className="fw-bold">{formatCurrency(financial.averageOrderValue)}</span>
+                    <div className="mb-4">
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <span className="text-muted">Paid Orders</span>
+                        <span className="fw-bold text-success">{financial.paidOrders}</span>
                       </div>
-                    </div>
-                    <div className="mb-3">
-                      <div className="d-flex justify-content-between align-items-center">
-                        <span className="text-muted">Orders Paid</span>
-                        <span className="fw-bold">{financial.paidOrders} / {financial.totalOrders}</span>
-                      </div>
-                    </div>
-                    <div className="mb-3">
-                      <div className="d-flex justify-content-between align-items-center">
-                        <span className="text-muted">Deposits Collected</span>
-                        <span className="fw-bold">{formatCurrency(financial.totalDeposits)}</span>
-                      </div>
+                      <ProgressBar variant="success" now={financial.collectionRate} height={8} />
                     </div>
                   </Col>
                 </Row>
