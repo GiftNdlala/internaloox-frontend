@@ -11,8 +11,8 @@ const initialForm = {
   description: '',
   price: '',
   currency: 'ZAR',
-  color: '',
-  fabric: '',
+  colors: [], // array of color IDs
+  fabrics: [], // array of fabric IDs (optional)
   attributes: {}
 };
 
@@ -70,8 +70,8 @@ const AddProduct = ({ user }) => {
           vErrors.price = 'Enter a valid price (>= 0)';
         }
       }
-      if (!values.color || String(values.color).trim() === '') {
-        vErrors.color = 'Color is required';
+      if (!Array.isArray(values.colors) || values.colors.length === 0) {
+        vErrors.colors = 'Select at least one color';
       }
       // Fabric is optional
       // Attributes: ensure keys are non-empty
@@ -89,6 +89,11 @@ const AddProduct = ({ user }) => {
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
+  };
+  const handleMultiSelectChange = (field, event) => {
+    const selected = Array.from(event.target.selectedOptions).map(opt => opt.value);
+    setForm((prev) => ({ ...prev, [field]: selected }));
+    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
   };
 
   const addCustomField = () => {
@@ -130,8 +135,8 @@ const AddProduct = ({ user }) => {
         description: form.description?.trim() || '',
         price: Number(form.price),
         currency: form.currency || 'ZAR',
-        color: form.color,
-        fabric: form.fabric || null,
+        colors: (form.colors || []).map(id => Number(id)),
+        fabrics: (form.fabrics || []).map(id => Number(id)),
         attributes: form.attributes || {}
       };
       // Clean undefined
@@ -233,51 +238,51 @@ const AddProduct = ({ user }) => {
                     </Col>
 
                     <Col md={6}>
-                      <Form.Group controlId="color">
-                        <Form.Label>Color</Form.Label>
+                      <Form.Group controlId="colors">
+                        <Form.Label>Colors (select one or more)</Form.Label>
                         <InputGroup>
                           <InputGroup.Text>
                             <FaPalette />
                           </InputGroup.Text>
                           <Form.Select
-                            value={form.color}
-                            onChange={(e) => handleChange('color', e.target.value)}
-                            isInvalid={!!errors.color}
+                            multiple
+                            value={form.colors}
+                            onChange={(e) => handleMultiSelectChange('colors', e)}
+                            isInvalid={!!errors.colors}
                             required
                           >
-                            <option value="">Select a color</option>
                             {loadingRefs && <option>Loading...</option>}
                             {!loadingRefs && colorOptions.map((c, idx) => {
                               const value = c?.id ?? c?.name ?? c;
                               const label = c?.name ?? c?.label ?? String(value);
                               return (
-                                <option key={`${value}-${idx}`} value={label}>{label}</option>
+                                <option key={`${value}-${idx}`} value={value}>{label}</option>
                               );
                             })}
                           </Form.Select>
-                          <Form.Control.Feedback type="invalid">{errors.color}</Form.Control.Feedback>
+                          <Form.Control.Feedback type="invalid">{errors.colors}</Form.Control.Feedback>
                         </InputGroup>
                       </Form.Group>
                     </Col>
 
                     <Col md={6}>
-                      <Form.Group controlId="fabric">
-                        <Form.Label>Fabric (optional)</Form.Label>
+                      <Form.Group controlId="fabrics">
+                        <Form.Label>Fabrics (optional, multiple)</Form.Label>
                         <InputGroup>
                           <InputGroup.Text>
                             <FaCouch />
                           </InputGroup.Text>
                           <Form.Select
-                            value={form.fabric}
-                            onChange={(e) => handleChange('fabric', e.target.value)}
+                            multiple
+                            value={form.fabrics}
+                            onChange={(e) => handleMultiSelectChange('fabrics', e)}
                           >
-                            <option value="">Select a fabric (optional)</option>
                             {loadingRefs && <option>Loading...</option>}
                             {!loadingRefs && fabricOptions.map((f, idx) => {
                               const value = f?.id ?? f?.name ?? f;
                               const label = f?.name ?? f?.label ?? String(value);
                               return (
-                                <option key={`${value}-${idx}`} value={label}>{label}</option>
+                                <option key={`${value}-${idx}`} value={value}>{label}</option>
                               );
                             })}
                           </Form.Select>
