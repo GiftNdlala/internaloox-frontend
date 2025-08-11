@@ -163,6 +163,20 @@ const WarehouseNavbar = ({
                 <span>Inventory</span>
               </Nav.Link>
             )}
+            {canManageInventory() && (
+              <Nav.Link 
+                active={pathname.includes('/warehouse/inventory/stock')}
+                onClick={() => {
+                  onTabChange?.('inventory');
+                  navigate('/warehouse/inventory/stock');
+                  setExpanded(false);
+                }}
+                className="d-flex align-items-center"
+              >
+                <FaBoxes className="me-2" />
+                <span>Stock Movements</span>
+              </Nav.Link>
+            )}
 
             {/* Products */}
             <Nav.Link 
