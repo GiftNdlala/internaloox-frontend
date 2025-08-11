@@ -277,7 +277,7 @@ const Orders = ({ user, userRole, onLogout }) => {
         pending: { bg: 'warning', text: 'Pending' },
         confirmed: { bg: 'info', text: 'Confirmed' },
         in_production: { bg: 'primary', text: 'In Production' },
-        ready_for_delivery: { bg: 'success', text: 'Ready' },
+        order_ready: { bg: 'success', text: 'Ready' },
         out_for_delivery: { bg: 'info', text: 'Out for Delivery' },
         delivered: { bg: 'success', text: 'Delivered' },
         cancelled: { bg: 'danger', text: 'Cancelled' }
@@ -285,11 +285,11 @@ const Orders = ({ user, userRole, onLogout }) => {
       production: {
         not_started: { bg: 'secondary', text: '🟡 Not Started' },
         in_production: { bg: 'warning', text: '🟠 In Production' },
-        ready_for_delivery: { bg: 'success', text: '🟢 Ready for Delivery' }
+        completed: { bg: 'success', text: '🟢 Completed' }
       }
     };
-    
-    const config = statusConfig[type][status] || { bg: 'secondary', text: status };
+    const normalized = status === 'ready_for_delivery' ? 'order_ready' : status;
+    const config = statusConfig[type][normalized] || { bg: 'secondary', text: normalized };
     return <Badge bg={config.bg}>{config.text}</Badge>;
   };
 
@@ -323,7 +323,7 @@ const Orders = ({ user, userRole, onLogout }) => {
       all: orders.length,
       pending: orders.filter(o => o.order_status === 'pending').length,
       production: orders.filter(o => o.production_status === 'in_production').length,
-      ready: orders.filter(o => o.production_status === 'ready_for_delivery').length,
+      ready: orders.filter(o => (o.order_status === 'order_ready') || (o.production_status === 'completed')).length,
       overdue: orders.filter(o => isOverdue(o)).length
     };
   };
@@ -547,11 +547,32 @@ const Orders = ({ user, userRole, onLogout }) => {
                       onChange={(e)=>setStatusForm({...statusForm, order_status: e.target.value})}
                     >
                       <option value="">-- Select --</option>
-                      {statusOptions.order_statuses.map(opt => {
-                        const val = typeof opt === 'string' ? opt : opt.value;
-                        const label = typeof opt === 'string' ? opt : (opt.label || opt.value);
-                        return <option key={val} value={val}>{label}</option>;
-                      })}
+                      {statusOptions.order_statuses
+                        .filter(opt => {
+                          const val = typeof opt === 'string' ? opt : opt.value;
+                          // Role-based filtering of order status transitions
+                          if (userRole === 'owner' || userRole === 'admin') return true;
+                          const current = selectedOrder?.order_status;
+                          if (userRole === 'warehouse' || userRole === 'warehouse_worker') {
+                            return current === 'deposit_paid' ? ['order_ready'].includes(val) : false;
+                          }
+                          if (userRole === 'warehouse_manager') {
+                            if (current === 'deposit_paid') return ['order_ready'].includes(val);
+                            if (current === 'order_ready') return ['out_for_delivery'].includes(val);
+                            return false;
+                          }
+                          if (userRole === 'delivery') {
+                            if (current === 'order_ready') return ['out_for_delivery'].includes(val);
+                            if (current === 'out_for_delivery') return ['delivered'].includes(val);
+                            return false;
+                          }
+                          return false;
+                        })
+                        .map(opt => {
+                          const val = typeof opt === 'string' ? opt : opt.value;
+                          const label = typeof opt === 'string' ? opt : (opt.label || opt.value);
+                          return <option key={val} value={val}>{label}</option>;
+                        })}
                     </Form.Select>
                   </Form.Group>
                   <Form.Group className="mb-3">
@@ -561,11 +582,22 @@ const Orders = ({ user, userRole, onLogout }) => {
                       onChange={(e)=>setStatusForm({...statusForm, production_status: e.target.value})}
                     >
                       <option value="">-- Select --</option>
-                      {statusOptions.production_statuses.map(opt => {
-                        const val = typeof opt === 'string' ? opt : opt.value;
-                        const label = typeof opt === 'string' ? opt : (opt.label || opt.value);
-                        return <option key={val} value={val}>{label}</option>;
-                      })}
+                      {statusOptions.production_statuses
+                        .filter(opt => {
+                          const val = typeof opt === 'string' ? opt : opt.value;
+                          // Only forward movement for production statuses unless owner/admin
+                          if (userRole === 'owner' || userRole === 'admin') return true;
+                          const current = selectedOrder?.production_status || 'not_started';
+                          const order = ['not_started', 'in_production', 'completed'];
+                          const currentIdx = order.indexOf(current);
+                          const targetIdx = order.indexOf(val);
+                          return targetIdx >= currentIdx && targetIdx <= currentIdx + 1;
+                        })
+                        .map(opt => {
+                          const val = typeof opt === 'string' ? opt : opt.value;
+                          const label = typeof opt === 'string' ? opt : (opt.label || opt.value);
+                          return <option key={val} value={val}>{label}</option>;
+                        })}
                     </Form.Select>
                   </Form.Group>
                 </Form>

@@ -59,7 +59,7 @@ const WarehouseAnalytics = () => {
   if (loading) return <div className="text-center py-5"><Spinner animation="border"/></div>;
   if (error) return <Alert variant="danger" onClose={()=>setError('')} dismissible>{error}</Alert>;
 
-  const readyOrders = orders.filter(o => o.production_status === 'ready_for_delivery').length;
+  const readyOrders = orders.filter(o => o.order_status === 'order_ready' || o.production_status === 'completed').length;
   const inProduction = orders.filter(o => o.production_status === 'in_production').length;
 
   return (
@@ -130,9 +130,9 @@ const WarehouseAnalytics = () => {
                       <td>{o.customer_name}</td>
                       <td>
                         <Badge bg={
-                          o.production_status === 'ready_for_delivery' ? 'success' :
+                          o.production_status === 'completed' || o.order_status === 'order_ready' ? 'success' :
                           o.production_status === 'in_production' ? 'warning' : 'secondary'
-                        }>{o.production_status}</Badge>
+                        }>{o.production_status === 'completed' ? 'completed' : (o.order_status === 'order_ready' ? 'order_ready' : (o.production_status || 'not_started'))}</Badge>
                       </td>
                     </tr>
                   ))}
