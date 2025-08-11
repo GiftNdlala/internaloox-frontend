@@ -275,8 +275,10 @@ export const updateTask = (taskId, taskData) =>
   apiRequest(`/tasks/tasks/${taskId}/`, { method: 'PUT', data: taskData });
 export const deleteTask = (taskId) => 
   apiRequest(`/tasks/tasks/${taskId}/`, { method: 'DELETE' });
-export const getTasksByStatus = (status) => 
-  apiRequest(`/tasks/tasks/?status=${status}`);
+export const getTasksByStatus = (status) => {
+  if (!status || status === 'all') return apiRequest('/tasks/tasks/');
+  return apiRequest(`/tasks/tasks/?status=${status}`);
+};
 export const assignWorkerToTask = (taskId, workerId) => 
   apiRequest(`/tasks/tasks/${taskId}/assign_worker/`, { method: 'POST', data: { worker_id: workerId } });
 export const bulkAssignTasks = (taskIds, workerId) => 

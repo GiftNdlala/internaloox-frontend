@@ -61,6 +61,20 @@ const Orders = ({ user, userRole, onLogout }) => {
         });
       } catch (_) {
         // optional
+        setStatusOptions({
+          order_statuses: [
+            { value: 'deposit_pending', label: 'Deposit Pending' },
+            { value: 'deposit_paid', label: 'Deposit Paid' },
+            { value: 'confirmed', label: 'Confirmed' },
+            { value: 'delivered', label: 'Delivered' },
+            { value: 'cancelled', label: 'Cancelled' }
+          ],
+          production_statuses: [
+            { value: 'not_started', label: 'Not Started' },
+            { value: 'in_production', label: 'In Production' },
+            { value: 'ready_for_delivery', label: 'Ready for Delivery' }
+          ]
+        });
       }
     })();
   }, []);

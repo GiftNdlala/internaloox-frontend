@@ -68,7 +68,7 @@ const TaskManagement = ({ user }) => {
   );
 
   const { data: tasksData, refresh: refreshTasks } = usePolling(
-    () => getTasksByStatus('all'),
+    () => getTasksByStatus(),
     15000
   );
 
