@@ -12,7 +12,7 @@ import {
 
 const defaultMaterial = {
   name: '',
-  category_id: '',
+  category: '',
   unit: '',
   unit_price: '',
   minimum_stock: '',
@@ -63,7 +63,7 @@ const InventoryManagement = () => {
     setEditingMaterial(material);
     setForm({
       name: material.name || '',
-      category_id: material.category_id || '',
+      category: material.category_id || material.category || '',
       unit: material.unit || '',
       unit_price: material.unit_price ?? '',
       minimum_stock: material.minimum_stock ?? '',
@@ -108,9 +108,9 @@ const InventoryManagement = () => {
     try {
       const payload = {
         name: form.name.trim(),
-        category_id: form.category_id || null,
+        category: form.category ? Number(form.category) : null,
         unit: form.unit,
-        unit_price: Number(form.unit_price),
+        cost_per_unit: Number(form.unit_price),
         minimum_stock: form.minimum_stock === '' ? null : Number(form.minimum_stock),
         description: form.description?.trim() || ''
       };
@@ -175,7 +175,7 @@ const InventoryManagement = () => {
                     materials.map((m) => (
                       <tr key={m.id}>
                         <td>{m.name}</td>
-                        <td>{categories.find((c) => c.id === m.category_id)?.name || '-'}</td>
+                        <td>{categories.find((c) => c.id === (m.category_id ?? m.category))?.name || '-'}</td>
                         <td><Badge bg="secondary">{m.unit}</Badge></td>
                         <td>R {Number(m.unit_price || 0).toFixed(2)}</td>
                         <td>{m.minimum_stock ?? '-'}</td>
@@ -215,7 +215,7 @@ const InventoryManagement = () => {
                 <Col md={6}>
                   <Form.Group>
                     <Form.Label>Category</Form.Label>
-                    <Form.Select value={form.category_id} onChange={(e) => onChange('category_id', e.target.value)}>
+                    <Form.Select value={form.category} onChange={(e) => onChange('category', e.target.value)}>
                       <option value="">Uncategorized</option>
                       {categories.map((c) => (
                         <option key={c.id} value={c.id}>{c.name}</option>

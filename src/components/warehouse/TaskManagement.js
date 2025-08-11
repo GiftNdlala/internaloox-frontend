@@ -93,9 +93,26 @@ const TaskManagement = ({ user }) => {
         getUsersQuery('role=warehouse_worker,warehouse_manager,warehouse'),
         getTaskTemplates()
       ]);
-      
-      setTaskTypes(typesData.task_types || []);
-      setWorkers(workersData.users || workersData.results || workersData || []);
+      // Normalize task types (support arrays under different keys)
+      const typesArr = (Array.isArray(typesData?.task_types) && typesData.task_types)
+        || (Array.isArray(typesData?.results) && typesData.results)
+        || (Array.isArray(typesData) && typesData)
+        || [];
+      setTaskTypes(typesArr);
+
+      // Normalize workers list and provide name fallbacks
+      const workersArr = (workersData?.users && Array.isArray(workersData.users) && workersData.users)
+        || (Array.isArray(workersData?.results) && workersData.results)
+        || (Array.isArray(workersData) && workersData)
+        || [];
+      const normalizedWorkers = workersArr.map(w => ({
+        id: w.id,
+        first_name: w.first_name || w.username || '',
+        last_name: w.last_name || '',
+        username: w.username || '',
+        role: w.role || ''
+      }));
+      setWorkers(normalizedWorkers);
       setTemplates(templatesData.templates || []);
     } catch (err) {
       setError('Failed to load initial data: ' + err.message);
@@ -111,10 +128,14 @@ const TaskManagement = ({ user }) => {
     setLoading(true);
     try {
       const taskData = {
-        ...taskForm,
-        order_id: selectedOrder.id,
+        title: taskForm.title,
+        description: taskForm.description,
+        task_type_id: taskForm.task_type ? Number(taskForm.task_type) : undefined,
+        assigned_to_id: taskForm.assigned_worker ? Number(taskForm.assigned_worker) : undefined,
+        priority: taskForm.priority,
         estimated_duration: parseInt(taskForm.estimated_duration),
-        materials_needed: taskForm.materials_needed.join(',')
+        due_date: taskForm.deadline ? new Date(taskForm.deadline).toISOString() : null,
+        instructions: taskForm.instructions,
       };
 
       await createTaskInOrder(selectedOrder.id, taskData);
@@ -719,7 +740,7 @@ const TaskManagement = ({ user }) => {
                     <option value="">Assign later...</option>
                     {workers.map(worker => (
                       <option key={worker.id} value={worker.id}>
-                        {worker.first_name} {worker.last_name} ({worker.role})
+                        {(worker.first_name || worker.username) + (worker.last_name ? ' ' + worker.last_name : '')} ({worker.role})
                       </option>
                     ))}
                   </Form.Select>
@@ -852,7 +873,7 @@ const TaskManagement = ({ user }) => {
                     <option value="">Unassigned</option>
                     {workers.map(worker => (
                       <option key={worker.id} value={worker.id}>
-                        {worker.first_name} {worker.last_name}
+                        {(worker.first_name || worker.username) + (worker.last_name ? ' ' + worker.last_name : '')}
                       </option>
                     ))}
                   </Form.Select>
@@ -902,7 +923,7 @@ const TaskManagement = ({ user }) => {
             <option value="">Select worker...</option>
             {workers.map(worker => (
               <option key={worker.id} value={worker.id}>
-                {worker.first_name} {worker.last_name} ({worker.role})
+                {(worker.first_name || worker.username) + (worker.last_name ? ' ' + worker.last_name : '')} ({worker.role})
               </option>
             ))}
           </Form.Select>
