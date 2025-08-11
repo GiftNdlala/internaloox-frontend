@@ -12,7 +12,7 @@ import {
 } from 'react-icons/fa';
 import { usePolling } from '../../hooks/usePolling';
 import { 
-  getWarehouseOrders, getTaskTypes, getUsers, createTaskInOrder,
+  getWarehouseOrders, getTaskTypes, getUsersQuery, createTaskInOrder,
   updateTask, deleteTask, getTasksByStatus, assignWorkerToTask,
   getTaskTemplates, bulkAssignTasks
 } from '../api';
@@ -90,12 +90,12 @@ const TaskManagement = ({ user }) => {
     try {
       const [typesData, workersData, templatesData] = await Promise.all([
         getTaskTypes(),
-        getUsers({ role: 'warehouse_worker,warehouse_manager,warehouse' }),
+        getUsersQuery('role=warehouse_worker,warehouse_manager,warehouse'),
         getTaskTemplates()
       ]);
       
       setTaskTypes(typesData.task_types || []);
-      setWorkers(workersData.users || []);
+      setWorkers(workersData.users || workersData.results || workersData || []);
       setTemplates(templatesData.templates || []);
     } catch (err) {
       setError('Failed to load initial data: ' + err.message);

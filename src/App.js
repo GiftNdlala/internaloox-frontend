@@ -198,8 +198,8 @@ function App() {
               <Route path="approvals" element={<ProtectedRoute allowedRoles={['owner','admin','warehouse_manager']}><ApprovalQueue /></ProtectedRoute>} />
               {/* Keep existing inventory routes accessible under warehouse */}
               <Route path="inventory/materials" element={<InventoryManagement />} />
-              <Route path="inventory/stock-in-house" element={<StockInHouse />} />
-              <Route path="orders" element={<Orders user={user} userRole="warehouse" onLogout={handleLogout} />} />
+              <Route path="inventory/stock" element={<StockInHouse />} />
+              <Route path="orders" element={<Orders user={user} userRole={user?.role} onLogout={handleLogout} />} />
             </Route>
 
             {/* Add Product (Warehouse Manager view) */}
@@ -212,26 +212,6 @@ function App() {
               }
             />
 
-            {/* Inventory Management */}
-            <Route
-              path="/warehouse/inventory/materials"
-              element={
-                <ProtectedRoute allowedRoles={['warehouse', 'warehouse_manager', 'owner', 'admin', 'warehouse_worker']}>
-                  <InventoryManagement />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Stock In-House Management */}
-            <Route
-              path="/warehouse/inventory/stock-in-house"
-              element={
-                <ProtectedRoute allowedRoles={['warehouse', 'warehouse_manager', 'owner', 'admin', 'warehouse_worker']}>
-                  <StockInHouse />
-                </ProtectedRoute>
-              }
-            />
-            
             {/* Delivery Dashboard Route */}
             <Route 
               path="/delivery" 

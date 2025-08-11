@@ -289,8 +289,11 @@ export const warehouseAPI = {
   // Get complete dashboard data based on user role
   getDashboardData: async (userRole) => {
     switch (userRole) {
-      case 'warehouse':
+      case 'warehouse_worker':
         return await getWorkerDashboard();
+      case 'warehouse':
+      case 'warehouse_manager':
+        return await getSupervisorDashboard();
       case 'admin':
       case 'owner':
         return await getSupervisorDashboard();

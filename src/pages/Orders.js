@@ -55,17 +55,37 @@ const Orders = ({ user, userRole, onLogout }) => {
     (async () => {
       try {
         const mgmt = await getOrderManagementData();
+        const defaultOrderStatuses = [
+          { value: 'deposit_pending', label: 'Deposit Pending' },
+          { value: 'deposit_paid', label: 'Deposit Paid' },
+          { value: 'pending', label: 'Pending' },
+          { value: 'confirmed', label: 'Confirmed' },
+          { value: 'out_for_delivery', label: 'Out for Delivery' },
+          { value: 'delivered', label: 'Delivered' },
+          { value: 'cancelled', label: 'Cancelled' }
+        ];
+        const defaultProductionStatuses = [
+          { value: 'not_started', label: 'Not Started' },
+          { value: 'in_production', label: 'In Production' },
+          { value: 'ready_for_delivery', label: 'Ready for Delivery' }
+        ];
+
+        const fetchedOrderStatuses = mgmt?.status_options?.order_statuses;
+        const fetchedProductionStatuses = mgmt?.status_options?.production_statuses;
+
         setStatusOptions({
-          order_statuses: mgmt?.status_options?.order_statuses || [],
-          production_statuses: mgmt?.status_options?.production_statuses || []
+          order_statuses: Array.isArray(fetchedOrderStatuses) && fetchedOrderStatuses.length > 0 ? fetchedOrderStatuses : defaultOrderStatuses,
+          production_statuses: Array.isArray(fetchedProductionStatuses) && fetchedProductionStatuses.length > 0 ? fetchedProductionStatuses : defaultProductionStatuses
         });
       } catch (_) {
-        // optional
+        // fallback defaults
         setStatusOptions({
           order_statuses: [
             { value: 'deposit_pending', label: 'Deposit Pending' },
             { value: 'deposit_paid', label: 'Deposit Paid' },
+            { value: 'pending', label: 'Pending' },
             { value: 'confirmed', label: 'Confirmed' },
+            { value: 'out_for_delivery', label: 'Out for Delivery' },
             { value: 'delivered', label: 'Delivered' },
             { value: 'cancelled', label: 'Cancelled' }
           ],
@@ -100,9 +120,9 @@ const Orders = ({ user, userRole, onLogout }) => {
 
   // Role-based permissions
   const canCreate = userRole === 'owner' || userRole === 'admin';
-  const canEdit = userRole === 'owner' || userRole === 'admin';
+  const canEdit = userRole === 'owner' || userRole === 'admin' || userRole === 'warehouse_manager' || userRole === 'warehouse';
   const canDelete = userRole === 'owner';
-  const isManagerOnly = userRole === 'warehouse_manager';
+  const isManagerOnly = userRole === 'warehouse_manager' || userRole === 'warehouse';
 
   const canViewFinancials = userRole === 'owner' || userRole === 'admin';
 

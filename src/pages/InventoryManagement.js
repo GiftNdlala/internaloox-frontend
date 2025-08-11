@@ -8,7 +8,7 @@ import {
   deleteMaterial,
   getMaterialCategories
 } from '../components/api';
-import SharedHeader from '../components/SharedHeader';
+// Removed SharedHeader to rely on WarehouseLayout navbar
 
 const defaultMaterial = {
   name: '',
@@ -136,7 +136,6 @@ const InventoryManagement = () => {
 
   return (
     <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
-      <SharedHeader user={{}} onLogout={() => {}} dashboardType={'warehouse'} />
       <Container className="py-4">
         <Row className="mb-3">
           <Col className="d-flex align-items-center justify-content-between">
