@@ -128,7 +128,7 @@ const Analytics = ({ user, userRole, onLogout }) => {
       pending: filteredOrders.filter(o => o.order_status === 'pending').length,
       confirmed: filteredOrders.filter(o => o.order_status === 'confirmed').length,
       in_production: filteredOrders.filter(o => o.production_status === 'in_production').length,
-      ready_for_delivery: filteredOrders.filter(o => o.production_status === 'ready_for_delivery').length,
+      order_ready: filteredOrders.filter(o => o.order_status === 'order_ready' || o.production_status === 'completed').length,
       delivered: filteredOrders.filter(o => o.order_status === 'delivered').length,
       cancelled: filteredOrders.filter(o => o.order_status === 'cancelled').length
     };
@@ -174,8 +174,7 @@ const Analytics = ({ user, userRole, onLogout }) => {
     const productionStatuses = {
       not_started: orders.filter(o => o.production_status === 'not_started' || !o.production_status).length,
       in_production: orders.filter(o => o.production_status === 'in_production').length,
-      ready_for_delivery: orders.filter(o => o.production_status === 'ready_for_delivery').length,
-      completed: orders.filter(o => o.order_status === 'delivered').length
+      completed: orders.filter(o => o.production_status === 'completed').length
     };
 
     const avgProductionTime = 5; // This would be calculated from actual production data
@@ -460,7 +459,7 @@ const Analytics = ({ user, userRole, onLogout }) => {
                       <div className="bg-primary rounded me-2" style={{width: '12px', height: '12px'}}></div>
                       <span className="text-muted">Ready for Delivery</span>
                     </div>
-                    <Badge bg="primary">{orderStats.ready_for_delivery}</Badge>
+                    <Badge bg="primary">{orderStats.order_ready}</Badge>
                   </div>
                   <div className="d-flex justify-content-between align-items-center mb-2">
                     <div className="d-flex align-items-center">

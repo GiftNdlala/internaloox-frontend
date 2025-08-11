@@ -72,7 +72,7 @@ const Deliveries = ({ user, userRole, onLogout }) => {
 
   // Delivery status configuration
   const deliveryStatusConfig = {
-    ready_for_delivery: { label: 'Ready', color: 'info', icon: FaBoxes },
+    order_ready: { label: 'Ready', color: 'info', icon: FaBoxes },
     out_for_delivery: { label: 'Out for Delivery', color: 'warning', icon: FaTruck },
     delivered: { label: 'Delivered', color: 'success', icon: FaCheckCircle },
     failed_delivery: { label: 'Failed', color: 'danger', icon: FaTimesCircle },
@@ -82,7 +82,7 @@ const Deliveries = ({ user, userRole, onLogout }) => {
   // Get delivery-relevant orders
   const getDeliveryOrders = () => {
     return orders.filter(order => 
-      order.production_status === 'ready_for_delivery' || 
+      order.order_status === 'order_ready' || 
       ['out_for_delivery', 'delivered', 'failed_delivery', 'returned'].includes(order.order_status)
     );
   };
@@ -94,7 +94,7 @@ const Deliveries = ({ user, userRole, onLogout }) => {
     // Filter by tab
     if (activeTab === 'ready') {
       filtered = filtered.filter(order => 
-        order.production_status === 'ready_for_delivery' && 
+        order.order_status === 'order_ready' && 
         order.order_status !== 'out_for_delivery' &&
         order.order_status !== 'delivered'
       );
@@ -224,8 +224,8 @@ const Deliveries = ({ user, userRole, onLogout }) => {
 
   const getDeliveryStatusBadge = (order) => {
     let status = order.order_status;
-    if (order.production_status === 'ready_for_delivery' && !['out_for_delivery', 'delivered'].includes(order.order_status)) {
-      status = 'ready_for_delivery';
+    if (order.order_status === 'order_ready' && !['out_for_delivery', 'delivered'].includes(order.order_status)) {
+      status = 'order_ready';
     }
     
     const config = deliveryStatusConfig[status] || { label: status, color: 'secondary', icon: FaBoxes };
@@ -250,7 +250,7 @@ const Deliveries = ({ user, userRole, onLogout }) => {
     return {
       total: deliveryOrders.length,
       ready: deliveryOrders.filter(o => 
-        o.production_status === 'ready_for_delivery' && 
+        o.order_status === 'order_ready' && 
         !['out_for_delivery', 'delivered'].includes(o.order_status)
       ).length,
       transit: deliveryOrders.filter(o => o.order_status === 'out_for_delivery').length,

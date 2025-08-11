@@ -232,7 +232,7 @@ const AdminDashboard = ({ user, onLogout }) => {
     const pendingOrders = orders.filter(o => o.order_status === 'pending');
     const overdueOrders = orders.filter(o => {
       if (!o.delivery_deadline) return false;
-      return new Date(o.delivery_deadline) < new Date() && o.production_status !== 'ready_for_delivery';
+      return new Date(o.delivery_deadline) < new Date() && o.order_status !== 'delivered';
     });
 
     return (
@@ -294,10 +294,10 @@ const AdminDashboard = ({ user, onLogout }) => {
                 </small>
               </div>
               <Badge bg={
-                order.production_status === 'ready_for_delivery' ? 'success' :
+                order.production_status === 'completed' || order.order_status === 'order_ready' ? 'success' :
                 order.production_status === 'in_production' ? 'warning' : 'secondary'
               } className="small">
-                {(order.production_status || 'pending').replace('_', ' ').toUpperCase()}
+                {(order.production_status === 'completed' ? 'COMPLETED' : (order.order_status === 'order_ready' ? 'ORDER READY' : ((order.production_status || 'pending').replace('_', ' ').toUpperCase())))}
               </Badge>
             </div>
           ))}

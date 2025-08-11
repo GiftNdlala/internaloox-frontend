@@ -183,7 +183,7 @@ const OrderDetail = ({ orderId, onBack }) => {
                 <option value="pending">Pending</option>
                 <option value="confirmed">Confirmed (Deposit Paid)</option>
                 <option value="in_production">In Production</option>
-                <option value="ready_for_delivery">Ready for Delivery</option>
+                <option value="order_ready">Ready</option>
                 <option value="out_for_delivery">Out for Delivery</option>
                 <option value="delivered">Delivered</option>
                 <option value="cancelled">Cancelled</option>
