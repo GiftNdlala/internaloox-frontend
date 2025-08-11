@@ -437,7 +437,7 @@ const Orders = ({ user, userRole, onLogout }) => {
                               <Button variant="outline-primary" onClick={() => handleEditOrder(order)}><FaEdit /></Button>
                             </OverlayTrigger>
                           )}
-                          {canEdit && (
+                          {(userRole === 'owner' || userRole === 'admin') && (
                             <OverlayTrigger placement="top" overlay={<Tooltip>Advance Workflow</Tooltip>}>
                               <Button variant="outline-secondary" onClick={async ()=>{ try { await advanceOrderWorkflow(order.id); fetchAllData(); } catch(e){ setError(e?.message||'Advance failed'); } }}>Next</Button>
                             </OverlayTrigger>
