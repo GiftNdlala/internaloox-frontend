@@ -128,7 +128,7 @@ const TaskManagement = ({ user }) => {
         role: w.role || ''
       }));
       // If current user is a warehouse_manager, show only workers (warehouse_worker or legacy warehouse)
-      const visibleWorkers = (user?.role === 'warehouse_manager')
+      const visibleWorkers = (user?.role === 'warehouse')
         ? normalizedWorkers.filter(w => w.role === 'warehouse_worker' || w.role === 'warehouse')
         : normalizedWorkers;
       setWorkers(visibleWorkers);

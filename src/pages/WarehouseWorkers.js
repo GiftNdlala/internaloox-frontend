@@ -3,12 +3,12 @@ import { Button, Card, Table, Spinner, Alert, Form, Modal, InputGroup } from 're
 import { FaUserPlus, FaTrash, FaEdit, FaSearch, FaHistory } from 'react-icons/fa';
 import { getUsersQuery, createUser, updateUser, deleteUser, getTasksByWorker } from '../components/api';
 
-const ROLE_OPTIONS = ['warehouse_worker', 'warehouse_manager', 'delivery', 'admin', 'owner'];
+const ROLE_OPTIONS = ['warehouse_worker', 'warehouse', 'delivery', 'admin', 'owner'];
 
 function getAllowedCreateRoles(currentRole) {
   if (currentRole === 'owner') return ROLE_OPTIONS;
-  if (currentRole === 'admin') return ['warehouse_manager', 'warehouse_worker', 'delivery'];
-  if (currentRole === 'warehouse_manager') return ['warehouse_worker'];
+  if (currentRole === 'admin') return ['warehouse', 'warehouse_worker', 'delivery'];
+  if (currentRole === 'warehouse') return ['warehouse_worker'];
   return [];
 }
 
@@ -134,7 +134,7 @@ const WarehouseWorkers = ({ currentUser }) => {
         <div className="d-flex gap-2">
           <Form.Select size="sm" value={roleFilter} onChange={(e)=>setRoleFilter(e.target.value)}>
             <option value="warehouse_worker">Warehouse Workers</option>
-            <option value="warehouse_manager">Warehouse Managers</option>
+            <option value="warehouse">Warehouse Staff (Managers)</option>
             <option value="delivery">Delivery Personnel</option>
           </Form.Select>
           {allowedRoles.length > 0 && (

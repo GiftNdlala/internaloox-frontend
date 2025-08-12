@@ -43,15 +43,15 @@ const WarehouseNavbar = ({
 
   const canManageTasks = () => {
     // Restrict Workers link to owner, admin, warehouse_manager
-    return ['owner', 'admin', 'warehouse_manager'].includes(user?.role);
+    return ['owner', 'admin', 'warehouse'].includes(user?.role);
   };
 
   const canViewAnalytics = () => {
-    return ['owner', 'admin', 'warehouse_manager', 'warehouse'].includes(user?.role);
+    return ['owner', 'admin', 'warehouse'].includes(user?.role);
   };
 
   const canManageInventory = () => {
-    return ['owner', 'admin', 'warehouse_manager', 'warehouse_worker', 'warehouse'].includes(user?.role);
+    return ['owner', 'admin', 'warehouse_worker', 'warehouse'].includes(user?.role);
   };
 
   const formatTime = (date) => {
@@ -234,7 +234,7 @@ const WarehouseNavbar = ({
             )}
 
             {/* Analytics - Management only */}
-            {['owner', 'admin', 'warehouse_manager', 'warehouse'].includes(user?.role) && (
+            {['owner', 'admin', 'warehouse'].includes(user?.role) && (
               <Nav.Link 
                 active={isOverview && activeTab === 'analytics'}
                 onClick={() => {

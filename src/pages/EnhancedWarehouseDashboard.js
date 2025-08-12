@@ -46,7 +46,7 @@ const EnhancedWarehouseDashboard = ({ user, onLogout, showNavbar = true }) => {
   const [activeTab, setActiveTab] = useState(() => {
     console.log('Setting default tab for role:', user?.role);
     if (user?.role === 'warehouse_worker') return 'my-tasks';
-    if (['owner', 'admin', 'warehouse_manager', 'warehouse'].includes(user?.role)) return 'overview';
+    if (['owner', 'admin', 'warehouse'].includes(user?.role)) return 'overview';
     return 'overview';
   });
   // Sync tab from URL param
@@ -99,17 +99,17 @@ const EnhancedWarehouseDashboard = ({ user, onLogout, showNavbar = true }) => {
   const canManageTasks = () => {
     // Debug: Log the user role
     console.log('Current user role:', user?.role);
-    return ['owner', 'admin', 'warehouse_manager', 'warehouse'].includes(user?.role);
+    return ['owner', 'admin', 'warehouse'].includes(user?.role);
   };
 
   const canViewAnalytics = () => {
-    return ['owner', 'admin', 'warehouse_manager', 'warehouse'].includes(user?.role);
+    return ['owner', 'admin', 'warehouse'].includes(user?.role);
   };
 
   const getOrdersPathForRole = () => {
     if (user?.role === 'owner') return '/owner/orders';
     if (user?.role === 'admin') return '/admin/orders';
-    if (user?.role === 'warehouse' || user?.role === 'warehouse_worker' || user?.role === 'warehouse_manager') return '/warehouse/orders';
+    if (user?.role === 'warehouse' || user?.role === 'warehouse_worker') return '/warehouse/orders';
     return '/';
   };
 
@@ -120,7 +120,7 @@ const EnhancedWarehouseDashboard = ({ user, onLogout, showNavbar = true }) => {
   };
 
   const canManageInventory = () => {
-    return ['owner', 'admin', 'warehouse_manager', 'warehouse_worker', 'warehouse'].includes(user?.role);
+    return ['owner', 'admin', 'warehouse_worker', 'warehouse'].includes(user?.role);
   };
 
   const loadDashboardData = async (silent = false) => {

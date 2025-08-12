@@ -195,7 +195,7 @@ function App() {
               <Route path="workers" element={<WarehouseWorkers currentUser={user} />} />
               <Route path="worker" element={<WorkerDashboard />} />
               <Route path="analytics" element={<WarehouseAnalytics />} />
-              <Route path="approvals" element={<ProtectedRoute allowedRoles={['owner','admin','warehouse_manager']}><ApprovalQueue /></ProtectedRoute>} />
+              <Route path="approvals" element={<ProtectedRoute allowedRoles={['owner','admin','warehouse']}><ApprovalQueue /></ProtectedRoute>} />
               {/* Keep existing inventory routes accessible under warehouse */}
               <Route path="inventory/materials" element={<InventoryManagement />} />
               <Route path="inventory/stock" element={<StockInHouse />} />
@@ -206,7 +206,7 @@ function App() {
             <Route
               path="/warehouse/products/new"
               element={
-                <ProtectedRoute allowedRoles={['warehouse', 'warehouse_manager', 'owner', 'admin', 'warehouse_worker']}>
+                <ProtectedRoute allowedRoles={['warehouse', 'owner', 'admin', 'warehouse_worker']}>
                   <AddProduct user={user} />
                 </ProtectedRoute>
               }
