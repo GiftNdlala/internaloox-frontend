@@ -14,7 +14,7 @@ import { usePolling } from '../../hooks/usePolling';
 import { 
   getWarehouseOrders, getTaskTypes, getUsersQuery, createTaskInOrder,
   updateTask, deleteTask, getTasksByStatus, assignWorkerToTask,
-  getTaskTemplates, bulkAssignTasks
+  getTaskTemplates, bulkAssignTasks, getOrderDetailsForTasks
 } from '../api';
 
 const TaskManagement = ({ user }) => {
@@ -30,6 +30,7 @@ const TaskManagement = ({ user }) => {
   const [taskTypes, setTaskTypes] = useState([]);
   const [workers, setWorkers] = useState([]);
   const [templates, setTemplates] = useState([]);
+  const [orderItems, setOrderItems] = useState([]);
   
   // UI State
   const [searchTerm, setSearchTerm] = useState('');
@@ -58,7 +59,8 @@ const TaskManagement = ({ user }) => {
     deadline: '',
     materials_needed: [],
     instructions: '',
-    template_id: null
+    template_id: null,
+    order_item_id: ''
   });
 
   const FALLBACK_TASK_TYPES = [
@@ -170,6 +172,9 @@ const TaskManagement = ({ user }) => {
       if (!taskData.task_type_name && taskForm.task_type) {
         taskData.task_type_id = Number(taskForm.task_type);
       }
+      if (taskForm.order_item_id) {
+        taskData.order_item_id = Number(taskForm.order_item_id);
+      }
 
       await createTaskInOrder(selectedOrder.id, taskData);
       
@@ -247,14 +252,24 @@ const TaskManagement = ({ user }) => {
       deadline: '',
       materials_needed: [],
       instructions: '',
-      template_id: null
+      template_id: null,
+      order_item_id: ''
     });
     setSelectedOrder(null);
     setSelectedTask(null);
+    setOrderItems([]);
   };
 
   const openCreateTaskModal = (order) => {
     setSelectedOrder(order);
+    setOrderItems([]);
+    // Fetch order details (items) for selection
+    getOrderDetailsForTasks(order.id)
+      .then((data) => {
+        const items = Array.isArray(data?.items) ? data.items : (Array.isArray(data?.results) ? data.results : []);
+        setOrderItems(items);
+      })
+      .catch(() => setOrderItems([]));
     setShowCreateTask(true);
   };
 
@@ -613,7 +628,15 @@ const TaskManagement = ({ user }) => {
                       <td>
                         <div>
                           <div className="fw-semibold">{task.title}</div>
-                          <small className="text-muted">{task.description}</small>
+                          <small className="text-muted d-block">{task.description}</small>
+                          {task.order_item_details && (
+                            <small className="text-muted">
+                              {task.order_item_details.product_name}
+                              {task.order_item_details.fabric_name ? ` • ${task.order_item_details.fabric_name}` : ''}
+                              {task.order_item_details.color_name ? ` • ${task.order_item_details.color_name}` : ''}
+                              {` • Qty ${task.order_item_details.quantity}`}
+                            </small>
+                          )}
                         </div>
                       </td>
                       <td>
@@ -749,6 +772,22 @@ const TaskManagement = ({ user }) => {
                     <option value="">Select task type...</option>
                     {(taskTypes.length > 0 ? taskTypes.map(t => t.name) : FALLBACK_TASK_TYPES).map(name => (
                       <option key={name} value={name}>{name}</option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Order Item (optional)</Form.Label>
+                  <Form.Select
+                    value={taskForm.order_item_id}
+                    onChange={(e) => setTaskForm(prev => ({ ...prev, order_item_id: e.target.value }))}
+                  >
+                    <option value="">No specific item</option>
+                    {orderItems.map(item => (
+                      <option key={item.id} value={item.id}>
+                        {`${item.product_name || item.product?.name || 'Item'}${item.fabric_name ? ' • ' + item.fabric_name : ''}${item.color_name ? ' • ' + item.color_name : ''} • Qty ${item.quantity}`}
+                      </option>
                     ))}
                   </Form.Select>
                 </Form.Group>
