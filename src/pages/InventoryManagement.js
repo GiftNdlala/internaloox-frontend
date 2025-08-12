@@ -85,6 +85,7 @@ const InventoryManagement = () => {
   const validate = useMemo(() => (vals) => {
     const v = {};
     if (!vals.name?.trim()) v.name = 'Name is required';
+    if (!vals.category) v.category = 'Category is required';
     if (!vals.unit?.trim()) v.unit = 'Unit is required';
     if (vals.unit_price === '' || Number.isNaN(Number(vals.unit_price)) || Number(vals.unit_price) < 0) v.unit_price = 'Valid unit price required';
     if (vals.minimum_stock !== '' && (Number.isNaN(Number(vals.minimum_stock)) || Number(vals.minimum_stock) < 0)) v.minimum_stock = 'Minimum stock must be >= 0';
@@ -215,12 +216,13 @@ const InventoryManagement = () => {
                 <Col md={6}>
                   <Form.Group>
                     <Form.Label>Category</Form.Label>
-                    <Form.Select value={form.category} onChange={(e) => onChange('category', e.target.value)}>
-                      <option value="">Uncategorized</option>
+                    <Form.Select value={form.category} onChange={(e) => onChange('category', e.target.value)} isInvalid={!!formErrors.category}>
+                      <option value="">Select category...</option>
                       {categories.map((c) => (
                         <option key={c.id} value={c.id}>{c.name}</option>
                       ))}
                     </Form.Select>
+                    {formErrors.category && <div className="invalid-feedback d-block">{formErrors.category}</div>}
                   </Form.Group>
                 </Col>
                 <Col md={4}>

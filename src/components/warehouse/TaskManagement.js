@@ -88,9 +88,12 @@ const TaskManagement = ({ user }) => {
   const loadInitialData = async () => {
     setLoading(true);
     try {
+      const rolesQuery = (user?.role === 'owner' || user?.role === 'admin')
+        ? 'role=warehouse_worker,warehouse_manager,warehouse'
+        : 'role=warehouse_worker,warehouse';
       const [typesData, workersData] = await Promise.all([
         getTaskTypes('is_active=true'),
-        getUsersQuery('role=warehouse_worker,warehouse_manager,warehouse')
+        getUsersQuery(rolesQuery)
       ]);
       // Normalize task types (support arrays under different keys)
       const typesArr = (Array.isArray(typesData?.task_types) && typesData.task_types)
@@ -376,6 +379,9 @@ const TaskManagement = ({ user }) => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </InputGroup>
+              {taskTypes.length === 0 && (
+                <div className="small text-muted mt-2">No task types found. Ensure backend returns /api/tasks/task_types/?is_active=true.</div>
+              )}
             </Col>
             <Col md={2}>
               <Form.Select
@@ -414,6 +420,9 @@ const TaskManagement = ({ user }) => {
                   </option>
                 ))}
               </Form.Select>
+              {workers.length === 0 && (
+                <div className="small text-muted mt-2">No workers found. Managers see warehouse workers only.</div>
+              )}
             </Col>
             <Col md={2}>
               <Form.Select

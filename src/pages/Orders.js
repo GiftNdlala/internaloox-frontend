@@ -269,6 +269,7 @@ const Orders = ({ user, userRole, onLogout }) => {
       setShowStatusModal(false);
       setSuccess('Status updated');
       fetchAllData();
+      try { window.dispatchEvent(new CustomEvent('oox:refresh')); } catch {}
     } catch (e) {
       setError(e?.message || 'Failed to update status');
     }
@@ -591,7 +592,7 @@ const Orders = ({ user, userRole, onLogout }) => {
                           // Only forward movement for production statuses unless owner/admin
                           if (userRole === 'owner' || userRole === 'admin') return true;
                           const current = selectedOrder?.production_status || 'not_started';
-                          const order = ['not_started', 'in_production', 'completed'];
+                          const order = ['not_started','cutting','sewing','finishing','quality_check','in_production','completed'];
                           const currentIdx = order.indexOf(current);
                           const targetIdx = order.indexOf(val);
                           return targetIdx >= currentIdx && targetIdx <= currentIdx + 1;
