@@ -51,7 +51,7 @@ const TaskManagement = ({ user }) => {
   const [taskForm, setTaskForm] = useState({
     title: '',
     description: '',
-    task_type: '',
+    task_type_name: '',
     assigned_worker: '',
     priority: 'medium',
     estimated_duration: 60,
@@ -60,6 +60,19 @@ const TaskManagement = ({ user }) => {
     instructions: '',
     template_id: null
   });
+
+  const FALLBACK_TASK_TYPES = [
+    'Material Preparation',
+    'Cutting',
+    'Frame Assembly',
+    'Foam Installation',
+    'Upholstery',
+    'Finishing',
+    'Quality Check',
+    'Packaging',
+    'Maintenance',
+    'Stock Management'
+  ];
 
   // Load data with polling
   const { data: ordersData, refresh: refreshOrders } = usePolling(
@@ -146,13 +159,17 @@ const TaskManagement = ({ user }) => {
       const taskData = {
         title: taskForm.title,
         description: taskForm.description,
-        task_type_id: taskForm.task_type ? Number(taskForm.task_type) : undefined,
+        task_type_name: taskForm.task_type_name || undefined,
         assigned_to_id: taskForm.assigned_worker ? Number(taskForm.assigned_worker) : undefined,
         priority: taskForm.priority,
         estimated_duration: parseInt(taskForm.estimated_duration),
         due_date: taskForm.deadline ? new Date(taskForm.deadline).toISOString() : null,
         instructions: taskForm.instructions,
       };
+      // Fallback: if name is not set but a type id was somehow stored, include id
+      if (!taskData.task_type_name && taskForm.task_type) {
+        taskData.task_type_id = Number(taskForm.task_type);
+      }
 
       await createTaskInOrder(selectedOrder.id, taskData);
       
@@ -223,7 +240,7 @@ const TaskManagement = ({ user }) => {
     setTaskForm({
       title: '',
       description: '',
-      task_type: '',
+      task_type_name: '',
       assigned_worker: '',
       priority: 'medium',
       estimated_duration: 60,
@@ -246,7 +263,7 @@ const TaskManagement = ({ user }) => {
     setTaskForm({
       title: task.title || '',
       description: task.description || '',
-      task_type: task.task_type?.id || '',
+      task_type_name: task.task_type?.name || '',
       assigned_worker: task.assigned_worker?.id || '',
       priority: task.priority || 'medium',
       estimated_duration: task.estimated_duration || 60,
@@ -265,7 +282,7 @@ const TaskManagement = ({ user }) => {
         ...prev,
         title: template.title,
         description: template.description,
-        task_type: template.task_type_id,
+        task_type_name: template.task_type_name || '',
         priority: template.priority,
         estimated_duration: template.estimated_duration,
         instructions: template.instructions,
@@ -725,15 +742,13 @@ const TaskManagement = ({ user }) => {
                 <Form.Group className="mb-3">
                   <Form.Label>Task Type *</Form.Label>
                   <Form.Select
-                    value={taskForm.task_type}
-                    onChange={(e) => setTaskForm(prev => ({ ...prev, task_type: e.target.value }))}
+                    value={taskForm.task_type_name}
+                    onChange={(e) => setTaskForm(prev => ({ ...prev, task_type_name: e.target.value }))}
                     required
                   >
                     <option value="">Select task type...</option>
-                    {taskTypes.map(type => (
-                      <option key={type.id} value={type.id}>
-                        {type.name} - {type.description}
-                      </option>
+                    {(taskTypes.length > 0 ? taskTypes.map(t => t.name) : FALLBACK_TASK_TYPES).map(name => (
+                      <option key={name} value={name}>{name}</option>
                     ))}
                   </Form.Select>
                 </Form.Group>
@@ -859,15 +874,13 @@ const TaskManagement = ({ user }) => {
                 <Form.Group className="mb-3">
                   <Form.Label>Task Type *</Form.Label>
                   <Form.Select
-                    value={taskForm.task_type}
-                    onChange={(e) => setTaskForm(prev => ({ ...prev, task_type: e.target.value }))}
+                    value={taskForm.task_type_name}
+                    onChange={(e) => setTaskForm(prev => ({ ...prev, task_type_name: e.target.value }))}
                     required
                   >
                     <option value="">Select task type...</option>
-                    {taskTypes.map(type => (
-                      <option key={type.id} value={type.id}>
-                        {type.name}
-                      </option>
+                    {(taskTypes.length > 0 ? taskTypes.map(t => t.name) : FALLBACK_TASK_TYPES).map(name => (
+                      <option key={name} value={name}>{name}</option>
                     ))}
                   </Form.Select>
                 </Form.Group>
