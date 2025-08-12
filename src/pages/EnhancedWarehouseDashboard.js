@@ -88,6 +88,13 @@ const EnhancedWarehouseDashboard = ({ user, onLogout, showNavbar = true }) => {
     }
   }, [user]);
 
+  // Listen for global refresh events (e.g., after task actions)
+  useEffect(() => {
+    const handler = () => loadDashboardData(true);
+    window.addEventListener('oox:refresh', handler);
+    return () => window.removeEventListener('oox:refresh', handler);
+  }, [user]);
+
   // Role-based access control
   const canManageTasks = () => {
     // Debug: Log the user role

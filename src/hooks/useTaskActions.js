@@ -38,6 +38,9 @@ export const useTaskActions = () => {
         created_at: new Date().toISOString()
       });
 
+      // Notify other views to refresh orders/tasks (to reflect production_status auto-advances)
+      try { window.dispatchEvent(new CustomEvent('oox:refresh')); } catch {}
+
       return { success: true, data: result };
     } catch (error) {
       // Add error notification
