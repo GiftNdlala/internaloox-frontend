@@ -137,12 +137,25 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
   // Validate and submit full order
   const validateOrder = () => {
     const newErrors = {};
+    
+    // Customer validation
     if (!customerData.customerName.trim()) newErrors.customerName = 'Customer name is required';
     if (!customerData.customerPhone.trim()) newErrors.customerPhone = 'Customer phone is required';
     if (!customerData.customerAddress.trim()) newErrors.customerAddress = 'Customer address is required';
     if (!customerData.expectedDeliveryDate) newErrors.expectedDeliveryDate = 'Expected delivery date is required';
-    if (!customerData.depositAmount || parseFloat(customerData.depositAmount) < 0) newErrors.depositAmount = 'Valid deposit amount is required';
-    if (orderItems.length === 0) newErrors.orderItems = 'Add at least one product';
+    
+    // Financial validation
+    if (!customerData.depositAmount || parseFloat(customerData.depositAmount) < 0) {
+      newErrors.depositAmount = 'Valid deposit amount is required';
+    } else if (parseFloat(customerData.depositAmount) > parseFloat(calculateTotal())) {
+      newErrors.depositAmount = 'Deposit amount cannot exceed total amount';
+    }
+    
+    // Products validation - order can be created with at least one product
+    if (orderItems.length === 0) {
+      newErrors.orderItems = 'Please add at least one product to the order using the "Add Product" button above';
+    }
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };

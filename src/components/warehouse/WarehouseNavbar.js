@@ -99,8 +99,15 @@ const WarehouseNavbar = ({
           {formatTime(currentTime)}
         </div>
 
-        {/* Always-visible navigation (no collapse) */}
-        <div className="d-flex w-100 align-items-center" id="warehouse-navbar-nav">
+        {/* Mobile Toggle Button */}
+        <Navbar.Toggle 
+          aria-controls="warehouse-navbar-nav" 
+          className="d-lg-none"
+          onClick={() => setExpanded(!expanded)}
+        />
+
+        {/* Collapsible Navigation */}
+        <Navbar.Collapse id="warehouse-navbar-nav" className="justify-content-end">
           {/* Main Navigation */}
           <Nav className="me-auto">
             <Nav.Link 
@@ -313,8 +320,22 @@ const WarehouseNavbar = ({
               </NavDropdown.Item>
             </NavDropdown>
           </Nav>
-        </div>
+        </Navbar.Collapse>
       </Container>
+      
+      {/* Mobile Overlay - Close navbar when clicking outside */}
+      {expanded && (
+        <div 
+          className="d-lg-none position-fixed w-100 h-100" 
+          style={{ 
+            top: 0, 
+            left: 0, 
+            backgroundColor: 'rgba(0,0,0,0.5)', 
+            zIndex: 1040 
+          }}
+          onClick={() => setExpanded(false)}
+        />
+      )}
 
       <style jsx>{`
         .warehouse-navbar {
@@ -367,12 +388,42 @@ const WarehouseNavbar = ({
         }
         
         @media (max-width: 991px) {
+          .warehouse-navbar .navbar-collapse {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #dee2e6;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 1050;
+            max-height: 80vh;
+            overflow-y: auto;
+          }
+          
           .warehouse-navbar .navbar-nav {
-            padding: 1rem 0;
+            padding: 1rem;
           }
           
           .warehouse-navbar .nav-link {
-            margin: 0.25rem 0;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s ease;
+          }
+          
+          .warehouse-navbar .nav-link:hover {
+            background-color: #f8f9fa;
+            transform: translateX(5px);
+          }
+          
+          .warehouse-navbar .dropdown-menu {
+            position: static !important;
+            float: none;
+            width: 100%;
+            margin-top: 0.5rem;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
           }
         }
       `}</style>
