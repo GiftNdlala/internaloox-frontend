@@ -27,6 +27,7 @@ import WarehouseAnalytics from './pages/WarehouseAnalytics';
 import ApprovalQueue from './pages/ApprovalQueue';
 import OrdersWorkflowDashboard from './pages/OrdersWorkflowDashboard';
 import AdminWarehouseOverview from './pages/AdminWarehouseOverview';
+import OwnerPaymentTransactions from './pages/OwnerPaymentTransactions';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -263,6 +264,14 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['owner', 'admin']}>
                   <Payments user={user} userRole={user?.role || "owner"} onLogout={handleLogout} />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/owner/transactions" 
+              element={
+                <ProtectedRoute allowedRoles={['owner', 'admin']}>
+                  <OwnerPaymentTransactions user={user} onLogout={handleLogout} />
                 </ProtectedRoute>
               } 
             />

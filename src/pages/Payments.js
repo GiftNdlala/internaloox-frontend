@@ -27,6 +27,8 @@ const Payments = ({ user, userRole, onLogout }) => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [recentProofs, setRecentProofs] = useState([]);
+  const [uploadingProof, setUploadingProof] = useState(false);
+  const [proofFile, setProofFile] = useState(null);
 
   // Form state
   const [paymentForm, setPaymentForm] = useState({
@@ -172,6 +174,31 @@ const Payments = ({ user, userRole, onLogout }) => {
   const handlePaymentSubmit = async (e) => {
     e.preventDefault();
     try {
+      // If EFT selected and no proof_id, attempt to upload file first
+      const method = (paymentForm.payment_method || selectedOrder?.payment_method || '').toLowerCase();
+      if (method === 'eft' && !paymentForm.proof_id) {
+        if (!proofFile) {
+          setError('Payment proof required for EFT payments');
+          return;
+        }
+        try {
+          setUploadingProof(true);
+          const form = new FormData();
+          form.append('order', selectedOrder.id);
+          if (paymentForm.deposit_amount) form.append('amount', paymentForm.deposit_amount);
+          form.append('proof_image', proofFile);
+          const created = await createPayment(form, true);
+          if (created?.id) {
+            paymentForm.proof_id = created.id;
+          }
+        } catch (uploadErr) {
+          setUploadingProof(false);
+          setError(uploadErr?.message || 'Failed to upload payment proof');
+          return;
+        } finally {
+          setUploadingProof(false);
+        }
+      }
       const toNumber = (v) => {
         const n = typeof v === 'string' && v.trim() === '' ? null : Number(v);
         return (n !== null && !Number.isNaN(n)) ? n : undefined;
@@ -756,6 +783,11 @@ const Payments = ({ user, userRole, onLogout }) => {
                               </div>
                             </div>
                           )}
+                          <div className="mt-3">
+                            <div className="small text-muted mb-1">Or upload proof image now (auto-attaches to this order):</div>
+                            <Form.Control type="file" accept="image/*" onChange={(e)=>setProofFile(e.target.files?.[0] || null)} />
+                            {uploadingProof && <div className="small text-muted mt-1">Uploading proof...</div>}
+                          </div>
                         </Form.Group>
                       </Col>
                     </Row>
