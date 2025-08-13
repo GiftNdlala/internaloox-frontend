@@ -18,8 +18,10 @@ import SharedHeader from '../components/SharedHeader';
 import UniversalSidebar from '../components/UniversalSidebar';
 import { getOrderManagementData, patchOrderStatus } from '../components/api';
 import { getOrderStatusOptions } from '../components/api';
+import { updateProductionStatus } from '../components/api';
 
 const Orders = ({ user, userRole, onLogout }) => {
+  const normalizedRole = (userRole === 'warehouse_manager') ? 'warehouse' : userRole;
   // State management
   const [orders, setOrders] = useState([]);
   const [customers, setCustomers] = useState([]);
@@ -131,12 +133,12 @@ const Orders = ({ user, userRole, onLogout }) => {
   };
 
   // Role-based permissions
-  const canCreate = userRole === 'owner' || userRole === 'admin';
-  const canEdit = userRole === 'owner' || userRole === 'admin' || userRole === 'warehouse_manager' || userRole === 'warehouse';
-  const canDelete = userRole === 'owner';
-  const isManagerOnly = userRole === 'warehouse_manager' || userRole === 'warehouse';
+  const canCreate = normalizedRole === 'owner' || normalizedRole === 'admin';
+  const canEdit = ['owner','admin','warehouse'].includes(normalizedRole);
+  const canDelete = normalizedRole === 'owner';
+  const isManagerOnly = normalizedRole === 'warehouse';
 
-  const canViewFinancials = userRole === 'owner' || userRole === 'admin';
+  const canViewFinancials = normalizedRole === 'owner' || normalizedRole === 'admin';
 
   // Filter and sort orders
   const filteredOrders = orders.filter(order => {
@@ -265,7 +267,14 @@ const Orders = ({ user, userRole, onLogout }) => {
   const submitStatusChange = async (e) => {
     e?.preventDefault?.();
     try {
-      await patchOrderStatus(selectedOrder.id, statusForm);
+      // Split calls: production transitions via dedicated endpoint; order_status via generic
+      const { order_status, production_status } = statusForm || {};
+      if (production_status && production_status !== selectedOrder?.production_status) {
+        await updateProductionStatus(selectedOrder.id, { production_status });
+      }
+      if (order_status && order_status !== selectedOrder?.order_status) {
+        await patchOrderStatus(selectedOrder.id, { order_status });
+      }
       setShowStatusModal(false);
       setSuccess('Status updated');
       fetchAllData();
@@ -555,17 +564,12 @@ const Orders = ({ user, userRole, onLogout }) => {
                         .filter(opt => {
                           const val = typeof opt === 'string' ? opt : opt.value;
                           // Role-based filtering of order status transitions
-                          if (userRole === 'owner' || userRole === 'admin') return true;
+                          if (normalizedRole === 'owner' || normalizedRole === 'admin') return true;
                           const current = selectedOrder?.order_status;
-                          if (userRole === 'warehouse' || userRole === 'warehouse_worker') {
+                          if (normalizedRole === 'warehouse' || normalizedRole === 'warehouse_worker') {
                             return current === 'deposit_paid' ? ['order_ready'].includes(val) : false;
                           }
-                          if (userRole === 'warehouse_manager') {
-                            if (current === 'deposit_paid') return ['order_ready'].includes(val);
-                            if (current === 'order_ready') return ['out_for_delivery'].includes(val);
-                            return false;
-                          }
-                          if (userRole === 'delivery') {
+                          if (normalizedRole === 'delivery') {
                             if (current === 'order_ready') return ['out_for_delivery'].includes(val);
                             if (current === 'out_for_delivery') return ['delivered'].includes(val);
                             return false;
@@ -590,7 +594,7 @@ const Orders = ({ user, userRole, onLogout }) => {
                         .filter(opt => {
                           const val = typeof opt === 'string' ? opt : opt.value;
                           // Only forward movement for production statuses unless owner/admin
-                          if (userRole === 'owner' || userRole === 'admin') return true;
+                          if (normalizedRole === 'owner' || normalizedRole === 'admin') return true;
                           const current = selectedOrder?.production_status || 'not_started';
                           const order = ['not_started','cutting','sewing','finishing','quality_check','in_production','completed'];
                           const currentIdx = order.indexOf(current);

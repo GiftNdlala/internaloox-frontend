@@ -6,6 +6,7 @@ import {
   getWarehouseOrders,
   getTasksByStatus
 } from '../components/api';
+import { getWarehouseAnalytics } from '../components/api';
 
 const StatCard = ({ title, value, variant = 'primary', footer }) => (
   <Card className={`border-${variant}`}>
@@ -30,23 +31,48 @@ const WarehouseAnalytics = () => {
     setLoading(true);
     setError('');
     try {
-      const [inv, low, ord] = await Promise.all([
-        getWarehouseDashboard(),
-        getLowStockAlerts(),
-        getWarehouseOrders()
-      ]);
-      setInventory(inv || { total_materials: 0, in_stock: 0 });
-      setLowStock(low?.alerts || []);
-      const ordList = Array.isArray(ord?.orders) ? ord.orders : (Array.isArray(ord) ? ord : []);
-      setOrders(ordList);
+      // Prefer consolidated analytics endpoint
+      let consolidated = null;
+      try {
+        consolidated = await getWarehouseAnalytics();
+      } catch {}
 
-      const [assigned, started, completed] = await Promise.all([
-        getTasksByStatus('assigned').catch(() => []),
-        getTasksByStatus('started').catch(() => []),
-        getTasksByStatus('completed').catch(() => [])
-      ]);
-      const count = (res) => Array.isArray(res?.results) ? res.results.length : (Array.isArray(res) ? res.length : 0);
-      setTaskCounts({ assigned: count(assigned), started: count(started), completed: count(completed) });
+      if (consolidated && typeof consolidated === 'object') {
+        const sa = consolidated.stock_analytics || {};
+        const oa = consolidated.order_analytics || {};
+        const ta = consolidated.task_analytics || {};
+        setInventory({ total_materials: sa.total_materials || 0, in_stock: sa.in_stock || 0 });
+        // If backend exposes low_stock_count only, keep separate call to list items
+        const low = await getLowStockAlerts().catch(()=>null);
+        setLowStock(low?.alerts || []);
+        const ordList = Array.isArray(oa.orders) ? oa.orders
+                      : Array.isArray(consolidated.orders) ? consolidated.orders
+                      : [];
+        if (ordList.length > 0) setOrders(ordList);
+        setTaskCounts({
+          assigned: ta.assigned || ta.total_tasks || 0,
+          started: ta.tasks_in_progress || 0,
+          completed: ta.tasks_completed_week || 0
+        });
+      } else {
+        // Fallback to existing multiple endpoints
+        const [inv, low, ord] = await Promise.all([
+          getWarehouseDashboard(),
+          getLowStockAlerts(),
+          getWarehouseOrders()
+        ]);
+        setInventory(inv || { total_materials: 0, in_stock: 0 });
+        setLowStock(low?.alerts || []);
+        const ordList = Array.isArray(ord?.orders) ? ord.orders : (Array.isArray(ord) ? ord : []);
+        setOrders(ordList);
+        const [assigned, started, completed] = await Promise.all([
+          getTasksByStatus('assigned').catch(() => []),
+          getTasksByStatus('started').catch(() => []),
+          getTasksByStatus('completed').catch (() => [])
+        ]);
+        const count = (res) => Array.isArray(res?.results) ? res.results.length : (Array.isArray(res) ? res.length : 0);
+        setTaskCounts({ assigned: count(assigned), started: count(started), completed: count(completed) });
+      }
     } catch (e) {
       setError(e?.message || 'Failed to load analytics');
     } finally {
@@ -61,6 +87,8 @@ const WarehouseAnalytics = () => {
 
   const readyOrders = orders.filter(o => o.order_status === 'order_ready' || o.production_status === 'completed').length;
   const inProduction = orders.filter(o => o.production_status === 'in_production').length;
+  // If consolidated analytics provided counts implicitly, prefer those but keep UI logic
+  // (no change to code if not present)
 
   return (
     <div>

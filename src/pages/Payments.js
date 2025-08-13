@@ -33,7 +33,8 @@ const Payments = ({ user, userRole, onLogout }) => {
     balance_amount: '',
     payment_status: '',
     payment_method: '',
-    payment_notes: ''
+    payment_notes: '',
+    proof_id: ''
   });
 
   // Filter and search states
@@ -149,7 +150,8 @@ const Payments = ({ user, userRole, onLogout }) => {
       balance_amount: order.balance_amount || '',
       payment_status: order.payment_status || '',
       payment_method: order.payment_method || '',
-      payment_notes: order.payment_notes || ''
+      payment_notes: order.payment_notes || '',
+      proof_id: ''
     });
     setShowPaymentModal(true);
   };
@@ -162,13 +164,23 @@ const Payments = ({ user, userRole, onLogout }) => {
   const handlePaymentSubmit = async (e) => {
     e.preventDefault();
     try {
+      const toNumber = (v) => {
+        const n = typeof v === 'string' && v.trim() === '' ? null : Number(v);
+        return (n !== null && !Number.isNaN(n)) ? n : undefined;
+      };
       const updateData = {
-        deposit_amount: parseFloat(paymentForm.deposit_amount) || 0,
-        balance_amount: parseFloat(paymentForm.balance_amount) || 0,
+        ...(toNumber(paymentForm.deposit_amount) !== undefined ? { deposit_amount: toNumber(paymentForm.deposit_amount) } : {}),
+        ...(toNumber(paymentForm.balance_amount) !== undefined ? { balance_amount: toNumber(paymentForm.balance_amount) } : {}),
         payment_status: paymentForm.payment_status,
         payment_method: paymentForm.payment_method,
         payment_notes: paymentForm.payment_notes
       };
+      // EFT PoP enforcement: include proof_id if provided
+      if ((paymentForm.payment_method || selectedOrder?.payment_method || '').toLowerCase() === 'eft') {
+        if (paymentForm.proof_id) {
+          updateData.proof_id = paymentForm.proof_id;
+        }
+      }
 
       await updateOrderPayment(selectedOrder.id, updateData);
       setSuccess('Payment information updated successfully');
@@ -709,6 +721,25 @@ const Payments = ({ user, userRole, onLogout }) => {
                       </Form.Group>
                     </Col>
                   </Row>
+                  {/* EFT Proof-of-payment */}
+                  {((paymentForm.payment_method || selectedOrder?.payment_method || '').toLowerCase() === 'eft') && (
+                    <Row>
+                      <Col md={12}>
+                        <Form.Group className="mb-3">
+                          <Form.Label>Payment Proof (required for EFT)</Form.Label>
+                          <InputGroup>
+                            <Form.Control
+                              placeholder="Enter proof ID (recent uploaded proof)"
+                              value={paymentForm.proof_id}
+                              onChange={(e)=>setPaymentForm({...paymentForm, proof_id: e.target.value})}
+                            />
+                            <Button variant="outline-secondary" onClick={()=>navigate('/owner/payments')}>Refresh</Button>
+                          </InputGroup>
+                          <div className="form-text">Upload proof via PaymentProofs module if needed, then paste its ID here. Backend validates proof belongs to this order and is recent.</div>
+                        </Form.Group>
+                      </Col>
+                    </Row>
+                  )}
                   <Row>
                     <Col md={12}>
                       <Form.Group className="mb-3">

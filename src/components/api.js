@@ -90,6 +90,9 @@ export const getWarehouseOrdersDashboard = () => apiRequest('/orders/warehouse_d
 export const getDeliveryOrdersDashboard = () => apiRequest('/orders/delivery_dashboard/');
 export const getAdminWarehouseOverview = () => apiRequest('/orders/admin_warehouse_overview/');
 
+// Consolidated warehouse analytics
+export const getWarehouseAnalytics = () => apiRequest('/orders/warehouse_analytics/');
+
 // Customers
 export const getCustomers = () => apiRequest('/customers/');
 export const createCustomer = (data) => apiRequest('/customers/', { method: 'POST', data });

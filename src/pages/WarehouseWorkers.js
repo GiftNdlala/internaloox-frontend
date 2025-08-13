@@ -6,9 +6,10 @@ import { getUsersQuery, createUser, updateUser, deleteUser, getTasksByWorker } f
 const ROLE_OPTIONS = ['warehouse_worker', 'warehouse', 'delivery', 'admin', 'owner'];
 
 function getAllowedCreateRoles(currentRole) {
-  if (currentRole === 'owner') return ROLE_OPTIONS;
-  if (currentRole === 'admin') return ['warehouse', 'warehouse_worker', 'delivery'];
-  if (currentRole === 'warehouse') return ['warehouse_worker'];
+  const role = currentRole === 'warehouse_manager' ? 'warehouse' : currentRole;
+  if (role === 'owner') return ROLE_OPTIONS;
+  if (role === 'admin') return ['warehouse', 'warehouse_worker', 'delivery'];
+  if (role === 'warehouse') return ['warehouse_worker'];
   return [];
 }
 
@@ -34,7 +35,8 @@ const WarehouseWorkers = ({ currentUser }) => {
     setLoading(true);
     setError('');
     try {
-      const data = await getUsersQuery(`role=${roleFilter}`);
+      const roleParam = roleFilter === 'warehouse_manager' ? 'warehouse' : roleFilter;
+      const data = await getUsersQuery(`role=${roleParam}`);
       const list = Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []);
       setUsers(list);
     } catch (e) {
