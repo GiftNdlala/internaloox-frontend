@@ -26,6 +26,8 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
     paymentStatus: 'deposit_only',
     orderStatus: 'pending',
   });
+  // Proof of Payment (required for EFT-only business at order creation)
+  const [popFile, setPopFile] = useState(null);
   // Product being added
   const [productForm, setProductForm] = useState({
     productId: '',
@@ -155,6 +157,11 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
     if (orderItems.length === 0) {
       newErrors.orderItems = 'Please add at least one product to the order using the "Add Product" button above';
     }
+
+    // Proof of payment required for new orders (EFT-only business)
+    if (!isEdit && !popFile) {
+      newErrors.popFile = 'Proof of payment is required';
+    }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -204,6 +211,8 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
           fabric: item.fabric || null,
           product_description: item.productDescription || '',
         })),
+        popFile: popFile || null,
+        popNotes: customerData.adminNotes || '',
       };
       onSubmit(payload);
     } catch (err) {
@@ -389,6 +398,13 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
               </div>
             </div>
           </div>
+          {!isEdit && (
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Proof of Payment (PDF/Image) *</label>
+              <input type="file" accept="image/*,application/pdf" onChange={(e)=>setPopFile(e.target.files?.[0] || null)} className={`w-full px-3 py-2 border rounded-lg ${errors.popFile ? 'border-red-500' : 'border-gray-300'}`} />
+              {errors.popFile && <p className="text-red-500 text-sm mt-1">{errors.popFile}</p>}
+            </div>
+          )}
         </div>
         {/* Delivery Section */}
         <div className="bg-purple-50 p-4 rounded-lg mt-4">

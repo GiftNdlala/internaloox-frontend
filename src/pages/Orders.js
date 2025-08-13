@@ -18,6 +18,7 @@ import SharedHeader from '../components/SharedHeader';
 import UniversalSidebar from '../components/UniversalSidebar';
 import { getOrderManagementData, patchOrderStatus } from '../components/api';
 import { getOrderStatusOptions } from '../components/api';
+import { createPayment, updateOrderPayment } from '../components/api';
 import { updateProductionStatus } from '../components/api';
 
 const Orders = ({ user, userRole, onLogout }) => {
@@ -227,8 +228,29 @@ const Orders = ({ user, userRole, onLogout }) => {
         await updateOrder(editingOrder.id, orderData);
         setSuccess('Order updated successfully');
       } else {
-        await createOrder(orderData);
-        setSuccess('Order created successfully');
+        // Step 1: create order
+        const { popFile, popNotes, ...pureOrder } = orderData;
+        const created = await createOrder(pureOrder);
+        const newOrderId = created?.id;
+        // Step 2: upload PoP (PDF/Image) for EFT
+        if (!newOrderId) throw new Error('Order creation failed');
+        if (!popFile) throw new Error('Payment proof required for EFT payments');
+        const form = new FormData();
+        form.append('order', newOrderId);
+        if (pureOrder?.deposit_amount) form.append('amount', pureOrder.deposit_amount);
+        form.append('payment_type', 'deposit');
+        form.append('proof_image', popFile);
+        if (popNotes) form.append('notes', popNotes);
+        const proof = await createPayment(form, true);
+        if (!proof?.id) throw new Error('Failed to upload payment proof');
+        // Step 3: commit deposit via update_payment with proof_id
+        await updateOrderPayment(newOrderId, {
+          payment_method: 'EFT',
+          payment_status: 'deposit_paid',
+          deposit_amount: Number(pureOrder?.deposit_amount) || 0,
+          proof_id: proof.id
+        });
+        setSuccess('Order created and deposit recorded');
       }
       setShowOrderModal(false);
       fetchAllData();
