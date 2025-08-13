@@ -30,15 +30,15 @@ const WarehouseNavbar = ({
   const isWorkers = pathname.includes('/warehouse/workers');
 
   const getRoleDisplayName = (role) => {
+    const canonical = role === 'warehouse_manager' ? 'warehouse' : role;
     const roleNames = {
       'owner': 'Owner',
       'admin': 'Admin', 
-      'warehouse_manager': 'Warehouse Manager',
       'warehouse_worker': 'Warehouse Worker',
-      'warehouse': 'Warehouse Staff', // Legacy role
+      'warehouse': 'Warehouse Manager',
       'delivery': 'Delivery'
     };
-    return roleNames[role] || role;
+    return roleNames[canonical] || canonical;
   };
 
   const canManageTasks = () => {

@@ -104,7 +104,7 @@ const TaskManagement = ({ user }) => {
     setLoading(true);
     try {
       const rolesQuery = (user?.role === 'owner' || user?.role === 'admin')
-        ? 'role=warehouse_worker,warehouse_manager,warehouse'
+        ? 'role=warehouse_worker,warehouse'
         : 'role=warehouse_worker,warehouse';
       const [typesData, workersData] = await Promise.all([
         getTaskTypes('is_active=true'),
@@ -129,7 +129,7 @@ const TaskManagement = ({ user }) => {
         username: w.username || '',
         role: w.role || ''
       }));
-      // If current user is a warehouse_manager, show only workers (warehouse_worker or legacy warehouse)
+      // If current user is a warehouse manager (canonical 'warehouse'), show only workers
       const visibleWorkers = (user?.role === 'warehouse')
         ? normalizedWorkers.filter(w => w.role === 'warehouse_worker' || w.role === 'warehouse')
         : normalizedWorkers;

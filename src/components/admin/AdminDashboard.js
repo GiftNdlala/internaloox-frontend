@@ -227,43 +227,7 @@ const AdminDashboard = ({ user, onLogout }) => {
     </Card>
   );
 
-  // Approval Queue Component
-  const ApprovalQueue = () => {
-    const pendingOrders = orders.filter(o => o.order_status === 'pending');
-    const overdueOrders = orders.filter(o => {
-      if (!o.delivery_deadline) return false;
-      return new Date(o.delivery_deadline) < new Date() && o.order_status !== 'delivered';
-    });
-
-    return (
-      <Card className="h-100 shadow-sm">
-        <Card.Header className="bg-warning text-dark d-flex justify-content-between align-items-center">
-          <h6 className="mb-0">
-                          <FaEnvelope className="me-2" />
-            Approval Queue
-          </h6>
-          <Badge bg="dark">{pendingOrders.length}</Badge>
-        </Card.Header>
-        <Card.Body style={{ maxHeight: '300px', overflowY: 'auto' }}>
-          {pendingOrders.length > 0 ? (
-            pendingOrders.slice(0, 5).map(order => (
-              <div key={order.id} className="d-flex justify-content-between align-items-center mb-3 p-2 rounded bg-light">
-                <div>
-                  <div className="fw-bold">{order.order_number}</div>
-                  <small className="text-muted">{order.customer?.name}</small>
-                </div>
-                <Button variant="outline-success" size="sm">
-                  <FaCheck />
-                </Button>
-              </div>
-            ))
-          ) : (
-            <p className="text-muted text-center">No pending approvals</p>
-          )}
-        </Card.Body>
-      </Card>
-    );
-  };
+  // Approval Queue removed from Admin; moved to Warehouse dashboard
 
   // Activity Monitor
   const ActivityMonitor = () => {
@@ -458,10 +422,7 @@ const AdminDashboard = ({ user, onLogout }) => {
 
           {/* Dashboard Widgets */}
           <Row className="mb-4">
-            <Col lg={6} className="mb-3">
-              <ApprovalQueue />
-            </Col>
-            <Col lg={6} className="mb-3">
+            <Col lg={12} className="mb-3">
               <ActivityMonitor />
             </Col>
           </Row>

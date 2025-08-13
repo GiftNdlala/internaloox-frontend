@@ -9,7 +9,7 @@ import {
 import UniversalSidebar from '../components/UniversalSidebar';
 import EnhancedPageHeader from '../components/EnhancedPageHeader';
 import SharedHeader from '../components/SharedHeader';
-import { getPayments, getOrders, getCustomers, createPayment, updatePayment, deletePayment, updateOrderPayment, markPaymentOverdue, getPaymentsDashboard } from '../components/api';
+import { getPayments, getOrders, getCustomers, createPayment, updatePayment, deletePayment, updateOrderPayment, markPaymentOverdue, getPaymentsDashboard, getPaymentProofsForOrder } from '../components/api';
 
 const Payments = ({ user, userRole, onLogout }) => {
   const navigate = useNavigate();
@@ -26,6 +26,7 @@ const Payments = ({ user, userRole, onLogout }) => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [recentProofs, setRecentProofs] = useState([]);
 
   // Form state
   const [paymentForm, setPaymentForm] = useState({
@@ -153,6 +154,13 @@ const Payments = ({ user, userRole, onLogout }) => {
       payment_notes: order.payment_notes || '',
       proof_id: ''
     });
+    // Load recent proofs for this order
+    getPaymentProofsForOrder(order.id)
+      .then((data) => {
+        const list = Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []);
+        setRecentProofs(list.slice(0, 5));
+      })
+      .catch(() => setRecentProofs([]));
     setShowPaymentModal(true);
   };
 
@@ -736,6 +744,18 @@ const Payments = ({ user, userRole, onLogout }) => {
                             <Button variant="outline-secondary" onClick={()=>navigate('/owner/payments')}>Refresh</Button>
                           </InputGroup>
                           <div className="form-text">Upload proof via PaymentProofs module if needed, then paste its ID here. Backend validates proof belongs to this order and is recent.</div>
+                          {recentProofs.length > 0 && (
+                            <div className="mt-2">
+                              <div className="small text-muted mb-1">Recent proofs for this order:</div>
+                              <div className="d-flex flex-wrap gap-2">
+                                {recentProofs.map(p => (
+                                  <Button key={p.id} size="sm" variant="outline-primary" onClick={()=>setPaymentForm({...paymentForm, proof_id: String(p.id)})}>
+                                    #{p.id} • {new Date(p.created_at || p.date || Date.now()).toLocaleString()}
+                                  </Button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </Form.Group>
                       </Col>
                     </Row>

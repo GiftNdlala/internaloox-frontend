@@ -441,6 +441,34 @@ const EnhancedWarehouseDashboard = ({ user, onLogout, showNavbar = true }) => {
         </Col>
       </Row>
 
+      {/* Approval Queue moved here for managers/admin/owner */}
+      <Row className="mb-4">
+        <Col md={12}>
+          <Card className="shadow-sm">
+            <Card.Header className="bg-warning text-dark d-flex justify-content-between align-items-center">
+              <h6 className="mb-0">Approval Queue</h6>
+              <Badge bg="dark">{orders.filter(o => o.order_status === 'pending').length}</Badge>
+            </Card.Header>
+            <Card.Body style={{ maxHeight: '300px', overflowY: 'auto' }}>
+              {orders.filter(o => o.order_status === 'pending').slice(0, 8).map(order => (
+                <div key={order.id} className="d-flex justify-content-between align-items-center mb-2 p-2 rounded bg-light">
+                  <div>
+                    <div className="fw-bold">{order.order_number}</div>
+                    <small className="text-muted">{order.customer_name}</small>
+                  </div>
+                  <Button size="sm" variant="outline-success" onClick={() => navigate(getOrdersPathForRole())}>
+                    Review
+                  </Button>
+                </div>
+              ))}
+              {orders.filter(o => o.order_status === 'pending').length === 0 && (
+                <div className="text-center text-muted">No pending approvals</div>
+              )}
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
       <Row>
         <Col md={6}>
           <Card className="mb-4">

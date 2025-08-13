@@ -104,6 +104,8 @@ export const getPayments = () => apiRequest('/payment-proofs/');
 export const createPayment = (data, isForm = false) => apiRequest('/payment-proofs/', { method: 'POST', data, isForm });
 export const updatePayment = (id, data, isForm = false) => apiRequest(`/payment-proofs/${id}/`, { method: 'PUT', data, isForm });
 export const deletePayment = (id) => apiRequest(`/payment-proofs/${id}/`, { method: 'DELETE' });
+// Convenience: list proofs for a given order (if backend supports filtering)
+export const getPaymentProofsForOrder = (orderId) => apiRequest(`/payment-proofs/?order=${orderId}`);
 
 // Dashboard stats
 export const getDashboardStats = () => apiRequest('/dashboard-stats/');
