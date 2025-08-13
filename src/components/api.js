@@ -107,6 +107,24 @@ export const deletePayment = (id) => apiRequest(`/payment-proofs/${id}/`, { meth
 // Convenience: list proofs for a given order (if backend supports filtering)
 export const getPaymentProofsForOrder = (orderId) => apiRequest(`/payment-proofs/?order=${orderId}`);
 
+// Payment Transactions (read-only)
+const buildQueryString = (params = {}) => {
+  const entries = Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== '');
+  if (entries.length === 0) return '';
+  const qs = entries.map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&');
+  return `?${qs}`;
+};
+
+export const getPaymentTransactions = (params = {}) => {
+  const qs = buildQueryString(params);
+  return apiRequest(`/payments/transactions/${qs}`);
+};
+
+export const getOrderPaymentTransactions = (orderId, params = {}) => {
+  const qs = buildQueryString(params);
+  return apiRequest(`/orders/${orderId}/payment_transactions/${qs}`);
+};
+
 // Dashboard stats
 export const getDashboardStats = () => apiRequest('/dashboard-stats/');
 // Users

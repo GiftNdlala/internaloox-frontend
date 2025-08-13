@@ -12,7 +12,7 @@ import {
   FaUserCog, FaPlus, FaEdit, FaTrash, FaTimes
 } from 'react-icons/fa';
 import UniversalSidebar from '../components/UniversalSidebar';
-import { getDashboardStats, getOrders, getUsers, createUser, updateUser, deleteUser } from '../components/api';
+import { getDashboardStats, getOrders, getUsers, createUser, updateUser, deleteUser, getPaymentTransactions } from '../components/api';
 import '../styles/MobileFirst.css';
 
 const OwnerDashboard = ({ user, onLogout }) => {
@@ -20,6 +20,12 @@ const OwnerDashboard = ({ user, onLogout }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [users, setUsers] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [txPage, setTxPage] = useState(1);
+  const [txPageSize] = useState(10);
+  const [txTotal, setTxTotal] = useState(0);
+  const [txLoading, setTxLoading] = useState(false);
+  const [txFilters, setTxFilters] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -61,12 +67,27 @@ const OwnerDashboard = ({ user, onLogout }) => {
       ]);
       setUsers(usersData.results || usersData);
       setOrders(ordersData.results || ordersData);
+      // Load initial transactions (non-blocking)
+      loadTransactions(1, txPageSize, txFilters);
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
       setError('Failed to load dashboard data');
     } finally {
       setLoading(false);
     }
+  };
+  const loadTransactions = async (page = 1, pageSize = txPageSize, filters = {}) => {
+    setTxLoading(true);
+    try {
+      const res = await getPaymentTransactions({ page, page_size: pageSize, ...filters });
+      const list = Array.isArray(res?.results) ? res.results : (Array.isArray(res) ? res : []);
+      setTransactions(list);
+      const total = (res?.count !== undefined) ? res.count : (Array.isArray(res) ? res.length : 0);
+      setTxTotal(total);
+      setTxPage(page);
+    } catch (e) {
+      // Non-blocking error
+    } finally { setTxLoading(false); }
   };
 
   // User Management Functions
@@ -550,6 +571,67 @@ const OwnerDashboard = ({ user, onLogout }) => {
     </Modal>
   );
 
+  const PaymentTransactionsTable = () => (
+    <div className="oox-mobile-card">
+      <div className="oox-mobile-flex-between oox-mobile-mb-3">
+        <h3 style={{ margin: 0, color: '#1e293b', fontWeight: '700' }}>
+          <FaMoneyBillWave style={{ marginRight: '0.5rem', color: '#10b981' }} />
+          Recent Payment Transactions
+        </h3>
+        <div className="d-flex gap-2">
+          <button className="oox-mobile-btn" onClick={()=>loadTransactions(1, txPageSize, txFilters)}>Refresh</button>
+        </div>
+      </div>
+      <div className="table-responsive">
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Order #</th>
+              <th>Actor</th>
+              <th>Method</th>
+              <th>Amount Δ</th>
+              <th>New Balance</th>
+              <th>Status</th>
+              <th>Proof</th>
+            </tr>
+          </thead>
+          <tbody>
+            {transactions.map(tx => (
+              <tr key={tx.id}>
+                <td>{new Date(tx.created_at).toLocaleString()}</td>
+                <td>{tx.order_number || tx.order}</td>
+                <td>{tx.actor_user?.username || `${tx.actor_user?.first_name||''} ${tx.actor_user?.last_name||''}`}</td>
+                <td>{tx.payment_method}</td>
+                <td>{typeof tx.amount_delta === 'number' ? `R${tx.amount_delta.toFixed(2)}` : tx.amount_delta}</td>
+                <td>{typeof tx.new_balance === 'number' ? `R${tx.new_balance.toFixed(2)}` : tx.new_balance}</td>
+                <td>{tx.payment_status}</td>
+                <td>{tx.proof?.id ? <a href={tx.proof.url || '#'} target="_blank" rel="noreferrer">#{tx.proof.id}</a> : '-'}</td>
+              </tr>
+            ))}
+            {transactions.length === 0 && (
+              <tr><td colSpan={8} className="text-center text-muted py-3">No transactions</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      {/* Pagination */}
+      {txTotal > txPageSize && (
+        <div className="d-flex justify-content-between align-items-center">
+          <div className="text-muted small">Page {txPage} of {Math.ceil(txTotal / txPageSize)}</div>
+          <div className="d-flex gap-2">
+            <button className="oox-mobile-btn" disabled={txPage<=1 || txLoading} onClick={()=>loadTransactions(txPage-1)}>
+              Prev
+            </button>
+            <button className="oox-mobile-btn" disabled={(txPage*txPageSize)>=txTotal || txLoading} onClick={()=>loadTransactions(txPage+1)}>
+              Next
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
   if (loading) {
     return (
       <div className="oox-mobile-container" style={{ minHeight: '100vh' }}>
@@ -679,6 +761,9 @@ const OwnerDashboard = ({ user, onLogout }) => {
                   </button>
                 </div>
               </div>
+
+              {/* Payment Transactions Table */}
+              <PaymentTransactionsTable />
             </div>
           )}
 
