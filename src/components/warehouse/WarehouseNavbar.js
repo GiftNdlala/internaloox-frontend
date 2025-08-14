@@ -54,6 +54,12 @@ const WarehouseNavbar = ({
     return ['owner', 'admin', 'warehouse_worker', 'warehouse'].includes(user?.role);
   };
 
+  // Debug logging
+  console.log('WarehouseNavbar - User role:', user?.role);
+  console.log('WarehouseNavbar - Can manage tasks:', canManageTasks());
+  console.log('WarehouseNavbar - Can view analytics:', canViewAnalytics());
+  console.log('WarehouseNavbar - Can manage inventory:', canManageInventory());
+
   const formatTime = (date) => {
     return date.toLocaleTimeString('en-US', { 
       hour: '2-digit', 
@@ -139,6 +145,20 @@ const WarehouseNavbar = ({
               </Nav.Link>
             )}
 
+            {/* Always show Inventory for testing */}
+            <Nav.Link 
+              active={isInventory}
+              onClick={() => {
+                onTabChange?.('inventory');
+                navigate('/warehouse/inventory/materials');
+                setExpanded(false);
+              }}
+              className="d-flex align-items-center"
+            >
+              <FaBoxes className="me-2" />
+              <span>Inventory</span>
+            </Nav.Link>
+
             {/* My Tasks - Workers only */}
             {user?.role === 'warehouse_worker' && (
               <Nav.Link 
@@ -222,6 +242,20 @@ const WarehouseNavbar = ({
             >
               <FaClipboardList className="me-2" />
               <span>Orders</span>
+            </Nav.Link>
+
+            {/* Analytics - Always show for testing */}
+            <Nav.Link 
+              active={isOverview && activeTab === 'analytics'}
+              onClick={() => {
+                onTabChange?.('analytics');
+                navigate('/warehouse/analytics');
+                setExpanded(false);
+              }}
+              className="d-flex align-items-center"
+            >
+              <FaChartBar className="me-2" />
+              <span>Analytics</span>
             </Nav.Link>
 
             {/* Workers - Management only */}
@@ -328,9 +362,9 @@ const WarehouseNavbar = ({
         <div 
           className="d-lg-none position-fixed w-100 h-100" 
           style={{ 
-            top: 0, 
+            top: 70, 
             left: 0, 
-            backgroundColor: 'rgba(0,0,0,0.5)', 
+            backgroundColor: 'rgba(0,0,0,0.3)', 
             zIndex: 1040 
           }}
           onClick={() => setExpanded(false)}
@@ -365,6 +399,15 @@ const WarehouseNavbar = ({
           color: white !important;
         }
         
+        .warehouse-navbar .nav-link {
+          color: #495057 !important;
+          text-decoration: none !important;
+        }
+        
+        .warehouse-navbar .nav-link:hover {
+          color: #0d6efd !important;
+        }
+        
         .warehouse-navbar .dropdown-toggle::after {
           display: none;
         }
@@ -389,27 +432,44 @@ const WarehouseNavbar = ({
         
         @media (max-width: 991px) {
           .warehouse-navbar .navbar-collapse {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
+            position: fixed !important;
+            top: 70px !important;
+            left: 0 !important;
+            right: 0 !important;
+            background: white !important;
             border-top: 1px solid #dee2e6;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            z-index: 1050;
-            max-height: 80vh;
-            overflow-y: auto;
+            z-index: 1050 !important;
+            max-height: calc(100vh - 70px) !important;
+            overflow-y: auto !important;
+            transform: none !important;
+            transition: all 0.3s ease !important;
+          }
+          
+          .warehouse-navbar .navbar-collapse.show {
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+          }
+          
+          .warehouse-navbar .navbar-collapse.collapsing {
+            display: block !important;
+            opacity: 0.5 !important;
+            visibility: visible !important;
           }
           
           .warehouse-navbar .navbar-nav {
-            padding: 1rem;
+            padding: 1rem !important;
+            margin: 0 !important;
           }
           
           .warehouse-navbar .nav-link {
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
-            transition: all 0.2s ease;
+            padding: 0.75rem 1rem !important;
+            border-radius: 8px !important;
+            margin-bottom: 0.5rem !important;
+            transition: all 0.2s ease !important;
+            display: flex !important;
+            align-items: center !important;
           }
           
           .warehouse-navbar .nav-link:hover {
@@ -419,11 +479,27 @@ const WarehouseNavbar = ({
           
           .warehouse-navbar .dropdown-menu {
             position: static !important;
-            float: none;
-            width: 100%;
-            margin-top: 0.5rem;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
+            float: none !important;
+            width: 100% !important;
+            margin-top: 0.5rem !important;
+            border: 1px solid #dee2e6 !important;
+            border-radius: 8px !important;
+            box-shadow: none !important;
+          }
+          
+          .warehouse-navbar .navbar-toggler {
+            border: none !important;
+            padding: 0.5rem !important;
+            border-radius: 8px !important;
+            transition: all 0.2s ease !important;
+          }
+          
+          .warehouse-navbar .navbar-toggler:focus {
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25) !important;
+          }
+          
+          .warehouse-navbar .navbar-toggler:hover {
+            background-color: #f8f9fa !important;
           }
         }
       `}</style>

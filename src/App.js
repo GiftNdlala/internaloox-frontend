@@ -189,7 +189,7 @@ function App() {
                 </ProtectedRoute>
               }
             >
-              <Route index element={<EnhancedWarehouseDashboard user={user} onLogout={handleLogout} showNavbar={false} />} />
+              <Route index element={<EnhancedWarehouseDashboard user={user} onLogout={handleLogout} />} />
               <Route path="products" element={<WarehouseProducts />} />
               <Route path="products/new" element={<AddProduct user={user} />} />
               <Route path="stock" element={<WarehouseStock />} />

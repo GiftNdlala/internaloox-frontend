@@ -3,8 +3,9 @@ import { Document, Page, pdfjs } from 'react-pdf';
 import { Spinner, Button, ButtonGroup } from 'react-bootstrap';
 import { FaSearchPlus, FaSearchMinus, FaDownload } from 'react-icons/fa';
 
-// Configure pdfjs worker from the installed pdfjs-dist package
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+// Configure pdfjs worker to use local worker instead of CDN
+// This fixes the "Failed to fetch dynamically imported module" error
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
 	const [numPages, setNumPages] = useState(null);
@@ -26,7 +27,8 @@ const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
 	};
 
 	const onDocumentLoadError = (err) => {
-		setError(err?.message || 'Failed to load PDF');
+		console.error('PDF load error:', err);
+		setError(err?.message || 'Failed to load PDF. Please try refreshing the page.');
 		setLoading(false);
 	};
 
@@ -40,12 +42,14 @@ const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
 			a.target = '_blank';
 			a.rel = 'noreferrer';
 			a.click();
-		} catch {}
+		} catch (err) {
+			console.error('Download error:', err);
+		}
 	};
 
 	return (
 		<div>
-			<div className="d-flex justify-content-between align-items-center mb-2">
+			<div className="d-flex justify-content-between align-items-center mb-3">
 				<div className="small text-muted">{fileName}</div>
 				<ButtonGroup>
 					<Button variant="outline-secondary" size="sm" onClick={zoomOut}><FaSearchMinus /></Button>
@@ -60,10 +64,21 @@ const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
 					</div>
 				)}
 				{error && (
-					<div className="text-center text-danger p-3">{error}</div>
+					<div className="text-center text-danger p-3">
+						<div className="mb-2">{error}</div>
+						<Button variant="outline-primary" size="sm" onClick={() => window.open(url, '_blank')}>
+							Open in New Tab
+						</Button>
+					</div>
 				)}
 				{!error && (
-					<Document file={url} onLoadSuccess={onDocumentLoadSuccess} onLoadError={onDocumentLoadError} loading=" ">
+					<Document 
+						file={url} 
+						onLoadSuccess={onDocumentLoadSuccess} 
+						onLoadError={onDocumentLoadError} 
+						loading=" "
+						error={<div className="text-center text-danger p-3">Failed to load PDF</div>}
+					>
 						<div className="d-flex flex-column align-items-center py-3">
 							{Array.from(new Array(numPages || 0), (el, index) => (
 								<div key={`page_${index + 1}`} className="mb-3" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.1)', background: 'white' }}>

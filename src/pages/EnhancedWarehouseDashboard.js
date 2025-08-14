@@ -15,7 +15,6 @@ import {
   getWorkerDashboard, getSupervisorDashboard, getUnreadNotifications,
   getWarehouseDashboard, getLowStockAlerts
 } from '../components/api';
-import WarehouseNavbar from '../components/warehouse/WarehouseNavbar';
 import TaskCard from '../components/warehouse/TaskCard';
 import OrderTaskAssignment from '../components/warehouse/OrderTaskAssignment';
 import StockEntry from '../components/warehouse/StockEntry';
@@ -24,7 +23,7 @@ import WarehouseOrders from '../components/warehouse/WarehouseOrders';
 import WorkerOrderTasks from '../components/warehouse/WorkerOrderTasks';
 import VERSION from '../version';
 
-const EnhancedWarehouseDashboard = ({ user, onLogout, showNavbar = true }) => {
+const EnhancedWarehouseDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
   
   // Core State
@@ -598,16 +597,6 @@ const EnhancedWarehouseDashboard = ({ user, onLogout, showNavbar = true }) => {
   if (loading) {
     return (
       <div className="warehouse-dashboard">
-        {showNavbar && (
-          <WarehouseNavbar 
-            user={user}
-            onLogout={onLogout}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            notifications={notifications}
-            currentTime={currentTime}
-          />
-        )}
         <Container fluid className="d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
           <div className="text-center">
             <Spinner animation="border" variant="primary" style={{ width: '3rem', height: '3rem' }} />
@@ -620,17 +609,6 @@ const EnhancedWarehouseDashboard = ({ user, onLogout, showNavbar = true }) => {
 
   return (
     <div className="warehouse-dashboard" style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
-      {/* Enhanced Navbar */}
-      {showNavbar && (
-        <WarehouseNavbar 
-          user={user}
-          onLogout={onLogout}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          notifications={notifications}
-          currentTime={currentTime}
-        />
-      )}
       
       {/* Main Content */}
       <Container fluid className="p-4">
