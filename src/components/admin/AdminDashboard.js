@@ -357,6 +357,12 @@ const AdminDashboard = ({ user, onLogout }) => {
                   </Button>
                   <Button 
                     variant="outline-success"
+                    onClick={() => navigate('/admin/transactions')}
+                  >
+                    Transactions
+                  </Button>
+                  <Button 
+                    variant="outline-success"
                     onClick={() => navigate('/admin/warehouse')}
                   >
                     Warehouse Overview

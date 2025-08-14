@@ -276,6 +276,14 @@ function App() {
               } 
             />
             <Route 
+              path="/admin/transactions" 
+              element={
+                <ProtectedRoute allowedRoles={['admin','owner']}>
+                  <OwnerPaymentTransactions user={user} onLogout={handleLogout} />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
               path="/owner/deliveries" 
               element={
                 <ProtectedRoute allowedRoles={['owner', 'admin']}>

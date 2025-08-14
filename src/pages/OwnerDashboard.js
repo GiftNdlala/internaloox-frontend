@@ -753,6 +753,13 @@ const OwnerDashboard = ({ user, onLogout }) => {
                     Payments
                   </button>
                   <button
+                    onClick={() => navigate('/owner/transactions')}
+                    className="oox-mobile-btn"
+                  >
+                    <FaMoneyBillWave />
+                    Transactions
+                  </button>
+                  <button
                     onClick={() => navigate('/owner/analytics')}
                     className="oox-mobile-btn"
                   >

@@ -103,7 +103,6 @@ const WarehouseNavbar = ({
         <Navbar.Toggle 
           aria-controls="warehouse-navbar-nav" 
           className="d-lg-none"
-          onClick={() => setExpanded(!expanded)}
         />
 
         {/* Collapsible Navigation */}
