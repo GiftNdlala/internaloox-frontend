@@ -203,15 +203,7 @@ function App() {
               <Route path="orders" element={<Orders user={user} userRole={user?.role} onLogout={handleLogout} />} />
             </Route>
 
-            {/* Add Product (Warehouse Manager view) */}
-            <Route
-              path="/warehouse/products/new"
-              element={
-                <ProtectedRoute allowedRoles={['warehouse', 'owner', 'admin', 'warehouse_worker']}>
-                  <AddProduct user={user} />
-                </ProtectedRoute>
-              }
-            />
+            {/* (Removed duplicate top-level Add Product route to ensure navbar from WarehouseLayout is always shown) */}
 
             {/* Delivery Dashboard Route */}
             <Route 
