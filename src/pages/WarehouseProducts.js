@@ -98,11 +98,11 @@ const WarehouseProducts = () => {
             <tbody>
               {filtered.map(prod => (
                 <tr key={prod.id}>
-                  <td>{prod.name}</td>
-                  <td>{prod.sku || '-'}</td>
-                  <td>{prod.color || '-'}</td>
-                  <td>{prod.fabric || '-'}</td>
-                  <td>{typeof prod.price === 'number' ? `R${prod.price}` : '-'}</td>
+                  <td>{prod.product_name || prod.name || 'Unnamed Product'}</td>
+                  <td>{prod.model_code || prod.sku || '-'}</td>
+                  <td>{prod.default_color_code || prod.color || '-'}</td>
+                  <td>{prod.default_fabric_letter || prod.fabric || '-'}</td>
+                  <td>{prod.unit_price ? `R${prod.unit_price}` : prod.base_price ? `R${prod.base_price}` : '-'}</td>
                 </tr>
               ))}
               {filtered.length === 0 && (

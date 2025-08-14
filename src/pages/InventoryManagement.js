@@ -110,8 +110,7 @@ const InventoryManagement = () => {
         cost_per_unit: Number(form.unit_price),
         minimum_stock: form.minimum_stock === '' ? null : Number(form.minimum_stock),
         description: form.description?.trim() || '',
-        // Add default category to prevent 400 errors
-        category_id: 1  // Use the 'other' category ID
+        // Category is now optional - backend will handle defaults
       };
       let saved;
       if (editingMaterial) {

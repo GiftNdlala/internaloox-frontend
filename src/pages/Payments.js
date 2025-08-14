@@ -206,6 +206,7 @@ const Payments = ({ user, userRole, onLogout }) => {
           const form = new FormData();
           form.append('order', selectedOrder.id);
           if (paymentForm.deposit_amount) form.append('amount', paymentForm.deposit_amount);
+          form.append('payment_type', 'deposit_payment');
           form.append('proof_image', proofFile);
           const created = await createPayment(form, true);
           if (created?.id) {

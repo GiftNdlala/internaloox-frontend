@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
-import WarehouseNavbar from '../components/warehouse/WarehouseNavbar';
+import WarehouseSideNav from '../components/warehouse/WarehouseSideNav';
 
 const WarehouseLayout = ({ user, onLogout }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -14,16 +14,18 @@ const WarehouseLayout = ({ user, onLogout }) => {
 
   return (
     <div className="warehouse-dashboard" style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
-      <WarehouseNavbar 
+      <WarehouseSideNav 
         user={user}
         onLogout={onLogout}
         activeTab={activeTab}
         onTabChange={setActiveTab}
         currentTime={currentTime}
       />
-      <Container fluid className="p-4">
-        <Outlet />
-      </Container>
+      <div style={{ marginLeft: '280px', minHeight: '100vh' }}>
+        <Container fluid className="p-4">
+          <Outlet />
+        </Container>
+      </div>
     </div>
   );
 };
