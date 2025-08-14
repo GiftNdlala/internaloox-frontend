@@ -23,6 +23,8 @@ import WarehouseOrders from '../components/warehouse/WarehouseOrders';
 import WorkerOrderTasks from '../components/warehouse/WorkerOrderTasks';
 import VERSION from '../version';
 
+// Remove any old navbar imports - now using WarehouseLayout with side navigation
+
 const EnhancedWarehouseDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
   
