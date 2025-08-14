@@ -225,7 +225,8 @@ const Payments = ({ user, userRole, onLogout }) => {
       };
       const updateData = {
         ...(toNumber(paymentForm.deposit_amount) !== undefined ? { deposit_amount: toNumber(paymentForm.deposit_amount) } : {}),
-        ...(toNumber(paymentForm.balance_amount) !== undefined ? { balance_amount: toNumber(paymentForm.balance_amount) } : {}),
+        // Only send balance_amount if explicitly set, otherwise let backend auto-calculate
+        ...(paymentForm.balance_amount && paymentForm.balance_amount.trim() !== '' ? { balance_amount: toNumber(paymentForm.balance_amount) } : {}),
         payment_status: paymentForm.payment_status,
         payment_method: paymentForm.payment_method,
         payment_notes: paymentForm.payment_notes
@@ -731,7 +732,7 @@ const Payments = ({ user, userRole, onLogout }) => {
                     </Col>
                     <Col md={6}>
                       <Form.Group className="mb-3">
-                        <Form.Label>Balance Amount</Form.Label>
+                        <Form.Label>Balance Amount (Being Paid)</Form.Label>
                         <Form.Control
                           type="number"
                           step="0.01"
@@ -739,6 +740,9 @@ const Payments = ({ user, userRole, onLogout }) => {
                           onChange={(e) => setPaymentForm({...paymentForm, balance_amount: e.target.value})}
                           placeholder="0.00"
                         />
+                        <Form.Text className="text-muted">
+                          Leave empty to auto-calculate (Total - Deposit)
+                        </Form.Text>
                       </Form.Group>
                     </Col>
                   </Row>
@@ -752,9 +756,9 @@ const Payments = ({ user, userRole, onLogout }) => {
                           required
                         >
                           <option value="">Select status...</option>
-                          <option value="pending">Pending</option>
-                          <option value="partial">Partial</option>
-                          <option value="paid">Paid</option>
+                          <option value="deposit_pending">Deposit Pending</option>
+                          <option value="deposit_paid">Deposit Paid</option>
+                          <option value="fully_paid">Fully Paid</option>
                           <option value="overdue">Overdue</option>
                         </Form.Select>
                       </Form.Group>
@@ -769,7 +773,7 @@ const Payments = ({ user, userRole, onLogout }) => {
                           <option value="">Select method...</option>
                           <option value="cash">Cash</option>
                           <option value="card">Card</option>
-                          <option value="eft">EFT</option>
+                          <option value="EFT">EFT</option>
                           <option value="cheque">Cheque</option>
                           <option value="other">Other</option>
                         </Form.Select>

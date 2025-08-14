@@ -111,7 +111,7 @@ const InventoryManagement = () => {
         minimum_stock: form.minimum_stock === '' ? null : Number(form.minimum_stock),
         description: form.description?.trim() || '',
         // Add default category to prevent 400 errors
-        category: 'other'  // This will be mapped to the 'other' category in the backend
+        category_id: 1  // Use the 'other' category ID
       };
       let saved;
       if (editingMaterial) {

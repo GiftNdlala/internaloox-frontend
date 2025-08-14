@@ -5,7 +5,7 @@ import { Navbar, Nav, NavDropdown, Badge, Button, Container } from 'react-bootst
 import { 
   FaWarehouse, FaTasks, FaBoxes, FaUsers, FaChartBar, 
   FaBell, FaCog, FaSignOutAlt, FaUserCircle, FaClock,
-  FaHome, FaClipboardList, FaIndustry
+  FaHome, FaClipboardList, FaIndustry, FaChevronRight, FaChevronLeft
 } from 'react-icons/fa';
 import NotificationBell from './NotificationBell';
 
@@ -18,6 +18,7 @@ const WarehouseNavbar = ({
   currentTime 
 }) => {
   const [expanded, setExpanded] = useState(false);
+  const [desktopCollapsed, setDesktopCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -100,6 +101,17 @@ const WarehouseNavbar = ({
           </div>
         </Navbar.Brand>
 
+        {/* Desktop Collapse Toggle Button */}
+        <Button
+          variant="outline-secondary"
+          size="sm"
+          className="d-none d-lg-block me-3"
+          onClick={() => setDesktopCollapsed(!desktopCollapsed)}
+          style={{ minWidth: '40px' }}
+        >
+          {desktopCollapsed ? <FaChevronRight /> : <FaChevronLeft />}
+        </Button>
+
         {/* Mobile Time Display */}
         <div className="d-md-none text-muted small">
           <FaClock className="me-1" />
@@ -113,7 +125,7 @@ const WarehouseNavbar = ({
         />
 
         {/* Collapsible Navigation */}
-        <Navbar.Collapse id="warehouse-navbar-nav" className="justify-content-end">
+        <Navbar.Collapse id="warehouse-navbar-nav" className={`justify-content-end ${desktopCollapsed ? 'd-none d-lg-none' : ''}`}>
           {/* Main Navigation */}
           <Nav className="me-auto">
             <Nav.Link 
@@ -172,36 +184,6 @@ const WarehouseNavbar = ({
               >
                 <FaClipboardList className="me-2" />
                 <span>My Tasks</span>
-              </Nav.Link>
-            )}
-
-            {/* Inventory */}
-            {canManageInventory() && (
-              <Nav.Link 
-                active={isInventory}
-                onClick={() => {
-                  onTabChange?.('inventory');
-                  navigate('/warehouse/inventory/materials');
-                  setExpanded(false);
-                }}
-                className="d-flex align-items-center"
-              >
-                <FaBoxes className="me-2" />
-                <span>Inventory</span>
-              </Nav.Link>
-            )}
-            {canManageInventory() && (
-              <Nav.Link 
-                active={pathname.includes('/warehouse/inventory/stock')}
-                onClick={() => {
-                  onTabChange?.('inventory');
-                  navigate('/warehouse/inventory/stock');
-                  setExpanded(false);
-                }}
-                className="d-flex align-items-center"
-              >
-                <FaBoxes className="me-2" />
-                <span>Stock Movements</span>
               </Nav.Link>
             )}
 
@@ -271,22 +253,6 @@ const WarehouseNavbar = ({
               >
                 <FaUsers className="me-2" />
                 <span>Workers</span>
-              </Nav.Link>
-            )}
-
-            {/* Analytics - Management only */}
-            {['owner', 'admin', 'warehouse'].includes(user?.role) && (
-              <Nav.Link 
-                active={isOverview && activeTab === 'analytics'}
-                onClick={() => {
-                  onTabChange?.('analytics');
-                  navigate('/warehouse/analytics');
-                  setExpanded(false);
-                }}
-                className="d-flex align-items-center"
-              >
-                <FaChartBar className="me-2" />
-                <span>Analytics</span>
               </Nav.Link>
             )}
           </Nav>
@@ -387,6 +353,8 @@ const WarehouseNavbar = ({
           border-radius: 8px;
           margin: 0 0.25rem;
           transition: all 0.3s ease;
+          color: #495057 !important;
+          text-decoration: none !important;
         }
         
         .warehouse-navbar .nav-link:hover {
@@ -397,15 +365,6 @@ const WarehouseNavbar = ({
         .warehouse-navbar .nav-link.active {
           background-color: #0d6efd;
           color: white !important;
-        }
-        
-        .warehouse-navbar .nav-link {
-          color: #495057 !important;
-          text-decoration: none !important;
-        }
-        
-        .warehouse-navbar .nav-link:hover {
-          color: #0d6efd !important;
         }
         
         .warehouse-navbar .dropdown-toggle::after {
@@ -473,8 +432,8 @@ const WarehouseNavbar = ({
           }
           
           .warehouse-navbar .nav-link:hover {
-            background-color: #f8f9fa;
-            transform: translateX(5px);
+            background-color: #f8f9fa !important;
+            transform: translateX(5px) !important;
           }
           
           .warehouse-navbar .dropdown-menu {

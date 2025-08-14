@@ -3,9 +3,24 @@ import { Document, Page, pdfjs } from 'react-pdf';
 import { Spinner, Button, ButtonGroup } from 'react-bootstrap';
 import { FaSearchPlus, FaSearchMinus, FaDownload } from 'react-icons/fa';
 
-// Configure pdfjs worker to use local worker instead of CDN
-// This fixes the "Failed to fetch dynamically imported module" error
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+// Configure pdfjs worker with multiple fallback options
+const setupPdfWorker = () => {
+  try {
+    // Try CDN first
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+  } catch (error) {
+    try {
+      // Fallback to unpkg
+      pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+    } catch (fallbackError) {
+      // Final fallback to jsdelivr
+      pdfjs.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+    }
+  }
+};
+
+// Initialize worker
+setupPdfWorker();
 
 const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
 	const [numPages, setNumPages] = useState(null);
