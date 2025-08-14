@@ -7,7 +7,20 @@ const WarehouseLayout = ({ user, onLogout }) => {
   const location = useLocation();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeTab, setActiveTab] = useState('overview');
+  const [isMobile, setIsMobile] = useState(false);
   
+  // Check if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Auto-detect active tab from URL
   useEffect(() => {
     const path = location.pathname;
@@ -17,6 +30,7 @@ const WarehouseLayout = ({ user, onLogout }) => {
     else if (path.includes('/warehouse/workers')) setActiveTab('workers');
     else if (path.includes('/warehouse/analytics')) setActiveTab('analytics');
     else if (path.includes('/warehouse/delivery')) setActiveTab('delivery');
+    else if (path.includes('/warehouse/stock')) setActiveTab('warehouse');
     else setActiveTab('overview');
   }, [location]);
 
@@ -25,18 +39,29 @@ const WarehouseLayout = ({ user, onLogout }) => {
     return () => clearInterval(timer);
   }, []);
 
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+  };
+
   return (
     <div className="warehouse-dashboard" style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
       <WarehouseSideNav 
         user={user}
         onLogout={onLogout}
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={handleTabChange}
         currentTime={currentTime}
+        isMobile={isMobile}
       />
-      <div style={{ marginLeft: '280px', minHeight: '100vh' }}>
+      {/* Main content area with responsive margin */}
+      <div style={{ 
+        marginLeft: isMobile ? '0' : '280px', 
+        minHeight: '100vh',
+        paddingTop: isMobile ? '60px' : '0' // Add top padding for mobile to account for toggle button
+      }}>
         <Container fluid className="p-4">
-          <Outlet />
+          {/* Pass user and onLogout to child components through Outlet */}
+          <Outlet context={{ user, onLogout }} />
         </Container>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { 
   Container, Row, Col, Card, Button, Badge, 
   Alert, Modal, Spinner, Form
@@ -25,8 +25,19 @@ import VERSION from '../version';
 
 // Remove any old navbar imports - now using WarehouseLayout with side navigation
 
-const EnhancedWarehouseDashboard = ({ user, onLogout }) => {
+const EnhancedWarehouseDashboard = ({ user: propUser, onLogout: propOnLogout }) => {
   const navigate = useNavigate();
+  
+  // Try to get user and onLogout from outlet context first, fallback to props
+  let contextData = null;
+  try {
+    contextData = useOutletContext();
+  } catch (error) {
+    // Not in outlet context, use props instead
+  }
+  
+  const user = contextData?.user || propUser;
+  const onLogout = contextData?.onLogout || propOnLogout;
   
   // Core State
   const [loading, setLoading] = useState(true);

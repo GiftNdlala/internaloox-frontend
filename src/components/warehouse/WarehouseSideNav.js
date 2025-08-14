@@ -1,43 +1,45 @@
-import React from 'react';
-import { Nav, Badge } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Nav, Badge, Offcanvas } from 'react-bootstrap';
 import { 
   FaBoxes, FaTasks, FaUsers, FaChartBar, FaCog, 
   FaSignOutAlt, FaHome, FaClipboardList, FaTruck,
-  FaWarehouse, FaBell
+  FaWarehouse, FaBell, FaBars, FaTimes
 } from 'react-icons/fa';
 
-const WarehouseSideNav = ({ user, onLogout, activeTab, onTabChange, notifications = [] }) => {
+const WarehouseSideNav = ({ user, onLogout, activeTab, onTabChange, notifications = [], isMobile = false }) => {
+  const [showMobileNav, setShowMobileNav] = useState(false);
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
   const navItems = [
-    { id: 'overview', label: 'Overview', icon: FaHome, color: '#007bff' },
-    { id: 'orders', label: 'Orders', icon: FaClipboardList, color: '#28a745' },
-    { id: 'task-management', label: 'Task Management', icon: FaTasks, color: '#ffc107' },
-    { id: 'inventory', label: 'Inventory', icon: FaBoxes, color: '#17a2b8' },
-    { id: 'workers', label: 'Workers', icon: FaUsers, color: '#6f42c1' },
-    { id: 'analytics', label: 'Analytics', icon: FaChartBar, color: '#fd7e14' },
-    { id: 'delivery', label: 'Delivery', icon: FaTruck, color: '#e83e8c' },
-    { id: 'warehouse', label: 'Warehouse', icon: FaWarehouse, color: '#20c997' },
+    { id: 'overview', label: 'Overview', icon: FaHome, color: '#007bff', route: '/warehouse' },
+    { id: 'orders', label: 'Orders', icon: FaClipboardList, color: '#28a745', route: '/warehouse/orders' },
+    { id: 'task-management', label: 'Task Management', icon: FaTasks, color: '#ffc107', route: '/warehouse/tasks' },
+    { id: 'inventory', label: 'Inventory', icon: FaBoxes, color: '#17a2b8', route: '/warehouse/products' },
+    { id: 'workers', label: 'Workers', icon: FaUsers, color: '#6f42c1', route: '/warehouse/workers' },
+    { id: 'analytics', label: 'Analytics', icon: FaChartBar, color: '#fd7e14', route: '/warehouse/analytics' },
+    { id: 'delivery', label: 'Delivery', icon: FaTruck, color: '#e83e8c', route: '/warehouse/delivery' },
+    { id: 'warehouse', label: 'Warehouse Stock', icon: FaWarehouse, color: '#20c997', route: '/warehouse/stock' },
   ];
 
-  const handleTabChange = (tabId) => {
+  const handleTabChange = (tabId, route) => {
     onTabChange(tabId);
-    // Update URL without page reload
-    const url = new URL(window.location);
-    url.searchParams.set('tab', tabId);
-    window.history.pushState({}, '', url);
+    if (route && window.location.pathname !== route) {
+      window.location.href = route;
+    }
+    // Close mobile nav after selection
+    if (isMobile) {
+      setShowMobileNav(false);
+    }
   };
 
-  return (
+  const sideNavContent = (
     <div className="warehouse-side-nav" style={{
-      width: '280px',
+      width: '100%',
       height: '100vh',
       backgroundColor: '#2c3e50',
       color: 'white',
-      position: 'fixed',
-      left: 0,
-      top: 0,
-      zIndex: 1000,
+      display: 'flex',
+      flexDirection: 'column',
       overflowY: 'auto',
       boxShadow: '2px 0 10px rgba(0,0,0,0.1)'
     }}>
@@ -45,7 +47,8 @@ const WarehouseSideNav = ({ user, onLogout, activeTab, onTabChange, notification
       <div style={{
         padding: '20px',
         borderBottom: '1px solid #34495e',
-        textAlign: 'center'
+        textAlign: 'center',
+        flexShrink: 0
       }}>
         <div style={{
           fontSize: '24px',
@@ -68,7 +71,8 @@ const WarehouseSideNav = ({ user, onLogout, activeTab, onTabChange, notification
       <div style={{
         padding: '15px 20px',
         borderBottom: '1px solid #34495e',
-        backgroundColor: '#34495e'
+        backgroundColor: '#34495e',
+        flexShrink: 0
       }}>
         <div style={{
           display: 'flex',
@@ -99,71 +103,71 @@ const WarehouseSideNav = ({ user, onLogout, activeTab, onTabChange, notification
         </div>
       </div>
 
-      {/* Navigation Items */}
-      <Nav className="flex-column" style={{ padding: '20px 0' }}>
-        {navItems.map((item) => {
-          const IconComponent = item.icon;
-          const isActive = activeTab === item.id;
-          
-          return (
-            <Nav.Item key={item.id}>
-              <Nav.Link
-                onClick={() => handleTabChange(item.id)}
-                style={{
-                  color: isActive ? 'white' : '#bdc3c7',
-                  backgroundColor: isActive ? item.color : 'transparent',
-                  border: 'none',
-                  padding: '15px 25px',
-                  margin: '2px 15px',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  fontSize: '16px'
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive) {
-                    e.target.style.backgroundColor = '#34495e';
-                    e.target.style.color = 'white';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive) {
-                    e.target.style.backgroundColor = 'transparent';
-                    e.target.style.color = '#bdc3c7';
-                  }
-                }}
-              >
-                <IconComponent size={18} />
-                {item.label}
-                {item.id === 'orders' && (
-                  <Badge 
-                    bg="danger" 
-                    style={{ 
-                      marginLeft: 'auto',
-                      fontSize: '10px',
-                      padding: '4px 6px'
-                    }}
-                  >
-                    New
-                  </Badge>
-                )}
-              </Nav.Link>
-            </Nav.Item>
-          );
-        })}
-      </Nav>
+      {/* Navigation Items - Flexible grow area */}
+      <div style={{ flex: 1, overflow: 'auto' }}>
+        <Nav className="flex-column" style={{ padding: '20px 0' }}>
+          {navItems.map((item) => {
+            const IconComponent = item.icon;
+            const isActive = activeTab === item.id;
+            
+            return (
+              <Nav.Item key={item.id}>
+                <Nav.Link
+                  onClick={() => handleTabChange(item.id, item.route)}
+                  style={{
+                    color: isActive ? 'white' : '#bdc3c7',
+                    backgroundColor: isActive ? item.color : 'transparent',
+                    border: 'none',
+                    padding: '15px 25px',
+                    margin: '2px 15px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    fontSize: '16px'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) {
+                      e.target.style.backgroundColor = '#34495e';
+                      e.target.style.color = 'white';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) {
+                      e.target.style.backgroundColor = 'transparent';
+                      e.target.style.color = '#bdc3c7';
+                    }
+                  }}
+                >
+                  <IconComponent size={18} />
+                  {item.label}
+                  {item.id === 'orders' && (
+                    <Badge 
+                      bg="danger" 
+                      style={{ 
+                        marginLeft: 'auto',
+                        fontSize: '10px',
+                        padding: '4px 6px'
+                      }}
+                    >
+                      New
+                    </Badge>
+                  )}
+                </Nav.Link>
+              </Nav.Item>
+            );
+          })}
+        </Nav>
+      </div>
 
-      {/* Bottom Section */}
+      {/* Bottom Section - Fixed at bottom */}
       <div style={{
-        position: 'absolute',
-        bottom: 0,
-        width: '100%',
         padding: '20px',
         borderTop: '1px solid #34495e',
-        backgroundColor: '#34495e'
+        backgroundColor: '#34495e',
+        flexShrink: 0
       }}>
         {/* Notifications */}
         <div style={{
@@ -174,7 +178,14 @@ const WarehouseSideNav = ({ user, onLogout, activeTab, onTabChange, notification
           padding: '10px',
           backgroundColor: '#2c3e50',
           borderRadius: '8px',
-          cursor: 'pointer'
+          cursor: 'pointer',
+          transition: 'all 0.3s ease'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#1a252f';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = '#2c3e50';
         }}>
           <FaBell size={16} color="#3498db" />
           <span style={{ fontSize: '14px' }}>Notifications</span>
@@ -206,16 +217,90 @@ const WarehouseSideNav = ({ user, onLogout, activeTab, onTabChange, notification
             transition: 'all 0.3s ease'
           }}
           onMouseEnter={(e) => {
-            e.target.style.backgroundColor = '#c0392b';
+            e.currentTarget.style.backgroundColor = '#c0392b';
+            e.currentTarget.style.transform = 'translateY(-1px)';
           }}
           onMouseLeave={(e) => {
-            e.target.style.backgroundColor = '#e74c3c';
+            e.currentTarget.style.backgroundColor = '#e74c3c';
+            e.currentTarget.style.transform = 'translateY(0)';
           }}
         >
           <FaSignOutAlt size={16} />
           <span style={{ fontSize: '14px' }}>Logout</span>
         </div>
       </div>
+    </div>
+  );
+
+  // Mobile Toggle Button
+  const MobileToggle = () => (
+    <div 
+      onClick={() => setShowMobileNav(true)}
+      style={{
+        position: 'fixed',
+        top: '20px',
+        left: '20px',
+        zIndex: 1050,
+        backgroundColor: '#2c3e50',
+        color: 'white',
+        padding: '12px',
+        borderRadius: '8px',
+        cursor: 'pointer',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+        display: window.innerWidth <= 768 ? 'block' : 'none'
+      }}
+    >
+      <FaBars size={20} />
+    </div>
+  );
+
+  // For mobile devices, use Bootstrap Offcanvas
+  if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+    return (
+      <>
+        <MobileToggle />
+        <Offcanvas 
+          show={showMobileNav} 
+          onHide={() => setShowMobileNav(false)}
+          placement="start"
+          style={{ width: '280px' }}
+        >
+          <Offcanvas.Header style={{ backgroundColor: '#2c3e50', color: 'white', border: 'none' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <FaWarehouse color="#3498db" />
+              <strong>OOX Warehouse</strong>
+            </div>
+            <div 
+              onClick={() => setShowMobileNav(false)}
+              style={{ 
+                cursor: 'pointer', 
+                padding: '5px',
+                color: 'white',
+                fontSize: '20px'
+              }}
+            >
+              <FaTimes />
+            </div>
+          </Offcanvas.Header>
+          <Offcanvas.Body style={{ padding: 0 }}>
+            {sideNavContent}
+          </Offcanvas.Body>
+        </Offcanvas>
+      </>
+    );
+  }
+
+  // Desktop version - fixed sidebar
+  return (
+    <div style={{
+      width: '280px',
+      height: '100vh',
+      position: 'fixed',
+      left: 0,
+      top: 0,
+      zIndex: 1000
+    }}>
+      {sideNavContent}
     </div>
   );
 };
