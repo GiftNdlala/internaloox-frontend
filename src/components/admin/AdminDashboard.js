@@ -380,106 +380,62 @@ const AdminDashboard = ({ user, onLogout }) => {
       {error && <Alert variant="danger" dismissible onClose={() => setError('')}>{error}</Alert>}
       {success && <Alert variant="success" dismissible onClose={() => setSuccess('')}>{success}</Alert>}
 
-      {activeTab === 'overview' && (
-        <>
-          {/* Stats Cards */}
-          <Row className="mb-4">
-            <Col xl={3} md={6} className="mb-3">
-              <AdminStatsCard
-                title="Total Orders"
-                value={orders.length}
-                icon={FaClipboardList}
-                color="#3b82f6"
-                bgColor="#3b82f6"
-                change={12}
-              />
-            </Col>
-            <Col xl={3} md={6} className="mb-3">
-              <AdminStatsCard
-                title="Active Users"
-                value={users.filter(u => u.is_active).length}
-                icon={FaUsers}
-                color="#10b981"
-                bgColor="#10b981"
-                change={5}
-              />
-            </Col>
-            <Col xl={3} md={6} className="mb-3">
-              <AdminStatsCard
-                title="Pending Approvals"
-                value={orders.filter(o => o.order_status === 'pending').length}
-                icon={FaTasks}
-                color="#f59e0b"
-                bgColor="#f59e0b"
-                change={-3}
-              />
-            </Col>
-            <Col xl={3} md={6} className="mb-3">
-              <AdminStatsCard
-                title="Total Customers"
-                value={customers.length}
-                icon={FaFileAlt}
-                color="#8b5cf6"
-                bgColor="#8b5cf6"
-                change={8}
-              />
-            </Col>
-          </Row>
+              {activeTab === 'overview' && (
+          <>
+            {/* Replace business/financial analytics with warehouse analytics snapshot */}
+            <Row className="mb-4">
+              <Col xl={4} md={6} className="mb-3">
+                <AdminStatsCard
+                  title="In Production"
+                  value={orders.filter(o => o.production_status === 'in_production').length}
+                  icon={FaClipboardList}
+                  color="#3b82f6"
+                  bgColor="#3b82f6"
+                />
+              </Col>
+              <Col xl={4} md={6} className="mb-3">
+                <AdminStatsCard
+                  title="Ready for Delivery"
+                  value={orders.filter(o => (o.order_status === 'order_ready') || (o.production_status === 'completed')).length}
+                  icon={FaCheckCircle}
+                  color="#10b981"
+                  bgColor="#10b981"
+                />
+              </Col>
+              <Col xl={4} md={12} className="mb-3">
+                <AdminStatsCard
+                  title="Deposit Pending"
+                  value={orders.filter(o => o.payment_status === 'deposit_pending' || o.order_status === 'deposit_pending').length}
+                  icon={FaExclamationTriangle}
+                  color="#f59e0b"
+                  bgColor="#f59e0b"
+                />
+              </Col>
+            </Row>
 
-          {/* Dashboard Widgets */}
-          <Row className="mb-4">
-            <Col lg={12} className="mb-3">
-              <ActivityMonitor />
-            </Col>
-          </Row>
+            {/* Warehouse Overview redirect */}
+            <Row className="mb-4">
+              <Col lg={12}>
+                <Card className="shadow-sm border-success">
+                  <Card.Body className="d-flex justify-content-between align-items-center">
+                    <div>
+                      <div className="fw-bold">Warehouse Analytics</div>
+                      <div className="text-muted">View low stock, production snapshot, and task overview</div>
+                    </div>
+                    <Button variant="success" onClick={() => navigate('/admin/warehouse')}>Open</Button>
+                  </Card.Body>
+                </Card>
+              </Col>
+            </Row>
 
-          {/* System Status */}
-          <Row>
-            <Col>
-              <Card className="shadow-sm">
-                <Card.Header className="bg-dark text-white">
-                  <h6 className="mb-0">
-                    <FaCog className="me-2" />
-                    System Status
-                  </h6>
-                </Card.Header>
-                <Card.Body>
-                  <Row>
-                    <Col md={3} className="text-center mb-3">
-                      <div className="h4 text-success mb-1">
-                        <FaCheckCircle />
-                      </div>
-                      <div className="small">Database</div>
-                      <div className="text-success small">Online</div>
-                    </Col>
-                    <Col md={3} className="text-center mb-3">
-                      <div className="h4 text-success mb-1">
-                        <FaCheckCircle />
-                      </div>
-                      <div className="small">API Server</div>
-                      <div className="text-success small">Running</div>
-                    </Col>
-                    <Col md={3} className="text-center mb-3">
-                      <div className="h4 text-warning mb-1">
-                        <FaExclamationTriangle />
-                      </div>
-                      <div className="small">Notifications</div>
-                      <div className="text-warning small">Limited</div>
-                    </Col>
-                    <Col md={3} className="text-center mb-3">
-                      <div className="h4 text-success mb-1">
-                        <FaCheckCircle />
-                      </div>
-                      <div className="small">File Storage</div>
-                      <div className="text-success small">Available</div>
-                    </Col>
-                  </Row>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-        </>
-      )}
+            {/* Activity Monitor */}
+            <Row className="mb-4">
+              <Col lg={12} className="mb-3">
+                <ActivityMonitor />
+              </Col>
+            </Row>
+          </>
+        )}
 
       {/* Tab Content */}
 

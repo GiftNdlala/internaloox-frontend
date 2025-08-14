@@ -107,7 +107,7 @@ const OwnerPaymentTransactions = ({ user, onLogout }) => {
 													<td>{typeof tx.amount_delta === 'number' ? `R${tx.amount_delta.toFixed(2)}` : tx.amount_delta}</td>
 													<td>{typeof tx.new_balance === 'number' ? `R${tx.new_balance.toFixed(2)}` : tx.new_balance}</td>
 													<td>{tx.payment_status}</td>
-													<td>{tx.proof?.proof_image ? <a href={tx.proof.proof_image} target="_blank" rel="noreferrer">View</a> : '-'}</td>
+													<td>{tx.proof?.id ? <a href={(tx.proof.absolute_url || tx.proof.proof_image || (tx.proof.id && (window?.OOX_API_BASE || 'https://internaloox-1.onrender.com/api') + `/payment-proofs/${tx.proof.id}/file/`))} target="_blank" rel="noreferrer">View</a> : '-'}</td>
 													<td style={{ maxWidth: 280 }}>{tx.notes || '-'}</td>
 												</tr>
 											))}

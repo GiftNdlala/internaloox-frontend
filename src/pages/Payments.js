@@ -785,7 +785,7 @@ const Payments = ({ user, userRole, onLogout }) => {
                           )}
                           <div className="mt-3">
                             <div className="small text-muted mb-1">Or upload proof image now (auto-attaches to this order):</div>
-                            <Form.Control type="file" accept="image/*" onChange={(e)=>setProofFile(e.target.files?.[0] || null)} />
+                            <Form.Control type="file" accept="image/*,application/pdf" onChange={(e)=>setProofFile(e.target.files?.[0] || null)} />
                             {uploadingProof && <div className="small text-muted mt-1">Uploading proof...</div>}
                           </div>
                         </Form.Group>

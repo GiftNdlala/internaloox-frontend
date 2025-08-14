@@ -125,6 +125,20 @@ export const getOrderPaymentTransactions = (orderId, params = {}) => {
   return apiRequest(`/orders/${orderId}/payment_transactions/${qs}`);
 };
 
+// New: Payment Proof helpers (stream and signed URL)
+export const getPaymentProofFileUrl = (id) => `${API_BASE}/payment-proofs/${id}/file/`;
+export const getPaymentProofSignedUrl = async (id, expires = 300) => {
+  return apiRequest(`/payment-proofs/${id}/signed_url/?expires=${expires}`);
+};
+
+// New: Invoice/Delivery/Reports data endpoints for client-side PDF rendering
+export const getOrderInvoiceData = (orderId) => apiRequest(`/orders/${orderId}/invoice_data/`);
+export const getOrderDeliveryNoteData = (orderId) => apiRequest(`/orders/${orderId}/delivery_note_data/`);
+export const getPaymentsReportData = (params = {}) => {
+  const qs = buildQueryString(params);
+  return apiRequest(`/reports/payments_data/${qs}`);
+};
+
 // Dashboard stats
 export const getDashboardStats = () => apiRequest('/dashboard-stats/');
 // Users

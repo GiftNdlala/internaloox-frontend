@@ -80,6 +80,7 @@ const WarehouseNavbar = ({
       expanded={expanded}
       onToggle={setExpanded}
       sticky="top"
+      collapseOnSelect
     >
       <Container fluid>
         {/* Brand */}
@@ -245,7 +246,7 @@ const WarehouseNavbar = ({
                 active={isOverview && activeTab === 'analytics'}
                 onClick={() => {
                   onTabChange?.('analytics');
-                  navigate('/warehouse');
+                  navigate('/warehouse/analytics');
                   setExpanded(false);
                 }}
                 className="d-flex align-items-center"

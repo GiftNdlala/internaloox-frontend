@@ -39,6 +39,12 @@ const UniversalSidebar = ({ user, userRole, onLogout }) => {
           badge: 'New'
         },
         {
+          key: 'transactions',
+          label: 'Transactions',
+          icon: FaMoneyBillWave,
+          path: '/owner/transactions'
+        },
+        {
           key: 'customers',
           label: 'Customers',
           icon: FaUsers,
@@ -76,6 +82,12 @@ const UniversalSidebar = ({ user, userRole, onLogout }) => {
           label: 'Orders Management',
           icon: FaClipboardList,
           path: '/admin/orders'
+        },
+        {
+          key: 'transactions',
+          label: 'Transactions',
+          icon: FaMoneyBillWave,
+          path: '/admin/transactions'
         },
         {
           key: 'customers',

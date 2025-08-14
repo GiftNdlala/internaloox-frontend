@@ -606,7 +606,7 @@ const OwnerDashboard = ({ user, onLogout }) => {
                 <td>{typeof tx.amount_delta === 'number' ? `R${tx.amount_delta.toFixed(2)}` : tx.amount_delta}</td>
                 <td>{typeof tx.new_balance === 'number' ? `R${tx.new_balance.toFixed(2)}` : tx.new_balance}</td>
                 <td>{tx.payment_status}</td>
-                <td>{tx.proof?.id ? <a href={tx.proof.url || '#'} target="_blank" rel="noreferrer">#{tx.proof.id}</a> : '-'}</td>
+                <td>{tx.proof?.id ? <a href={(tx.proof.absolute_url || tx.proof.proof_image || (tx.proof.id && (window?.OOX_API_BASE || 'https://internaloox-1.onrender.com/api') + `/payment-proofs/${tx.proof.id}/file/`))} target="_blank" rel="noreferrer">View</a> : '-'}</td>
               </tr>
             ))}
             {transactions.length === 0 && (
@@ -769,8 +769,22 @@ const OwnerDashboard = ({ user, onLogout }) => {
                 </div>
               </div>
 
-              {/* Payment Transactions Table */}
-              <PaymentTransactionsTable />
+              {/* Transactions moved to dedicated page */}
+              <div className="oox-mobile-card">
+                <div className="oox-mobile-flex-between oox-mobile-mb-2">
+                  <h3 style={{ margin: 0, color: '#1e293b', fontWeight: '700' }}>
+                    <FaMoneyBillWave style={{ marginRight: '0.5rem', color: '#10b981' }} />
+                    Payment Transactions
+                  </h3>
+                  <button
+                    onClick={() => navigate('/owner/transactions')}
+                    className="oox-mobile-btn"
+                  >
+                    Open Transactions Page
+                  </button>
+                </div>
+                <p className="text-muted mb-0">View the full transactions table on the dedicated Transactions page.</p>
+              </div>
             </div>
           )}
 

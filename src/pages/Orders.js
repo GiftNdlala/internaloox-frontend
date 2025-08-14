@@ -239,7 +239,7 @@ const Orders = ({ user, userRole, onLogout }) => {
         form.append('order', newOrderId);
         if (pureOrder?.deposit_amount) form.append('amount', pureOrder.deposit_amount);
         form.append('payment_type', 'deposit');
-        form.append('proof_image', popFile);
+        form.append('proof_image', popFile); // backend accepts PDFs and images
         if (popNotes) form.append('notes', popNotes);
         const proof = await createPayment(form, true);
         if (!proof?.id) throw new Error('Failed to upload payment proof');
