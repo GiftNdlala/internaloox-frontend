@@ -4,6 +4,9 @@ import { FaMoneyBillWave, FaSearch, FaFilter, FaSync } from 'react-icons/fa';
 import UniversalSidebar from '../components/UniversalSidebar';
 import SharedHeader from '../components/SharedHeader';
 import { getPaymentTransactions } from '../components/api';
+import PdfViewer from '../components/PdfViewer';
+import { Modal } from 'react-bootstrap';
+import { getPaymentProofSignedUrl, getPaymentProofFileUrl } from '../components/api';
 
 const OwnerPaymentTransactions = ({ user, onLogout }) => {
 	const [loading, setLoading] = useState(true);
@@ -13,6 +16,7 @@ const OwnerPaymentTransactions = ({ user, onLogout }) => {
 	const [pageSize, setPageSize] = useState(20);
 	const [total, setTotal] = useState(0);
 	const [filters, setFilters] = useState({ order: '', customer: '', method: '', status: '', user: '', since: '', until: '' });
+	const [viewer, setViewer] = useState({ open: false, url: '', name: '' });
 
 	const fetchTx = async (p = page, ps = pageSize, f = filters) => {
 		setLoading(true);
@@ -32,6 +36,28 @@ const OwnerPaymentTransactions = ({ user, onLogout }) => {
 			setLoading(false);
 		}
 	};
+
+  const openProof = async (tx) => {
+    const proof = tx?.proof;
+    if (!proof?.id) return;
+    try {
+      // Prefer signed URL; fallback to direct file endpoint
+      let url = '';
+      try {
+        const res = await getPaymentProofSignedUrl(proof.id, 300);
+        url = res?.url || '';
+      } catch {}
+      if (!url) {
+        url = getPaymentProofFileUrl(proof.id);
+      }
+      const name = proof?.file_name || `proof_${proof.id}.pdf`;
+      setViewer({ open: true, url, name });
+    } catch (e) {
+      setError(e?.message || 'Unable to open proof');
+    }
+  };
+
+  const closeViewer = () => setViewer({ open: false, url: '', name: '' });
 
 	useEffect(() => { fetchTx(1, pageSize, filters); }, []);
 
@@ -94,7 +120,7 @@ const OwnerPaymentTransactions = ({ user, onLogout }) => {
 												<th>New Balance</th>
 												<th>Status</th>
 												<th>Proof</th>
-												<th>Notes</th>
+												<th>Actions</th>
 											</tr>
 										</thead>
 										<tbody>
@@ -108,7 +134,7 @@ const OwnerPaymentTransactions = ({ user, onLogout }) => {
 													<td>{typeof tx.new_balance === 'number' ? `R${tx.new_balance.toFixed(2)}` : tx.new_balance}</td>
 													<td>{tx.payment_status}</td>
 													<td>{tx.proof?.id ? <a href={(tx.proof.absolute_url || tx.proof.proof_image || (tx.proof.id && (window?.OOX_API_BASE || 'https://internaloox-1.onrender.com/api') + `/payment-proofs/${tx.proof.id}/file/`))} target="_blank" rel="noreferrer">View</a> : '-'}</td>
-													<td style={{ maxWidth: 280 }}>{tx.notes || '-'}</td>
+													<td>{tx.proof?.id ? <Button variant="outline-primary" size="sm" onClick={()=>openProof(tx)}>Preview</Button> : '-'}</td>
 												</tr>
 											))}
 											{transactions.length === 0 && (
@@ -130,6 +156,14 @@ const OwnerPaymentTransactions = ({ user, onLogout }) => {
 						</Card>
 					)}
 				</Container>
+				<Modal show={viewer.open} onHide={closeViewer} size="lg" centered>
+					<Modal.Header closeButton>
+						<Modal.Title>Proof of Payment</Modal.Title>
+					</Modal.Header>
+					<Modal.Body>
+						{viewer.url ? <PdfViewer url={viewer.url} fileName={viewer.name} height="75vh"/> : <div className="text-muted">No document</div>}
+					</Modal.Body>
+				</Modal>
 			</div>
 		</>
 	);

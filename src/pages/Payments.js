@@ -10,6 +10,8 @@ import UniversalSidebar from '../components/UniversalSidebar';
 import EnhancedPageHeader from '../components/EnhancedPageHeader';
 import SharedHeader from '../components/SharedHeader';
 import { getPayments, getOrders, getCustomers, createPayment, updatePayment, deletePayment, updateOrderPayment, markPaymentOverdue, getPaymentsDashboard, getPaymentProofsForOrder } from '../components/api';
+import { getPaymentProofSignedUrl, getPaymentProofFileUrl } from '../components/api';
+import PdfViewer from '../components/PdfViewer';
 
 const Payments = ({ user, userRole, onLogout }) => {
   const navigate = useNavigate();
@@ -29,6 +31,7 @@ const Payments = ({ user, userRole, onLogout }) => {
   const [recentProofs, setRecentProofs] = useState([]);
   const [uploadingProof, setUploadingProof] = useState(false);
   const [proofFile, setProofFile] = useState(null);
+  const [viewer, setViewer] = useState({ open: false, url: '', name: '' });
 
   // Form state
   const [paymentForm, setPaymentForm] = useState({
@@ -165,6 +168,23 @@ const Payments = ({ user, userRole, onLogout }) => {
       .catch(() => setRecentProofs([]));
     setShowPaymentModal(true);
   };
+
+  const previewProof = async (proof) => {
+    if (!proof?.id) return;
+    try {
+      let url = '';
+      try {
+        const res = await getPaymentProofSignedUrl(proof.id, 300);
+        url = res?.url || '';
+      } catch {}
+      if (!url) url = getPaymentProofFileUrl(proof.id);
+      const name = proof?.file_name || `proof_${proof.id}.pdf`;
+      setViewer({ open: true, url, name });
+    } catch (e) {
+      setError(e?.message || 'Unable to open proof');
+    }
+  };
+  const closeViewer = () => setViewer({ open: false, url: '', name: '' });
 
   const handleViewDetails = (order) => {
     setSelectedOrder(order);
@@ -777,7 +797,14 @@ const Payments = ({ user, userRole, onLogout }) => {
                               <div className="d-flex flex-wrap gap-2">
                                 {recentProofs.map(p => (
                                   <Button key={p.id} size="sm" variant="outline-primary" onClick={()=>setPaymentForm({...paymentForm, proof_id: String(p.id)})}>
-                                    #{p.id} • {new Date(p.created_at || p.date || Date.now()).toLocaleString()}
+                                    Use ID {p.id}
+                                  </Button>
+                                ))}
+                              </div>
+                              <div className="d-flex flex-wrap gap-2 mt-2">
+                                {recentProofs.map(p => (
+                                  <Button key={`pv-${p.id}`} size="sm" variant="outline-secondary" onClick={()=>previewProof(p)}>
+                                    Preview #{p.id}
                                   </Button>
                                 ))}
                               </div>
@@ -906,6 +933,14 @@ const Payments = ({ user, userRole, onLogout }) => {
           </Modal.Footer>
         </Modal>
         </Container>
+        <Modal show={viewer.open} onHide={closeViewer} size="lg" centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Proof of Payment</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {viewer.url ? <PdfViewer url={viewer.url} fileName={viewer.name} height="75vh"/> : <div className="text-muted">No document</div>}
+          </Modal.Body>
+        </Modal>
       </div>
     </>
   );
