@@ -4,7 +4,7 @@ import {
   FaPlay, FaPause, FaStop, FaCheck, FaClock, 
   FaUser, FaBox, FaExclamationTriangle, FaStickyNote 
 } from 'react-icons/fa';
-import { warehouseAPI } from '../../api';
+import { warehouseAPI } from '../api';
 
 const TaskCard = ({ 
   task, 

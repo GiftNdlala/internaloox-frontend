@@ -3,7 +3,7 @@ import { Button, Dropdown, Badge, ListGroup } from 'react-bootstrap';
 import { FaBell, FaCheck, FaTrash, FaExclamationTriangle, FaInfo, FaCheckCircle } from 'react-icons/fa';
 import { useRealTimeUpdates } from '../../hooks/useRealTimeUpdates';
 import { WarehouseContext } from '../../contexts/WarehouseContext';
-import { markNotificationRead, markAllNotificationsRead } from '../../api';
+import { markNotificationRead, markAllNotificationsRead } from '../api';
 
 const NotificationBell = () => {
   const [show, setShow] = useState(false);

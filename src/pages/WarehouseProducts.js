@@ -13,7 +13,7 @@ import {
   FaPlus, FaSearch, FaEdit, FaTrash, FaEye, FaPalette, 
   FaCouch, FaBoxes, FaLayerGroup, FaCog, FaChartBar,
   FaSync, FaFilter, FaSortAmountDown, FaSortAmountUp,
-  FaTag, FaTags, FaColorize
+  FaTag, FaTags
 } from 'react-icons/fa';
 import ProductColorFabricManager from '../components/warehouse/ProductColorFabricManager';
 
