@@ -70,7 +70,7 @@ const StockInHouse = () => {
     try {
       const movementData = {
         material: form.material_id,
-        direction: form.direction,
+        movement_type: form.direction,
         quantity: parseFloat(form.quantity),
         unit_cost: form.direction === 'in' ? parseFloat(form.unit_cost) : 0,
         reason: form.reason.trim(),

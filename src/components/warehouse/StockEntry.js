@@ -121,7 +121,7 @@ const StockEntry = ({
           quantity: entry.direction === 'out' ? -entry.quantity : entry.quantity,
           location_id: entry.location_id,
           location: entry.location_id, // alias for backend location field
-          direction: entry.direction, // Use direction field for backend serializer
+          movement_type: entry.direction, // Send movement_type directly
           reason: entry.reason,
           batch_number: entry.batch_number,
           expiry_date: entry.expiry_date,
