@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Container, Row, Col, Card, Button, Form, Table, InputGroup, Alert, Spinner, Badge } from 'react-bootstrap';
-import { FaExchangeAlt, FaArrowDown, FaArrowUp, FaPlus } from 'react-icons/fa';
+import { FaExchangeAlt, FaArrowDown, FaArrowUp, FaPlus, FaRefresh } from 'react-icons/fa';
 import { getMaterials, getStockMovements, createStockMovement } from '../components/api';
 
 const StockInHouse = () => {
@@ -20,23 +20,25 @@ const StockInHouse = () => {
   const [formErrors, setFormErrors] = useState({});
 
   useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      try {
-        const [mats, movs] = await Promise.all([
-          getMaterials(),
-          getStockMovements()
-        ]);
-        setMaterials(Array.isArray(mats) ? mats : (mats?.results || []));
-        setMovements(Array.isArray(movs) ? movs : (movs?.results || []));
-      } catch (e) {
-        setError('Failed to load stock data');
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
+    loadData();
   }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [mats, movs] = await Promise.all([
+        getMaterials(),
+        getStockMovements()
+      ]);
+      setMaterials(Array.isArray(mats) ? mats : (mats?.results || []));
+      setMovements(Array.isArray(movs) ? movs : (movs?.results || []));
+    } catch (e) {
+      setError('Failed to load stock data: ' + e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const validate = useMemo(() => (vals) => {
     const v = {};
@@ -53,54 +55,105 @@ const StockInHouse = () => {
 
   const onSave = async (e) => {
     e.preventDefault();
-    const v = validate(form);
-    setFormErrors(v);
-    if (Object.values(v).filter(Boolean).length) return;
+    
+    const errors = validate(form);
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
 
     setSaving(true);
+    setFormErrors({});
+    
     try {
-      const payload = {
-        material: Number(form.material_id),
-        direction: form.direction, // 'in' | 'out'
-        quantity: Number(form.quantity),
-        unit_cost: form.direction === 'in' ? Number(form.unit_cost) : null,
-        note: form.note?.trim() || ''
+      const movementData = {
+        material: form.material_id,
+        direction: form.direction,
+        quantity: parseFloat(form.quantity),
+        unit_cost: form.direction === 'in' ? parseFloat(form.unit_cost) : 0,
+        note: form.note || `${form.direction === 'in' ? 'Stock In' : 'Stock Out'} - ${form.quantity} units`
       };
-      const saved = await createStockMovement(payload);
-      setMovements((prev) => [saved, ...prev]);
-      setForm({ material_id: '', direction: 'in', quantity: '', unit_cost: '', note: '' });
+
+      await createStockMovement(movementData);
+      
+      // Reset form
+      setForm({
+        material_id: '',
+        direction: 'in',
+        quantity: '',
+        unit_cost: '',
+        note: ''
+      });
+      
+      // Reload data
+      await loadData();
+      
     } catch (e) {
-      setFormErrors({ general: e?.message || 'Failed to save stock movement' });
+      setFormErrors({ general: e.message });
     } finally {
       setSaving(false);
     }
   };
 
-  const getMaterialName = (id) => materials.find((m) => m.id === id)?.name || '-';
   const getMaterialUnit = (id) => materials.find((m) => m.id === id)?.unit || '';
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleString();
+  };
+
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </div>
+    );
+  }
 
   return (
     <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
       <Container className="py-4">
         <Row className="mb-3">
           <Col className="d-flex align-items-center justify-content-between">
-            <h4 className="mb-0"><FaExchangeAlt className="me-2 text-primary" />Stock In-House</h4>
+            <h4 className="mb-0">
+              <FaExchangeAlt className="me-2 text-primary" />
+              Stock In-House Management
+            </h4>
+            <Button variant="outline-primary" onClick={loadData} disabled={loading}>
+              <FaRefresh className="me-2" />
+              Refresh
+            </Button>
           </Col>
         </Row>
 
+        {error && (
+          <Alert variant="danger" className="mb-4">
+            {error}
+          </Alert>
+        )}
+
         <Card className="shadow-sm mb-4">
-          <Card.Header>Record Stock Movement</Card.Header>
+          <Card.Header>
+            <h5 className="mb-0">Record Stock Movement</h5>
+          </Card.Header>
           <Card.Body>
             {formErrors.general && <Alert variant="danger">{formErrors.general}</Alert>}
             <Form onSubmit={onSave}>
               <Row className="g-3">
                 <Col md={5}>
                   <Form.Group>
-                    <Form.Label>Material</Form.Label>
-                    <Form.Select value={form.material_id} onChange={(e) => onChange('material_id', e.target.value)} isInvalid={!!formErrors.material_id}>
+                    <Form.Label>Material *</Form.Label>
+                    <Form.Select 
+                      value={form.material_id} 
+                      onChange={(e) => onChange('material_id', e.target.value)} 
+                      isInvalid={!!formErrors.material_id}
+                    >
                       <option value="">Select material</option>
                       {materials.map((m) => (
-                        <option key={m.id} value={m.id}>{m.name}</option>
+                        <option key={m.id} value={m.id}>
+                          {m.name} ({m.unit}) - Current: {m.current_stock || 0}
+                        </option>
                       ))}
                     </Form.Select>
                     <Form.Control.Feedback type="invalid">{formErrors.material_id}</Form.Control.Feedback>
@@ -117,76 +170,147 @@ const StockInHouse = () => {
                 </Col>
                 <Col md={2}>
                   <Form.Group>
-                    <Form.Label>Quantity</Form.Label>
-                    <Form.Control type="number" min="0" step="0.01" value={form.quantity} onChange={(e) => onChange('quantity', e.target.value)} isInvalid={!!formErrors.quantity} />
+                    <Form.Label>Quantity *</Form.Label>
+                    <InputGroup>
+                      <Form.Control
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={form.quantity}
+                        onChange={(e) => onChange('quantity', e.target.value)}
+                        isInvalid={!!formErrors.quantity}
+                        placeholder="0.00"
+                      />
+                      <InputGroup.Text>{getMaterialUnit(form.material_id)}</InputGroup.Text>
+                    </InputGroup>
                     <Form.Control.Feedback type="invalid">{formErrors.quantity}</Form.Control.Feedback>
-                    {form.material_id && <div className="small text-muted mt-1">Unit: {getMaterialUnit(Number(form.material_id))}</div>}
                   </Form.Group>
                 </Col>
-                {form.direction === 'in' && (
-                  <Col md={3}>
-                    <Form.Group>
-                      <Form.Label>Unit Cost (ZAR)</Form.Label>
-                      <InputGroup>
-                        <InputGroup.Text>R</InputGroup.Text>
-                        <Form.Control type="number" min="0" step="0.01" value={form.unit_cost} onChange={(e) => onChange('unit_cost', e.target.value)} isInvalid={!!formErrors.unit_cost} />
-                        <InputGroup.Text>ZAR</InputGroup.Text>
-                        <Form.Control.Feedback type="invalid">{formErrors.unit_cost}</Form.Control.Feedback>
-                      </InputGroup>
-                    </Form.Group>
-                  </Col>
-                )}
-                <Col md={12}>
+                <Col md={3}>
                   <Form.Group>
-                    <Form.Label>Note</Form.Label>
-                    <Form.Control as="textarea" rows={2} value={form.note} onChange={(e) => onChange('note', e.target.value)} />
+                    <Form.Label>Unit Cost {form.direction === 'in' && '*'}</Form.Label>
+                    <InputGroup>
+                      <InputGroup.Text>R</InputGroup.Text>
+                      <Form.Control
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={form.unit_cost}
+                        onChange={(e) => onChange('unit_cost', e.target.value)}
+                        isInvalid={!!formErrors.unit_cost}
+                        placeholder="0.00"
+                        disabled={form.direction === 'out'}
+                      />
+                    </InputGroup>
+                    <Form.Control.Feedback type="invalid">{formErrors.unit_cost}</Form.Control.Feedback>
                   </Form.Group>
                 </Col>
               </Row>
-              <div className="d-flex justify-content-end mt-3">
-                <Button type="submit" variant="primary" disabled={saving}><FaPlus className="me-2" /> Save Movement</Button>
-              </div>
+              <Row className="g-3 mt-2">
+                <Col md={12}>
+                  <Form.Group>
+                    <Form.Label>Notes</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={2}
+                      value={form.note}
+                      onChange={(e) => onChange('note', e.target.value)}
+                      placeholder="Optional notes about this stock movement..."
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+              <Row className="mt-3">
+                <Col>
+                  <Button 
+                    type="submit" 
+                    variant="primary" 
+                    disabled={saving}
+                    className="me-2"
+                  >
+                    {saving ? (
+                      <>
+                        <Spinner animation="border" size="sm" className="me-2" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <FaPlus className="me-2" />
+                        Record Movement
+                      </>
+                    )}
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline-secondary"
+                    onClick={() => setForm({
+                      material_id: '',
+                      direction: 'in',
+                      quantity: '',
+                      unit_cost: '',
+                      note: ''
+                    })}
+                  >
+                    Clear Form
+                  </Button>
+                </Col>
+              </Row>
             </Form>
           </Card.Body>
         </Card>
 
         <Card className="shadow-sm">
-          <Card.Header>Recent Movements</Card.Header>
+          <Card.Header>
+            <h5 className="mb-0">Recent Stock Movements</h5>
+          </Card.Header>
           <Card.Body>
-            {loading ? (
-              <div className="text-center py-5"><Spinner animation="border" /></div>
+            {movements.length === 0 ? (
+              <Alert variant="info">No stock movements recorded yet.</Alert>
             ) : (
-              <Table responsive hover size="sm" className="align-middle">
+              <Table responsive striped hover>
                 <thead>
                   <tr>
+                    <th>Date</th>
                     <th>Material</th>
                     <th>Direction</th>
                     <th>Quantity</th>
                     <th>Unit Cost</th>
                     <th>Total Value</th>
-                    <th>Note</th>
-                    <th>Date</th>
+                    <th>Notes</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {movements.length === 0 ? (
-                    <tr><td colSpan={7} className="text-center text-muted py-4">No movements</td></tr>
-                  ) : (
-                    movements.map((mv) => {
-                      const mid = mv.material_id ?? mv.material;
-                      return (
-                        <tr key={mv.id}>
-                          <td>{getMaterialName(mid)}</td>
-                          <td>{mv.direction === 'in' ? <Badge bg="success"><FaArrowDown className="me-1" />In</Badge> : <Badge bg="warning" text="dark"><FaArrowUp className="me-1" />Out</Badge>}</td>
-                          <td>{mv.quantity} {getMaterialUnit(mid)}</td>
-                          <td>{mv.unit_cost != null ? `R ${Number(mv.unit_cost).toFixed(2)}` : '-'}</td>
-                          <td>{mv.unit_cost != null ? `R ${(Number(mv.unit_cost) * Number(mv.quantity)).toFixed(2)}` : '-'}</td>
-                          <td className="text-truncate" style={{ maxWidth: 260 }}>{mv.note || '-'}</td>
-                          <td>{mv.created_at || '-'}</td>
-                        </tr>
-                      );
-                    })
-                  )}
+                  {movements.slice(0, 20).map((movement) => (
+                    <tr key={movement.id}>
+                      <td>{formatDate(movement.created_at)}</td>
+                      <td>
+                        <strong>{movement.material_name || 'Unknown'}</strong>
+                      </td>
+                      <td>
+                        <Badge bg={movement.direction === 'in' ? 'success' : 'warning'}>
+                          {movement.direction === 'in' ? (
+                            <><FaArrowDown className="me-1" />In</>
+                          ) : (
+                            <><FaArrowUp className="me-1" />Out</>
+                          )}
+                        </Badge>
+                      </td>
+                      <td>
+                        {movement.quantity} {movement.material_unit || 'units'}
+                      </td>
+                      <td>
+                        {movement.unit_cost ? `R${parseFloat(movement.unit_cost).toFixed(2)}` : '-'}
+                      </td>
+                      <td>
+                        {movement.unit_cost ? `R${(parseFloat(movement.quantity) * parseFloat(movement.unit_cost)).toFixed(2)}` : '-'}
+                      </td>
+                      <td>
+                        <small className="text-muted">
+                          {movement.note || movement.reason || '-'}
+                        </small>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </Table>
             )}

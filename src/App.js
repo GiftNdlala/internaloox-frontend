@@ -199,6 +199,7 @@ function App() {
               <Route path="approvals" element={<ProtectedRoute allowedRoles={['owner','admin','warehouse']}><ApprovalQueue /></ProtectedRoute>} />
               {/* Keep existing inventory routes accessible under warehouse */}
               <Route path="inventory/materials" element={<InventoryManagement />} />
+              <Route path="inventory/stock-in-house" element={<StockInHouse />} />
               <Route path="inventory/stock" element={<StockInHouse />} />
               <Route path="orders" element={<Orders user={user} userRole={user?.role} onLogout={handleLogout} />} />
             </Route>
