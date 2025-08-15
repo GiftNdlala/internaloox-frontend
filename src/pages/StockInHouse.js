@@ -71,7 +71,8 @@ const StockInHouse = () => {
         direction: form.direction,
         quantity: parseFloat(form.quantity),
         unit_cost: form.direction === 'in' ? parseFloat(form.unit_cost) : 0,
-        note: form.note || `${form.direction === 'in' ? 'Stock In' : 'Stock Out'} - ${form.quantity} units`
+        reason: `${form.direction === 'in' ? 'Stock In' : 'Stock Out'} - ${form.quantity} units`,
+        note: form.note || ''
       };
 
       await createStockMovement(movementData);
