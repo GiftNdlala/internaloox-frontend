@@ -10,7 +10,7 @@ import {
 import { 
   getMaterials, quickStockEntry, getStockLocations,
   getMaterialCategories 
-} from '../../api';
+} from '../api';
 
 const StockEntry = ({ 
   show, 

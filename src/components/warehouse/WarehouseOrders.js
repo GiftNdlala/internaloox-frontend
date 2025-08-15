@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, Button, Badge, Row, Col, Spinner, Alert } from 'react-bootstrap';
 import { FaBoxes, FaEye, FaPlus, FaSync, FaExclamationTriangle } from 'react-icons/fa';
 import { usePolling } from '../../hooks/usePolling';
-import { getWarehouseOrders } from '../../api';
+import { getWarehouseOrders } from '../api';
 
 const WarehouseOrders = () => {
   const navigate = useNavigate();

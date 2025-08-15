@@ -6,14 +6,14 @@ import {
 } from 'react-bootstrap';
 import {
   FaPalette, FaCouch, FaPlus, FaEdit, FaTrash, FaSave, 
-  FaTimes, FaEye, FaColorize, FaLayerGroup, FaImage,
+  FaTimes, FaEye, FaPalette as FaColorize, FaLayerGroup, FaImage,
   FaCheck, FaExclamationTriangle
 } from 'react-icons/fa';
 import { 
   getColors, getFabrics, createColor, createFabric, 
   updateColor, updateFabric, deleteColor, deleteFabric,
   updateProduct
-} from '../../api';
+} from '../api';
 
 const ProductColorFabricManager = ({ 
   show, 

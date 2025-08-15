@@ -281,6 +281,8 @@ export const getWarehouseDashboard = () => apiRequest('/inventory/materials/ware
 export const quickStockEntry = (data) => apiRequest('/inventory/materials/quick_stock_entry/', { method: 'POST', data });
 export const getStockLocations = () => apiRequest('/inventory/materials/stock_locations/');
 export const getLowStockAlerts = () => apiRequest('/inventory/materials/low_stock/');
+// Inventory dashboard summary
+export const getInventoryDashboard = () => apiRequest('/inventory/materials/dashboard/');
 
 // Stock Movements
 export const getStockMovements = () => apiRequest('/inventory/stock-movements/');
