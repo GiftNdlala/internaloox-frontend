@@ -14,6 +14,7 @@ const StockInHouse = () => {
     direction: 'in',
     quantity: '',
     unit_cost: '',
+    reason: '',
     note: ''
   });
   const [saving, setSaving] = useState(false);
@@ -45,6 +46,7 @@ const StockInHouse = () => {
     if (!vals.material_id) v.material_id = 'Select a material';
     if (!vals.quantity || Number.isNaN(Number(vals.quantity)) || Number(vals.quantity) <= 0) v.quantity = 'Enter a valid quantity';
     if (vals.direction === 'in' && (vals.unit_cost === '' || Number.isNaN(Number(vals.unit_cost)) || Number(vals.unit_cost) < 0)) v.unit_cost = 'Enter valid unit cost for stock-in';
+    if (!vals.reason || vals.reason.trim() === '') v.reason = 'Please provide a reason for this stock movement';
     return v;
   }, []);
 
@@ -71,7 +73,7 @@ const StockInHouse = () => {
         direction: form.direction,
         quantity: parseFloat(form.quantity),
         unit_cost: form.direction === 'in' ? parseFloat(form.unit_cost) : 0,
-        reason: `${form.direction === 'in' ? 'Stock In' : 'Stock Out'} - ${form.quantity} units`,
+        reason: form.reason.trim(),
         note: form.note || ''
       };
 
@@ -83,6 +85,7 @@ const StockInHouse = () => {
         direction: 'in',
         quantity: '',
         unit_cost: '',
+        reason: '',
         note: ''
       });
       
@@ -187,11 +190,11 @@ const StockInHouse = () => {
                     <Form.Control.Feedback type="invalid">{formErrors.quantity}</Form.Control.Feedback>
                   </Form.Group>
                 </Col>
-                  <Col md={3}>
-                    <Form.Group>
-                    <Form.Label>Unit Cost {form.direction === 'in' && '*'}</Form.Label>
-                      <InputGroup>
-                        <InputGroup.Text>R</InputGroup.Text>
+                <Col md={2}>
+                  <Form.Group>
+                    <Form.Label>Unit Cost {form.direction === 'in' ? '*' : '(Optional)'}</Form.Label>
+                    <InputGroup>
+                      <InputGroup.Text>R</InputGroup.Text>
                       <Form.Control
                         type="number"
                         step="0.01"
@@ -203,9 +206,22 @@ const StockInHouse = () => {
                         disabled={form.direction === 'out'}
                       />
                     </InputGroup>
-                        <Form.Control.Feedback type="invalid">{formErrors.unit_cost}</Form.Control.Feedback>
-                    </Form.Group>
-                  </Col>
+                    <Form.Control.Feedback type="invalid">{formErrors.unit_cost}</Form.Control.Feedback>
+                  </Form.Group>
+                </Col>
+                <Col md={3}>
+                  <Form.Group>
+                    <Form.Label>Reason *</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={form.reason}
+                      onChange={(e) => onChange('reason', e.target.value)}
+                      isInvalid={!!formErrors.reason}
+                      placeholder="e.g., New stock purchase, Supplier delivery, etc."
+                    />
+                    <Form.Control.Feedback type="invalid">{formErrors.reason}</Form.Control.Feedback>
+                  </Form.Group>
+                </Col>
               </Row>
               <Row className="g-3 mt-2">
                 <Col md={12}>
@@ -249,6 +265,7 @@ const StockInHouse = () => {
                       direction: 'in',
                       quantity: '',
                       unit_cost: '',
+                      reason: '',
                       note: ''
                     })}
                   >
@@ -277,6 +294,7 @@ const StockInHouse = () => {
                     <th>Quantity</th>
                     <th>Unit Cost</th>
                     <th>Total Value</th>
+                    <th>Reason</th>
                     <th>Notes</th>
                   </tr>
                 </thead>
@@ -307,7 +325,12 @@ const StockInHouse = () => {
                       </td>
                       <td>
                         <small className="text-muted">
-                          {movement.note || movement.reason || '-'}
+                          {movement.reason || '-'}
+                        </small>
+                      </td>
+                      <td>
+                        <small className="text-muted">
+                          {movement.note || '-'}
                         </small>
                       </td>
                         </tr>

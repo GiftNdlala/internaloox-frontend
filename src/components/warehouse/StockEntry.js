@@ -295,19 +295,14 @@ const StockEntry = ({
                   
                   <Col md={6}>
                     <Form.Group>
-                      <Form.Label>Reason</Form.Label>
-                      <Form.Select
+                      <Form.Label>Reason *</Form.Label>
+                      <Form.Control
+                        type="text"
                         value={reason}
                         onChange={(e) => setReason(e.target.value)}
-                      >
-                        <option value="">Select reason...</option>
-                        <option value="purchase">Purchase/Delivery</option>
-                        <option value="production">Production Use</option>
-                        <option value="adjustment">Stock Adjustment</option>
-                        <option value="damaged">Damaged/Waste</option>
-                        <option value="return">Return</option>
-                        <option value="transfer">Location Transfer</option>
-                      </Form.Select>
+                        placeholder="e.g., New stock purchase, Supplier delivery, etc."
+                        required
+                      />
                     </Form.Group>
                   </Col>
                   

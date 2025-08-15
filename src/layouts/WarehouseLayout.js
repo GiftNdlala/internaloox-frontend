@@ -8,6 +8,7 @@ const WarehouseLayout = ({ user, onLogout }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeTab, setActiveTab] = useState('overview');
   const [isMobile, setIsMobile] = useState(false);
+  const [isNavCollapsed, setIsNavCollapsed] = useState(false);
   
   // Check if device is mobile
   useEffect(() => {
@@ -52,12 +53,15 @@ const WarehouseLayout = ({ user, onLogout }) => {
         onTabChange={handleTabChange}
         currentTime={currentTime}
         isMobile={isMobile}
+        isNavCollapsed={isNavCollapsed}
+        onNavToggle={(collapsed) => setIsNavCollapsed(collapsed)}
       />
       {/* Main content area with responsive margin */}
       <div style={{ 
-        marginLeft: isMobile ? '0' : '280px', 
+        marginLeft: isMobile ? '0' : (isNavCollapsed ? '80px' : '280px'), 
         minHeight: '100vh',
-        paddingTop: isMobile ? '60px' : '0' // Add top padding for mobile to account for toggle button
+        paddingTop: isMobile ? '60px' : '0', // Add top padding for mobile to account for toggle button
+        transition: 'margin-left 0.3s ease'
       }}>
         <Container fluid className="p-4">
           {/* Pass user and onLogout to child components through Outlet */}
