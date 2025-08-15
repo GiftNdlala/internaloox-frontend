@@ -6,8 +6,8 @@ import {
 } from 'react-bootstrap';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { 
-  getProducts, getColors, getFabrics, createProduct, 
-  updateProduct, deleteProduct, getInventoryDashboard 
+  getWarehouseProducts, getColors, getFabrics, createWarehouseProduct, 
+  updateWarehouseProduct, deleteWarehouseProduct, getInventoryDashboard 
 } from '../components/api';
 import { 
   FaPlus, FaSearch, FaEdit, FaTrash, FaEye, FaPalette, 
@@ -76,7 +76,7 @@ const WarehouseProducts = () => {
       setError('');
 
       const [productsResponse, colorsResponse, fabricsResponse, dashResponse] = await Promise.all([
-        getProducts(),
+        getWarehouseProducts(),
         getColors().catch(() => ({ results: [] })),
         getFabrics().catch(() => ({ results: [] })),
         getInventoryDashboard().catch(() => null)
@@ -247,10 +247,10 @@ const WarehouseProducts = () => {
     try {
       setError('');
       if (modalMode === 'create') {
-        await createProduct(productForm);
+        await createWarehouseProduct(productForm);
         setSuccess('Product created successfully!');
       } else if (modalMode === 'edit') {
-        await updateProduct(selectedProduct.id, productForm);
+        await updateWarehouseProduct(selectedProduct.id, productForm);
         setSuccess('Product updated successfully!');
       }
       setShowProductModal(false);
@@ -268,7 +268,7 @@ const WarehouseProducts = () => {
     
     if (window.confirm(`Are you sure you want to delete "${product.name}"?`)) {
       try {
-        await deleteProduct(product.id);
+        await deleteWarehouseProduct(product.id);
         setSuccess('Product deleted successfully!');
         loadData();
       } catch (err) {
