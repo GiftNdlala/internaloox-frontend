@@ -28,7 +28,7 @@ const StockEntry = ({
   const [selectedMaterial, setSelectedMaterial] = useState('');
   const [quantity, setQuantity] = useState('');
   const [location, setLocation] = useState('');
-  const [movementType, setMovementType] = useState('in'); // 'in' or 'out'
+  const [direction, setDirection] = useState('in'); // 'in' or 'out'
   const [reason, setReason] = useState('');
   const [batchNumber, setBatchNumber] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
@@ -80,7 +80,7 @@ const StockEntry = ({
       quantity: parseFloat(quantity),
       location_id: location,
       location_name: locationName,
-      movement_type: movementType,
+      movement_type: direction,
       reason,
       batch_number: batchNumber,
       expiry_date: expiryDate,
@@ -121,7 +121,7 @@ const StockEntry = ({
           quantity: entry.movement_type === 'out' ? -entry.quantity : entry.quantity,
           location_id: entry.location_id,
           location: entry.location_id, // alias for backend location field
-          movement_type: entry.movement_type,
+          direction: entry.movement_type, // Use direction field for backend serializer
           reason: entry.reason,
           batch_number: entry.batch_number,
           expiry_date: entry.expiry_date,
@@ -247,8 +247,8 @@ const StockEntry = ({
                     <Form.Group>
                       <Form.Label>Movement Type *</Form.Label>
                       <Form.Select
-                        value={movementType}
-                        onChange={(e) => setMovementType(e.target.value)}
+                        value={direction}
+                        onChange={(e) => setDirection(e.target.value)}
                         required
                       >
                         <option value="in">Stock In (+)</option>
