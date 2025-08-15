@@ -6,7 +6,7 @@ import {
 } from 'react-icons/fa';
 import { usePolling } from '../../hooks/usePolling';
 import { useTaskActions } from '../../hooks/useTaskActions';
-import { getTasksByOrder } from '../api';
+import { getTasksByOrder } from '../../api';
 import TaskCard from './TaskCard';
 
 const WorkerOrderTasks = () => {

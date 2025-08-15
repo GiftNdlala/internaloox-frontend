@@ -15,7 +15,7 @@ import PaymentsTable from './PaymentsTable';
 import ReportsTable from './ReportsTable';
 import {
   getOrders, getCustomers, getPayments, getUsers
-} from '../api';
+} from '../../api';
 
 const AdminDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();

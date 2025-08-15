@@ -12,8 +12,8 @@ import {
 import { 
   getColors, getFabrics, createColor, createFabric, 
   updateColor, updateFabric, deleteColor, deleteFabric,
-  updateProduct, getProductColorFabrics 
-} from '../api';
+  updateProduct
+} from '../../api';
 
 const ProductColorFabricManager = ({ 
   show, 

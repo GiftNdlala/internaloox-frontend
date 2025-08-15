@@ -15,7 +15,7 @@ import {
   getWarehouseOrders, getTaskTypes, getUsersQuery, createTaskInOrder,
   updateTask, deleteTask, getTasksByStatus, assignWorkerToTask,
   getTaskTemplates, bulkAssignTasks, getOrderDetailsForTasks
-} from '../api';
+} from '../../api';
 
 const TaskManagement = ({ user }) => {
   // State Management

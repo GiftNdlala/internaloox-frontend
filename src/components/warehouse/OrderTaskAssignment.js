@@ -10,7 +10,7 @@ import {
 import { 
   getOrderDetailsForTasks, assignTasksToOrder, getTaskTypes, 
   getUsers, getTaskTemplates 
-} from '../api';
+} from '../../api';
 
 const OrderTaskAssignment = ({ 
   show, 

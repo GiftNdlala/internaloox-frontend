@@ -188,14 +188,27 @@ export const updateUser = (id, data) => apiRequest(`/users/users/${id}/`, { meth
 export const deleteUser = (id) => apiRequest(`/users/users/${id}/`, { method: 'DELETE' });
 
 // Products
-export const getProducts = () => apiRequest('/products/');
-export const getColors = () => apiRequest('/colors/');
-export const getFabrics = () => apiRequest('/fabrics/');
-export const createProduct = (data) => apiRequest('/products/', { method: 'POST', data });
+export const getProducts = () => apiRequest('/orders/products/');
+export const getColors = () => apiRequest('/orders/colors/');
+export const getFabrics = () => apiRequest('/orders/fabrics/');
+export const createProduct = (data) => apiRequest('/orders/products/', { method: 'POST', data });
+export const updateProduct = (id, data) => apiRequest(`/orders/products/${id}/`, { method: 'PUT', data });
+export const deleteProduct = (id) => apiRequest(`/orders/products/${id}/`, { method: 'DELETE' });
 
-// MVP: Reference Boards
-export const getColorReferences = () => apiRequest('/color-references/');
-export const getFabricReferences = () => apiRequest('/fabric-references/');
+// Color and Fabric Management
+export const createColor = (data) => apiRequest('/orders/colors/', { method: 'POST', data });
+export const updateColor = (id, data) => apiRequest(`/orders/colors/${id}/`, { method: 'PUT', data });
+export const deleteColor = (id) => apiRequest(`/orders/colors/${id}/`, { method: 'DELETE' });
+
+export const createFabric = (data) => apiRequest('/orders/fabrics/', { method: 'POST', data });
+export const updateFabric = (id, data) => apiRequest(`/orders/fabrics/${id}/`, { method: 'PUT', data });
+export const deleteFabric = (id) => apiRequest(`/orders/fabrics/${id}/`, { method: 'DELETE' });
+
+// Color and Fabric References
+export const getColorReferences = () => apiRequest('/orders/color-references/');
+export const getFabricReferences = () => apiRequest('/orders/fabric-references/');
+export const createColorReference = (data) => apiRequest('/orders/color-references/', { method: 'POST', data });
+export const createFabricReference = (data) => apiRequest('/orders/fabric-references/', { method: 'POST', data });
 
 // Production Status Updates
 export const updateProductionStatus = (orderId, data) => apiRequest(`/orders/${orderId}/update_production_status/`, { method: 'POST', data });

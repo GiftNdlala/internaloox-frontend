@@ -106,60 +106,60 @@ const WarehouseSideNav = ({ user, onLogout, activeTab, onTabChange, notification
       {/* Navigation Items - Flexible grow area */}
       <div style={{ flex: 1, overflow: 'auto' }}>
         <Nav className="flex-column" style={{ padding: '20px 0' }}>
-          {navItems.map((item) => {
-            const IconComponent = item.icon;
-            const isActive = activeTab === item.id;
-            
-            return (
-              <Nav.Item key={item.id}>
-                <Nav.Link
+        {navItems.map((item) => {
+          const IconComponent = item.icon;
+          const isActive = activeTab === item.id;
+          
+          return (
+            <Nav.Item key={item.id}>
+              <Nav.Link
                   onClick={() => handleTabChange(item.id, item.route)}
-                  style={{
-                    color: isActive ? 'white' : '#bdc3c7',
-                    backgroundColor: isActive ? item.color : 'transparent',
-                    border: 'none',
-                    padding: '15px 25px',
-                    margin: '2px 15px',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    fontSize: '16px'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) {
-                      e.target.style.backgroundColor = '#34495e';
-                      e.target.style.color = 'white';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) {
-                      e.target.style.backgroundColor = 'transparent';
-                      e.target.style.color = '#bdc3c7';
-                    }
-                  }}
-                >
-                  <IconComponent size={18} />
-                  {item.label}
-                  {item.id === 'orders' && (
-                    <Badge 
-                      bg="danger" 
-                      style={{ 
-                        marginLeft: 'auto',
-                        fontSize: '10px',
-                        padding: '4px 6px'
-                      }}
-                    >
-                      New
-                    </Badge>
-                  )}
-                </Nav.Link>
-              </Nav.Item>
-            );
-          })}
-        </Nav>
+                style={{
+                  color: isActive ? 'white' : '#bdc3c7',
+                  backgroundColor: isActive ? item.color : 'transparent',
+                  border: 'none',
+                  padding: '15px 25px',
+                  margin: '2px 15px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  fontSize: '16px'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    e.target.style.backgroundColor = '#34495e';
+                    e.target.style.color = 'white';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    e.target.style.backgroundColor = 'transparent';
+                    e.target.style.color = '#bdc3c7';
+                  }
+                }}
+              >
+                <IconComponent size={18} />
+                {item.label}
+                {item.id === 'orders' && (
+                  <Badge 
+                    bg="danger" 
+                    style={{ 
+                      marginLeft: 'auto',
+                      fontSize: '10px',
+                      padding: '4px 6px'
+                    }}
+                  >
+                    New
+                  </Badge>
+                )}
+              </Nav.Link>
+            </Nav.Item>
+          );
+        })}
+      </Nav>
       </div>
 
       {/* Bottom Section - Fixed at bottom */}
