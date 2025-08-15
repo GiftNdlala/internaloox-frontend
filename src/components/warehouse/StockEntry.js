@@ -80,7 +80,7 @@ const StockEntry = ({
       quantity: parseFloat(quantity),
       location_id: location,
       location_name: locationName,
-      movement_type: direction,
+      direction: direction, // Use direction instead of movement_type
       reason,
       batch_number: batchNumber,
       expiry_date: expiryDate,
@@ -118,10 +118,10 @@ const StockEntry = ({
       const stockData = {
         entries: quickEntries.map(entry => ({
           material_id: entry.material_id,
-          quantity: entry.movement_type === 'out' ? -entry.quantity : entry.quantity,
+          quantity: entry.direction === 'out' ? -entry.quantity : entry.quantity,
           location_id: entry.location_id,
           location: entry.location_id, // alias for backend location field
-          direction: entry.movement_type, // Use direction field for backend serializer
+          direction: entry.direction, // Use direction field for backend serializer
           reason: entry.reason,
           batch_number: entry.batch_number,
           expiry_date: entry.expiry_date,
@@ -392,8 +392,8 @@ const StockEntry = ({
                             </small>
                           </div>
                           <div className="text-end">
-                            <Badge bg={entry.movement_type === 'in' ? 'success' : 'warning'}>
-                              {entry.movement_type === 'in' ? '+' : '-'}{entry.quantity}
+                            <Badge bg={entry.direction === 'in' ? 'success' : 'warning'}>
+                              {entry.direction === 'in' ? '+' : '-'}{entry.quantity}
                             </Badge>
                             {entry.reason && (
                               <div>
