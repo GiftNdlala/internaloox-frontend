@@ -128,8 +128,8 @@ const WarehouseStock = () => {
                   <FaWarehouse className="me-2" />
                   Go to Dashboard
                 </Button>
-              </Card.Body>
-            </Card>
+          </Card.Body>
+        </Card>
           </Col>
 
           <Col lg={4} md={6}>
@@ -150,8 +150,8 @@ const WarehouseStock = () => {
                   <FaExclamationTriangle className="me-2" />
                   View Alerts
                 </Button>
-              </Card.Body>
-            </Card>
+          </Card.Body>
+        </Card>
           </Col>
         </Row>
 
@@ -160,7 +160,7 @@ const WarehouseStock = () => {
             <Card.Header>
               <h5 className="mb-0">Quick Actions</h5>
             </Card.Header>
-            <Card.Body>
+          <Card.Body>
               <Row className="g-3">
                 <Col md={3}>
                   <Button 
@@ -203,8 +203,8 @@ const WarehouseStock = () => {
                   </Button>
                 </Col>
               </Row>
-            </Card.Body>
-          </Card>
+          </Card.Body>
+        </Card>
         </div>
       </div>
     </div>

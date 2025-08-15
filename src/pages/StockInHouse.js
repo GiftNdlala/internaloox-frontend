@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Container, Row, Col, Card, Button, Form, Table, InputGroup, Alert, Spinner, Badge } from 'react-bootstrap';
-import { FaExchangeAlt, FaArrowDown, FaArrowUp, FaPlus, FaRefresh } from 'react-icons/fa';
+import { FaExchangeAlt, FaArrowDown, FaArrowUp, FaPlus, FaRedo } from 'react-icons/fa';
 import { getMaterials, getStockMovements, createStockMovement } from '../components/api';
 
 const StockInHouse = () => {
@@ -24,21 +24,21 @@ const StockInHouse = () => {
   }, []);
 
   const loadData = async () => {
-    setLoading(true);
+      setLoading(true);
     setError(null);
-    try {
-      const [mats, movs] = await Promise.all([
-        getMaterials(),
-        getStockMovements()
-      ]);
-      setMaterials(Array.isArray(mats) ? mats : (mats?.results || []));
-      setMovements(Array.isArray(movs) ? movs : (movs?.results || []));
-    } catch (e) {
+      try {
+        const [mats, movs] = await Promise.all([
+          getMaterials(),
+          getStockMovements()
+        ]);
+        setMaterials(Array.isArray(mats) ? mats : (mats?.results || []));
+        setMovements(Array.isArray(movs) ? movs : (movs?.results || []));
+      } catch (e) {
       setError('Failed to load stock data: ' + e.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+      } finally {
+        setLoading(false);
+      }
+    };
 
   const validate = useMemo(() => (vals) => {
     const v = {};
@@ -121,9 +121,9 @@ const StockInHouse = () => {
               Stock In-House Management
             </h4>
             <Button variant="outline-primary" onClick={loadData} disabled={loading}>
-              <FaRefresh className="me-2" />
+              <FaRedo className="me-2" />
               Refresh
-            </Button>
+                </Button>
           </Col>
         </Row>
 
@@ -186,11 +186,11 @@ const StockInHouse = () => {
                     <Form.Control.Feedback type="invalid">{formErrors.quantity}</Form.Control.Feedback>
                   </Form.Group>
                 </Col>
-                <Col md={3}>
-                  <Form.Group>
+                  <Col md={3}>
+                    <Form.Group>
                     <Form.Label>Unit Cost {form.direction === 'in' && '*'}</Form.Label>
-                    <InputGroup>
-                      <InputGroup.Text>R</InputGroup.Text>
+                      <InputGroup>
+                        <InputGroup.Text>R</InputGroup.Text>
                       <Form.Control
                         type="number"
                         step="0.01"
@@ -202,9 +202,9 @@ const StockInHouse = () => {
                         disabled={form.direction === 'out'}
                       />
                     </InputGroup>
-                    <Form.Control.Feedback type="invalid">{formErrors.unit_cost}</Form.Control.Feedback>
-                  </Form.Group>
-                </Col>
+                        <Form.Control.Feedback type="invalid">{formErrors.unit_cost}</Form.Control.Feedback>
+                    </Form.Group>
+                  </Col>
               </Row>
               <Row className="g-3 mt-2">
                 <Col md={12}>
@@ -309,7 +309,7 @@ const StockInHouse = () => {
                           {movement.note || movement.reason || '-'}
                         </small>
                       </td>
-                    </tr>
+                        </tr>
                   ))}
                 </tbody>
               </Table>
