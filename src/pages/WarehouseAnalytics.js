@@ -44,7 +44,7 @@ const WarehouseAnalytics = () => {
         setInventory({ total_materials: sa.total_materials || 0, in_stock: sa.in_stock || 0 });
         // If backend exposes low_stock_count only, keep separate call to list items
         const low = await getLowStockAlerts().catch(()=>null);
-        setLowStock(low?.alerts || []);
+        setLowStock(low || []);
         const ordList = Array.isArray(oa.orders) ? oa.orders
                       : Array.isArray(consolidated.orders) ? consolidated.orders
                       : [];
@@ -62,7 +62,7 @@ const WarehouseAnalytics = () => {
           getWarehouseOrders()
         ]);
         setInventory(inv || { total_materials: 0, in_stock: 0 });
-        setLowStock(low?.alerts || []);
+        setLowStock(low || []);
         const ordList = Array.isArray(ord?.orders) ? ord.orders : (Array.isArray(ord) ? ord : []);
         setOrders(ordList);
         const [assigned, started, completed] = await Promise.all([

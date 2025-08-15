@@ -204,7 +204,7 @@ const EnhancedWarehouseDashboard = ({ user: propUser, onLogout: propOnLogout }) 
       ]);
       
       setInventoryData(warehouseData);
-      setLowStockAlerts(alertsData.alerts || []);
+      setLowStockAlerts(alertsData || []);
     } catch (err) {
       console.error('Failed to load inventory data:', err);
     }

@@ -57,7 +57,7 @@ const Analytics = ({ user, userRole, onLogout }) => {
           getWarehouseOrders()
         ]);
         setWhInventory(inv || { total_materials: 0, in_stock: 0 });
-        setWhLowStock(low?.alerts || []);
+        setWhLowStock(low || []);
         const ordList = Array.isArray(ord?.orders) ? ord.orders : (Array.isArray(ord) ? ord : []);
         setWhOrders(ordList);
         const [assigned, started, completed] = await Promise.all([
