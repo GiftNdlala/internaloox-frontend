@@ -563,7 +563,7 @@ const ProductColorFabricManager = ({
                         type="text"
                         value={newFabric.description}
                         onChange={(e) => setNewFabric({...newFabric, description: e.target.value})}
-import React, { useState, useEffect } from 'react';
+                      />
 import {
   Modal, Button, Card, Row, Col, Form, InputGroup, Badge, 
   Alert, Spinner, Table, ButtonGroup, OverlayTrigger, 
@@ -762,101 +762,33 @@ const ProductColorFabricManager = ({
     setProductFabrics(productFabrics.filter(pf => pf.id !== fabricId));
   };
 
-  // Save product updates
-  const handleSaveProductChanges = async () => {
-    try {
-      setError('');
-      setLoading(true);
+                    </Form.Group>
+                  </Col>
+                </Row>
+                <div className="d-flex gap-2 mt-3">
+                  <Button variant="primary" onClick={handleAddFabric}>
+                    <FaPlus className="me-1" />
+                    Add Fabric
+                  </Button>
+                  <Button variant="secondary" onClick={() => setShowAddFabricForm(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button variant="outline-primary" onClick={() => setShowAddFabricForm(true)}>
+                <FaPlus className="me-1" />
+                Add New Fabric
+              </Button>
+            )}
+          </div>
+        </Tab>
+      </Tabs>
+    </Modal>
+  );
+};
 
-      const updatedProduct = {
-        ...product,
-        available_colors: productColors,
-        available_fabrics: productFabrics
-      };
-
-      await updateWarehouseProduct(product.id, {
-        available_colors: productColors.map(c => c.id),
-        available_fabrics: productFabrics.map(f => f.id)
-      });
-
-      onProductUpdate(updatedProduct);
-      setSuccess('Product colors and fabrics updated successfully!');
-      
-      // Close modal after brief delay
-      setTimeout(() => {
-        onHide();
-      }, 1500);
-
-    } catch (err) {
-      setError('Failed to update product: ' + (err?.message || 'Unknown error'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Render color management tab
-  const renderColorsTab = () => (
-    <div>
-      {/* Current Product Colors */}
-      <Card className="mb-4">
-        <Card.Header className="d-flex justify-content-between align-items-center">
-          <h6 className="mb-0">
-            <FaPalette className="me-2" />
-            Product Colors ({productColors.length})
-          </h6>
-          <small className="text-muted">Colors assigned to this product</small>
-        </Card.Header>
-        <Card.Body>
-          {productColors.length === 0 ? (
-            <div className="text-center text-muted py-3">
-              <FaPalette size={32} className="mb-2" />
-              <p>No colors assigned to this product</p>
-            </div>
-          ) : (
-            <Row>
-              {productColors.map(color => (
-                <Col key={color.id} md={4} className="mb-3">
-                  <Card className="border" style={{ borderLeftColor: color.hex_value || '#000', borderLeftWidth: '4px' }}>
-                    <Card.Body className="py-2">
-                      <div className="d-flex justify-content-between align-items-center">
-                        <div>
-                          <div className="fw-bold">{color.name}</div>
-                          {color.code && <small className="text-muted">Code: {color.code}</small>}
-                        </div>
-                        <div className="d-flex align-items-center gap-2">
-                          <div 
-                            style={{
-                              width: '20px',
-                              height: '20px',
-                              backgroundColor: color.hex_value || '#000',
-                              border: '1px solid #ddd',
-                              borderRadius: '3px'
-                            }}
-                          />
-                          {canManage() && (
-                            <Button 
-                              size="sm" 
-                              variant="outline-danger"
-                              onClick={() => handleRemoveColorFromProduct(color.id)}
-                            >
-                              <FaTimes />
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
-          )}
-        </Card.Body>
-      </Card>
-
-      {/* Available Colors */}
-      <Card>
-        <Card.Header className="d-flex justify-content-between align-items-center">
-          <h6 className="mb-0">
+export default ProductColorFabricManager;
             <FaColorize className="me-2" />
             All Available Colors ({allColors.length})
           </h6>
