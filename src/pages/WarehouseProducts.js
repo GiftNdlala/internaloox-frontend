@@ -112,12 +112,35 @@ const WarehouseProducts = () => {
       setProducts(allProducts);
       setFilteredProducts(allProducts);
       
-      // Normalize colors and fabrics
+      // Normalize colors and fabrics with field mapping for compatibility
       const normalizeArray = (data) => {
         if (!data) return [];
-        if (Array.isArray(data)) return data;
-        if (Array.isArray(data.results)) return data.results;
-        return [];
+        let items = [];
+        if (Array.isArray(data)) items = data;
+        else if (Array.isArray(data.results)) items = data.results;
+        else return [];
+        
+        // Map color_reference and fabric_reference fields to expected format
+        return items.map(item => {
+          if (item.color_name) {
+            // ColorReference model: map color_name to name
+            return {
+              ...item,
+              name: item.color_name,
+              code: item.color_code,
+              hex_color: item.hex_color
+            };
+          } else if (item.fabric_name) {
+            // FabricReference model: map fabric_name to name
+            return {
+              ...item,
+              name: item.fabric_name,
+              letter: item.fabric_letter,
+              type: item.fabric_type
+            };
+          }
+          return item;
+        });
       };
 
       setAvailableColors(normalizeArray(colorsResponse));

@@ -189,17 +189,17 @@ export const deleteUser = (id) => apiRequest(`/users/users/${id}/`, { method: 'D
 
 // Products
 export const getProducts = () => apiRequest('/products/');
-export const getColors = () => apiRequest('/orders/colors/');
-export const getFabrics = () => apiRequest('/orders/fabrics/');
+export const getColors = () => apiRequest('/orders/color-references/');
+export const getFabrics = () => apiRequest('/orders/fabric-references/');
 export const createProduct = (data) => apiRequest('/products/', { method: 'POST', data });
 export const updateProduct = (id, data) => apiRequest(`/products/${id}/`, { method: 'PUT', data });
 export const deleteProduct = (id) => apiRequest(`/products/${id}/`, { method: 'DELETE' });
 
-// Warehouse Products (Inventory app)
-export const getWarehouseProducts = () => apiRequest('/inventory/products/');
-export const createWarehouseProduct = (data) => apiRequest('/inventory/products/', { method: 'POST', data });
-export const updateWarehouseProduct = (id, data) => apiRequest(`/inventory/products/${id}/`, { method: 'PUT', data });
-export const deleteWarehouseProduct = (id) => apiRequest(`/inventory/products/${id}/`, { method: 'DELETE' });
+// Warehouse Products (Orders app - products are managed here)
+export const getWarehouseProducts = () => apiRequest('/orders/products/');
+export const createWarehouseProduct = (data) => apiRequest('/orders/products/', { method: 'POST', data });
+export const updateWarehouseProduct = (id, data) => apiRequest(`/orders/products/${id}/`, { method: 'PUT', data });
+export const deleteWarehouseProduct = (id) => apiRequest(`/orders/products/${id}/`, { method: 'DELETE' });
 
 // Color and Fabric Management
 export const createColor = (data) => apiRequest('/orders/colors/', { method: 'POST', data });
