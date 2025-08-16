@@ -151,12 +151,18 @@ const WarehouseProducts = () => {
         (product.name || '').toLowerCase().includes(searchTerm) ||
         (product.sku || '').toLowerCase().includes(searchTerm) ||
         (product.description || '').toLowerCase().includes(searchTerm) ||
-        (product.available_colors || []).some(color => 
-          (color.name || '').toLowerCase().includes(searchTerm)
-        ) ||
-        (product.available_fabrics || []).some(fabric => 
-          (fabric.name || '').toLowerCase().includes(searchTerm)
-        )
+        (product.available_colors || []).some(color => {
+          if (!color) return false;
+          if (typeof color === 'string') return color.toLowerCase().includes(searchTerm);
+          if (typeof color === 'object' && color !== null) return (color.name || '').toLowerCase().includes(searchTerm);
+          return false;
+        }) ||
+        (product.available_fabrics || []).some(fabric => {
+          if (!fabric) return false;
+          if (typeof fabric === 'string') return fabric.toLowerCase().includes(searchTerm);
+          if (typeof fabric === 'object' && fabric !== null) return (fabric.name || '').toLowerCase().includes(searchTerm);
+          return false;
+        })
       );
     }
 
@@ -294,20 +300,36 @@ const WarehouseProducts = () => {
   // Color and Fabric helpers
   const getColorDisplay = (colors) => {
     if (!colors || colors.length === 0) return 'No colors';
-    return colors.slice(0, 3).map((color, index) => (
-      <Badge key={index} bg="primary" className="me-1">
-        {color.name || color}
-      </Badge>
-    ));
+    return colors.slice(0, 3).map((color, index) => {
+      // Handle null/undefined colors
+      if (!color) return null;
+      
+      // Handle both string and object formats
+      const colorName = typeof color === 'string' ? color : (color.name || 'Unknown Color');
+      
+      return (
+        <Badge key={index} bg="primary" className="me-1">
+          {colorName}
+        </Badge>
+      );
+    }).filter(Badge => Badge !== null); // Remove null badges
   };
 
   const getFabricDisplay = (fabrics) => {
     if (!fabrics || fabrics.length === 0) return 'No fabrics';
-    return fabrics.slice(0, 3).map((fabric, index) => (
-      <Badge key={index} bg="secondary" className="me-1">
-        {fabric.name || fabric}
-      </Badge>
-    ));
+    return fabrics.slice(0, 3).map((fabric, index) => {
+      // Handle null/undefined fabrics
+      if (!fabric) return null;
+      
+      // Handle both string and object formats
+      const fabricName = typeof fabric === 'string' ? fabric : (fabric.name || 'Unknown Fabric');
+      
+      return (
+        <Badge key={index} bg="secondary" className="me-1">
+          {fabricName}
+        </Badge>
+      );
+    }).filter(Badge => Badge !== null); // Remove null badges
   };
 
   const formatCurrency = (amount) => {
@@ -667,12 +689,16 @@ const WarehouseProducts = () => {
                     <strong>Available Colors:</strong>
                     <div className="mt-2">
                       {selectedProduct.available_colors?.length > 0 ? 
-                        selectedProduct.available_colors.map((color, index) => (
-                          <Badge key={index} bg="primary" className="me-1 mb-1">
-                            <FaPalette className="me-1" />
-                            {color.name || color}
-                          </Badge>
-                        )) : 'No colors available'
+                        selectedProduct.available_colors.map((color, index) => {
+                          if (!color) return null;
+                          const colorName = typeof color === 'string' ? color : (color.name || 'Unknown Color');
+                          return (
+                            <Badge key={index} bg="primary" className="me-1 mb-1">
+                              <FaPalette className="me-1" />
+                              {colorName}
+                            </Badge>
+                          );
+                        }).filter(Badge => Badge !== null) : 'No colors available'
                       }
                     </div>
                   </div>
@@ -680,12 +706,16 @@ const WarehouseProducts = () => {
                     <strong>Available Fabrics:</strong>
                     <div className="mt-2">
                       {selectedProduct.available_fabrics?.length > 0 ? 
-                        selectedProduct.available_fabrics.map((fabric, index) => (
-                          <Badge key={index} bg="secondary" className="me-1 mb-1">
-                            <FaCouch className="me-1" />
-                            {fabric.name || fabric}
-                          </Badge>
-                        )) : 'No fabrics available'
+                        selectedProduct.available_fabrics.map((fabric, index) => {
+                          if (!fabric) return null;
+                          const fabricName = typeof fabric === 'string' ? fabric : (fabric.name || 'Unknown Fabric');
+                          return (
+                            <Badge key={index} bg="secondary" className="me-1 mb-1">
+                              <FaCouch className="me-1" />
+                              {fabricName}
+                            </Badge>
+                          );
+                        }).filter(Badge => Badge !== null) : 'No fabrics available'
                       }
                     </div>
                   </div>
