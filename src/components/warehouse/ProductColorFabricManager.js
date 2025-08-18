@@ -65,20 +65,56 @@ const ProductColorFabricManager = ({
         getFabrics().catch(() => ({ results: [] }))
       ]);
 
-      // Normalize responses
-      const normalizeArray = (data) => {
-        if (!data) return [];
-        if (Array.isArray(data)) return data;
-        if (Array.isArray(data.results)) return data.results;
-        return [];
+      // Normalize responses from reference endpoints into a frontend-friendly shape
+      const normalizeColors = (data) => {
+        const items = Array.isArray(data)
+          ? data
+          : (Array.isArray(data?.results) ? data.results : []);
+        return items.map((c) => {
+          if (c && (c.color_name || c.color_code)) {
+            return {
+              id: c.id,
+              name: c.color_name,
+              code: c.color_code,
+              hex_value: c.hex_color,
+              is_reference: true,
+            };
+          }
+          // Already normalized/custom color
+          return c;
+        });
       };
 
-      setAllColors(normalizeArray(colorsRes));
-      setAllFabrics(normalizeArray(fabricsRes));
+      const normalizeFabrics = (data) => {
+        const items = Array.isArray(data)
+          ? data
+          : (Array.isArray(data?.results) ? data.results : []);
+        return items.map((f) => {
+          if (f && (f.fabric_name || f.fabric_letter)) {
+            return {
+              id: f.id,
+              name: f.fabric_name,
+              code: f.fabric_letter,
+              description: f.fabric_type,
+              is_reference: true,
+            };
+          }
+          return f;
+        });
+      };
+
+      setAllColors(normalizeColors(colorsRes));
+      setAllFabrics(normalizeFabrics(fabricsRes));
       
-      // Set current product colors/fabrics
-      setProductColors(product?.available_colors || []);
-      setProductFabrics(product?.available_fabrics || []);
+      // Set current product colors/fabrics from aliased fields if available
+      const assignedColors = (product?.colors || product?.available_colors || []).map((c) => (
+        typeof c === 'string' ? { id: null, name: c } : c
+      ));
+      const assignedFabrics = (product?.fabrics || product?.available_fabrics || []).map((f) => (
+        typeof f === 'string' ? { id: null, name: f } : f
+      ));
+      setProductColors(assignedColors);
+      setProductFabrics(assignedFabrics);
 
     } catch (err) {
       setError('Failed to load colors and fabrics: ' + (err?.message || 'Unknown error'));
@@ -109,6 +145,12 @@ const ProductColorFabricManager = ({
   const handleEditColor = async (colorId, updatedData) => {
     try {
       setError('');
+      // Only allow editing for custom colors (not reference items)
+      const color = allColors.find(c => c.id === colorId);
+      if (color?.is_reference) {
+        setError('Editing reference colors is not supported here. Create a custom color instead.');
+        return;
+      }
       const updatedColor = await updateColor(colorId, updatedData);
       setAllColors(allColors.map(c => c.id === colorId ? updatedColor : c));
       setEditingColor(null);
@@ -123,6 +165,11 @@ const ProductColorFabricManager = ({
 
     try {
       setError('');
+      const color = allColors.find(c => c.id === colorId);
+      if (color?.is_reference) {
+        setError('Deleting reference colors is not supported here.');
+        return;
+      }
       await deleteColor(colorId);
       setAllColors(allColors.filter(c => c.id !== colorId));
       setProductColors(productColors.filter(c => c.id !== colorId));
@@ -164,6 +211,11 @@ const ProductColorFabricManager = ({
   const handleEditFabric = async (fabricId, updatedData) => {
     try {
       setError('');
+      const fabric = allFabrics.find(f => f.id === fabricId);
+      if (fabric?.is_reference) {
+        setError('Editing reference fabrics is not supported here. Create a custom fabric instead.');
+        return;
+      }
       const updatedFabric = await updateFabric(fabricId, updatedData);
       setAllFabrics(allFabrics.map(f => f.id === fabricId ? updatedFabric : f));
       setEditingFabric(null);
@@ -178,6 +230,11 @@ const ProductColorFabricManager = ({
 
     try {
       setError('');
+      const fabric = allFabrics.find(f => f.id === fabricId);
+      if (fabric?.is_reference) {
+        setError('Deleting reference fabrics is not supported here.');
+        return;
+      }
       await deleteFabric(fabricId);
       setAllFabrics(allFabrics.filter(f => f.id !== fabricId));
       setProductFabrics(productFabrics.filter(f => f.id !== fabricId));
@@ -203,10 +260,10 @@ const ProductColorFabricManager = ({
       setError('');
       setLoading(true);
 
-      // Prepare the update data with only the fields we're updating
+      // Prepare the update data using aliased fields (names). Backend maps names to JSON storage.
       const updateData = {
-        available_colors: productColors.map(color => color.id),
-        available_fabrics: productFabrics.map(fabric => fabric.id)
+        colors: productColors.map(color => color.name).filter(Boolean),
+        fabrics: productFabrics.map(fabric => fabric.name).filter(Boolean),
       };
 
       await updateWarehouseProduct(product.id, updateData);
@@ -214,6 +271,8 @@ const ProductColorFabricManager = ({
       // Update the local product state
       const updatedProduct = {
         ...product,
+        colors: productColors.map(c => c.name),
+        fabrics: productFabrics.map(f => f.name),
         available_colors: productColors,
         available_fabrics: productFabrics
       };
