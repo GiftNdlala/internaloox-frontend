@@ -177,7 +177,15 @@ const TaskCard = ({
                   {task.order_item_details.quantity}x {task.order_item_details.product_name}
                 </span>
                 {task.order_item_details.color_name && (
-                  <Badge bg="light" text="dark" className="border">
+                  <Badge 
+                    bg="light" 
+                    text="dark" 
+                    className="border"
+                    style={{
+                      backgroundColor: task.order_item_details.hex_color || undefined,
+                      color: task.order_item_details.hex_color ? '#000' : undefined
+                    }}
+                  >
                     Color: {task.order_item_details.color_name}
                   </Badge>
                 )}

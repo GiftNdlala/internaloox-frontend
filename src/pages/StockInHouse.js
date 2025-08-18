@@ -51,6 +51,13 @@ const StockInHouse = () => {
   }, []);
 
   const onChange = (field, value) => {
+    // Normalize direction to strict 'in' | 'out' to avoid accidental values
+    if (field === 'direction') {
+      const normalized = String(value).toLowerCase().trim() === 'in' ? 'in' : 'out';
+      setForm((p) => ({ ...p, direction: normalized }));
+      setFormErrors((p) => ({ ...p, direction: undefined }));
+      return;
+    }
     setForm((p) => ({ ...p, [field]: value }));
     setFormErrors((p) => ({ ...p, [field]: undefined }));
   };
@@ -70,9 +77,9 @@ const StockInHouse = () => {
     try {
       const movementData = {
         material: form.material_id,
-        movement_type: form.direction,
+        movement_type: (form.direction === 'in' ? 'in' : 'out'),
         quantity: parseFloat(form.quantity),
-        unit_cost: form.direction === 'in' ? parseFloat(form.unit_cost) : 0,
+        unit_cost: (form.direction === 'in' ? parseFloat(form.unit_cost) : 0),
         reason: form.reason.trim(),
         note: form.note || ''
       };

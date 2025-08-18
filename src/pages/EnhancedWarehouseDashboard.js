@@ -540,34 +540,34 @@ const EnhancedWarehouseDashboard = ({ user: propUser, onLogout: propOnLogout }) 
               Inventory Management
             </h4>
             {user?.role !== 'warehouse_worker' && (
-              <div className="d-flex gap-2">
-                <Button 
-                  variant="outline-success" 
-                  onClick={() => navigate('/warehouse/products/new')}
-                >
-                  <FaPlus className="me-2" />
-                  Add Product
-                </Button>
-                <Button 
-                  variant="outline-primary" 
-                  onClick={() => navigate('/warehouse/inventory/materials')}
-                >
-                  Manage Materials
-                </Button>
-                <Button 
-                  variant="outline-warning" 
-                  onClick={() => navigate('/warehouse/inventory/stock-in-house')}
-                >
-                  Update Stock In-House
-                </Button>
-                <Button 
-                  variant="primary" 
-                  onClick={() => setShowStockEntry(true)}
-                >
-                  <FaPlus className="me-2" />
-                  Quick Stock Entry
-                </Button>
-              </div>
+            <div className="d-flex gap-2">
+              <Button 
+                variant="outline-success" 
+                onClick={() => navigate('/warehouse/products/new')}
+              >
+                <FaPlus className="me-2" />
+                Add Product
+              </Button>
+              <Button 
+                variant="outline-primary" 
+                onClick={() => navigate('/warehouse/inventory/materials')}
+              >
+                Manage Materials
+              </Button>
+              <Button 
+                variant="outline-warning" 
+                onClick={() => navigate('/warehouse/inventory/stock-in-house')}
+              >
+                Update Stock In-House
+              </Button>
+              <Button 
+                variant="primary" 
+                onClick={() => setShowStockEntry(true)}
+              >
+                <FaPlus className="me-2" />
+                Quick Stock Entry
+              </Button>
+            </div>
             )}
           </div>
         </Col>
