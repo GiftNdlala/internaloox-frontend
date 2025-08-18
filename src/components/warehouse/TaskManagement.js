@@ -12,7 +12,7 @@ import {
 } from 'react-icons/fa';
 import { usePolling } from '../../hooks/usePolling';
 import { 
-  getWarehouseOrders, getTaskTypes, getUsersQuery, createTaskInOrder,
+  getWarehouseOrders, getTaskTypes, getUsersQuery, getWarehouseWorkersList, createTaskInOrder,
   updateTask, deleteTask, getTasksByStatus, assignWorkerToTask,
   getTaskTemplates, bulkAssignTasks, getOrderDetailsForTasks
 } from '../api';
@@ -103,12 +103,10 @@ const TaskManagement = ({ user }) => {
   const loadInitialData = async () => {
     setLoading(true);
     try {
-      const rolesQuery = (user?.role === 'owner' || user?.role === 'admin')
-        ? 'role=warehouse_worker,warehouse'
-        : 'role=warehouse_worker,warehouse';
-      const [typesData, workersData] = await Promise.all([
+      const rolesQuery = 'role=warehouse_worker,warehouse';
+      const [typesData, workersDataRaw] = await Promise.all([
         getTaskTypes('is_active=true'),
-        getUsersQuery(rolesQuery)
+        (user?.role === 'warehouse' ? getWarehouseWorkersList() : getUsersQuery(rolesQuery))
       ]);
       // Normalize task types (support arrays under different keys)
       const typesArr = (Array.isArray(typesData?.task_types) && typesData.task_types)
@@ -118,9 +116,10 @@ const TaskManagement = ({ user }) => {
       setTaskTypes(typesArr);
 
       // Normalize workers list and provide name fallbacks
-      const workersArr = (workersData?.users && Array.isArray(workersData.users) && workersData.users)
-        || (Array.isArray(workersData?.results) && workersData.results)
-        || (Array.isArray(workersData) && workersData)
+      const workersArr = (workersDataRaw?.warehouse_workers && Array.isArray(workersDataRaw.warehouse_workers) && workersDataRaw.warehouse_workers)
+        || (workersDataRaw?.users && Array.isArray(workersDataRaw.users) && workersDataRaw.users)
+        || (Array.isArray(workersDataRaw?.results) && workersDataRaw.results)
+        || (Array.isArray(workersDataRaw) && workersDataRaw)
         || [];
       const normalizedWorkers = workersArr.map(w => ({
         id: w.id,
