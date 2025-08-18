@@ -174,13 +174,13 @@ const WarehouseProducts = () => {
         (product.name || '').toLowerCase().includes(searchTerm) ||
         (product.sku || '').toLowerCase().includes(searchTerm) ||
         (product.description || '').toLowerCase().includes(searchTerm) ||
-        (product.available_colors || []).some(color => {
+        (product.colors || product.available_colors || []).some(color => {
           if (!color) return false;
           if (typeof color === 'string') return color.toLowerCase().includes(searchTerm);
           if (typeof color === 'object' && color !== null) return (color.name || '').toLowerCase().includes(searchTerm);
           return false;
         }) ||
-        (product.available_fabrics || []).some(fabric => {
+        (product.fabrics || product.available_fabrics || []).some(fabric => {
           if (!fabric) return false;
           if (typeof fabric === 'string') return fabric.toLowerCase().includes(searchTerm);
           if (typeof fabric === 'object' && fabric !== null) return (fabric.name || '').toLowerCase().includes(searchTerm);
@@ -192,13 +192,13 @@ const WarehouseProducts = () => {
     // Category filter
     if (filterBy !== 'all') {
       if (filterBy === 'with-colors') {
-        filtered = filtered.filter(p => p.available_colors && p.available_colors.length > 0);
+        filtered = filtered.filter(p => (p.colors || p.available_colors || []).length > 0);
       } else if (filterBy === 'with-fabrics') {
-        filtered = filtered.filter(p => p.available_fabrics && p.available_fabrics.length > 0);
+        filtered = filtered.filter(p => (p.fabrics || p.available_fabrics || []).length > 0);
       } else if (filterBy === 'no-colors') {
-        filtered = filtered.filter(p => !p.available_colors || p.available_colors.length === 0);
+        filtered = filtered.filter(p => !(p.colors && p.colors.length > 0) && !(p.available_colors && p.available_colors.length > 0));
       } else if (filterBy === 'no-fabrics') {
-        filtered = filtered.filter(p => !p.available_fabrics || p.available_fabrics.length === 0);
+        filtered = filtered.filter(p => !(p.fabrics && p.fabrics.length > 0) && !(p.available_fabrics && p.available_fabrics.length > 0));
       }
     }
 
@@ -244,8 +244,8 @@ const WarehouseProducts = () => {
       description: product.description || '',
       price: product.price || '',
       currency: product.currency || 'ZAR',
-      available_colors: product.available_colors || [],
-      available_fabrics: product.available_fabrics || [],
+      colors: product.colors || product.available_colors || [],
+      fabrics: product.fabrics || product.available_fabrics || [],
       attributes: product.attributes || {}
     });
     setModalMode('edit');
@@ -264,8 +264,8 @@ const WarehouseProducts = () => {
       description: '',
       price: '',
       currency: 'ZAR',
-      available_colors: [],
-      available_fabrics: [],
+      colors: [],
+      fabrics: [],
       attributes: {}
     });
     setModalMode('create');
@@ -392,11 +392,11 @@ const WarehouseProducts = () => {
               <div className="mb-3">
                 <div className="mb-2">
                   <small className="fw-bold">Colors:</small>
-                  <div>{getColorDisplay(product.available_colors)}</div>
+                  <div>{getColorDisplay(product.colors || product.available_colors)}</div>
                 </div>
                 <div>
                   <small className="fw-bold">Fabrics:</small>
-                  <div>{getFabricDisplay(product.available_fabrics)}</div>
+                  <div>{getFabricDisplay(product.fabrics || product.available_fabrics)}</div>
                 </div>
               </div>
 
@@ -470,8 +470,8 @@ const WarehouseProducts = () => {
               </td>
               <td><code>{product.sku || 'N/A'}</code></td>
               <td className="fw-bold text-success">{formatCurrency(product.price)}</td>
-              <td>{getColorDisplay(product.available_colors)}</td>
-              <td>{getFabricDisplay(product.available_fabrics)}</td>
+              <td>{getColorDisplay(product.colors || product.available_colors)}</td>
+              <td>{getFabricDisplay(product.fabrics || product.available_fabrics)}</td>
               <td>
                 <ButtonGroup size="sm">
                   <OverlayTrigger overlay={<Tooltip>View Details</Tooltip>}>
