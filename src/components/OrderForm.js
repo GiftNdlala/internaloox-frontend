@@ -240,14 +240,22 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
         order_status: customerData.orderStatus,
         total_amount: totalAmount,
         balance_amount: balanceAmount,
-        items: orderItems.map(item => ({
-          product: item.productId,
-          quantity: parseInt(item.quantity),
-          unit_price: parseFloat(item.unitPrice),
-          color: item.color || null,
-          fabric: item.fabric || null,
-          product_description: item.productDescription || '',
-        })),
+        items: orderItems.map(item => {
+          const colorObj = colors.find(c => String(c.id) === String(item.color));
+          const fabricObj = fabrics.find(f => String(f.id) === String(item.fabric));
+          return {
+            product: item.productId,
+            quantity: parseInt(item.quantity),
+            unit_price: parseFloat(item.unitPrice),
+            // Keep legacy IDs for backward compatibility; backend will ignore invalid legacy FKs
+            color: item.color || null,
+            fabric: item.fabric || null,
+            // New code-based fields for robust mapping
+            assigned_color_code: colorObj?.color_code || colorObj?.code || null,
+            assigned_fabric_letter: fabricObj?.fabric_letter || fabricObj?.code || null,
+            product_description: item.productDescription || '',
+          };
+        }),
         popFile: popFile || null,
         popNotes: customerData.adminNotes || '',
       };
