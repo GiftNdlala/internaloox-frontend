@@ -1,18 +1,15 @@
 import React, { useState } from 'react';
-import { Card, Button, Badge, Row, Col, Spinner, Alert, Accordion } from 'react-bootstrap';
-import { 
-  FaTasks, FaSync, FaPlay, FaPause, FaCheck, FaBox,
-  FaExclamationTriangle, FaClock, FaUser 
-} from 'react-icons/fa';
+import { Card, Button, Badge, Row, Col, Spinner, Alert } from 'react-bootstrap';
+import { FaTasks, FaSync, FaBox } from 'react-icons/fa';
 import { usePolling } from '../../hooks/usePolling';
 import { useTaskActions } from '../../hooks/useTaskActions';
-import { getTasksByOrder, getOrderDetailsForTasks } from '../api';
+import { getTasksByOrder } from '../api';
 import TaskCard from './TaskCard';
 
 const WorkerOrderTasks = () => {
   const [expandedOrders, setExpandedOrders] = useState(new Set());
   const [filterStatus, setFilterStatus] = useState('all');
-  const [orderDetailsMap, setOrderDetailsMap] = useState({});
+  // We no longer fetch and show all order items; each TaskCard shows its assigned item only
   
   const { data, loading, error, refresh } = usePolling(
     () => getTasksByOrder(),
@@ -32,15 +29,6 @@ const WorkerOrderTasks = () => {
       newExpanded.delete(orderId);
     } else {
       newExpanded.add(orderId);
-      // Lazy-load rich order details (items with color/fabric) when expanding
-      if (!orderDetailsMap[orderId]) {
-        try {
-          const details = await getOrderDetailsForTasks(orderId);
-          setOrderDetailsMap((prev) => ({ ...prev, [orderId]: details }));
-        } catch (_) {
-          // ignore; keep UI responsive even if extra details fail
-        }
-      }
     }
     setExpandedOrders(newExpanded);
   };
@@ -289,22 +277,7 @@ const WorkerOrderTasks = () => {
                   </div>
                 </div>
 
-                {/* Order Items Specifications (visible when expanded and details available) */}
-                {isExpanded && orderDetailsMap[orderGroup.order_info.id]?.items && (
-                  <div className="mt-3">
-                    <small className="text-muted d-block mb-1">Order Items:</small>
-                    <div className="d-flex flex-wrap gap-2">
-                      {orderDetailsMap[orderGroup.order_info.id].items.map((item, idx) => (
-                        <Badge key={idx} bg="light" text="dark" className="border">
-                          {item.quantity}x {item.product_name || item.product}
-                          {item.color && ` • Color: ${item.color_name || item.color}`}
-                          {item.fabric && ` • Fabric: ${item.fabric_name || item.fabric}`}
-                          {item.product_description && ` • ${item.product_description}`}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                {/* We intentionally avoid listing all order items here. Each task below shows its own item specs. */}
               </Card.Header>
 
               {/* Tasks List */}

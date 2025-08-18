@@ -167,6 +167,30 @@ const TaskCard = ({
           )}
         </Row>
 
+        {/* Assigned Order Item (product specs) */}
+        {task.order_item_details && (
+          <div className="mb-3">
+            <div className="assigned-item p-2 rounded border bg-white">
+              <div className="d-flex align-items-center flex-wrap gap-2">
+                <FaBox className="text-primary" />
+                <span className="fw-semibold">
+                  {task.order_item_details.quantity}x {task.order_item_details.product_name}
+                </span>
+                {task.order_item_details.color_name && (
+                  <Badge bg="light" text="dark" className="border">
+                    Color: {task.order_item_details.color_name}
+                  </Badge>
+                )}
+                {task.order_item_details.fabric_name && (
+                  <Badge bg="light" text="dark" className="border">
+                    Fabric: {task.order_item_details.fabric_name}
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Timer Display */}
         {(task.status === 'started' || task.status === 'paused' || currentTime > 0) && (
           <div className="timer-display mb-3 p-3 bg-light rounded">
@@ -310,6 +334,9 @@ const TaskCard = ({
         
         .font-monospace {
           font-family: 'Courier New', monospace;
+        }
+        .assigned-item {
+          background-image: linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.01));
         }
       `}</style>
     </Card>

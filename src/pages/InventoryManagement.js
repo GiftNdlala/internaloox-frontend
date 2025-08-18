@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Container, Row, Col, Card, Button, Form, Table, InputGroup, Badge, Modal, Alert, Spinner } from 'react-bootstrap';
+import { useOutletContext } from 'react-router-dom';
 import { FaBoxes, FaPlus, FaEdit, FaTrash, FaTag, FaRuler, FaDollarSign } from 'react-icons/fa';
 import { 
   getMaterials,
@@ -21,7 +22,10 @@ const defaultMaterial = {
 const UNITS = ['units', 'metres', 'meters', 'boards', 'rolls', 'kilograms', 'kg', 'litres', 'liters'];
 
 const InventoryManagement = () => {
+  const { user } = useOutletContext?.() || { user: null };
   const [materials, setMaterials] = useState([]);
+  const canManageMaterials = () => ['owner', 'admin', 'warehouse_manager', 'warehouse'].includes(user?.role);
+
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -138,9 +142,11 @@ const InventoryManagement = () => {
         <Row className="mb-3">
           <Col className="d-flex align-items-center justify-content-between">
             <h4 className="mb-0"><FaBoxes className="me-2 text-primary" />Inventory Materials</h4>
-            <Button variant="success" onClick={handleOpenNew}>
-              <FaPlus className="me-2" /> Add Material
-            </Button>
+            {canManageMaterials() && (
+              <Button variant="success" onClick={handleOpenNew}>
+                <FaPlus className="me-2" /> Add Material
+              </Button>
+            )}
           </Col>
         </Row>
 
@@ -161,7 +167,7 @@ const InventoryManagement = () => {
                     <th>Unit Price</th>
                     <th>Min Stock</th>
                     <th>Description</th>
-                    <th style={{ width: 140 }}></th>
+                    {canManageMaterials() && <th style={{ width: 140 }}></th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -178,14 +184,16 @@ const InventoryManagement = () => {
                         <td>R {Number((m.unit_price ?? m.cost_per_unit ?? 0)).toFixed(2)}</td>
                         <td>{m.minimum_stock ?? '-'}</td>
                         <td className="text-truncate" style={{ maxWidth: 260 }}>{m.description}</td>
-                        <td className="text-end">
-                          <Button variant="outline-primary" size="sm" className="me-2" onClick={() => handleOpenEdit(m)}>
-                            <FaEdit />
-                          </Button>
-                          <Button variant="outline-danger" size="sm" onClick={() => handleDelete(m)}>
-                            <FaTrash />
-                          </Button>
-                        </td>
+                        {canManageMaterials() && (
+                          <td className="text-end">
+                            <Button variant="outline-primary" size="sm" className="me-2" onClick={() => handleOpenEdit(m)}>
+                              <FaEdit />
+                            </Button>
+                            <Button variant="outline-danger" size="sm" onClick={() => handleDelete(m)}>
+                              <FaTrash />
+                            </Button>
+                          </td>
+                        )}
                       </tr>
                     ))
                   )}
@@ -195,6 +203,7 @@ const InventoryManagement = () => {
           </Card.Body>
         </Card>
 
+        {canManageMaterials() && (
         <Modal show={showForm} onHide={() => setShowForm(false)} backdrop="static" size="lg">
           <Modal.Header closeButton>
             <Modal.Title>{editingMaterial ? 'Edit Material' : 'Add Material'}</Modal.Title>
@@ -253,6 +262,7 @@ const InventoryManagement = () => {
             </Form>
           </Modal.Body>
         </Modal>
+        )}
       </Container>
     </div>
   );
