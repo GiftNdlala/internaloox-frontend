@@ -97,7 +97,12 @@ const TaskManagement = ({ user }) => {
   }, [ordersData]);
 
   useEffect(() => {
-    if (tasksData) setAllTasks(tasksData.tasks || []);
+    if (!tasksData) return;
+    const normalized = (Array.isArray(tasksData) && tasksData)
+      || (Array.isArray(tasksData?.results) && tasksData.results)
+      || (Array.isArray(tasksData?.tasks) && tasksData.tasks)
+      || [];
+    setAllTasks(normalized);
   }, [tasksData]);
 
   const loadInitialData = async () => {
@@ -640,20 +645,14 @@ const TaskManagement = ({ user }) => {
                       </td>
                       <td>
                         <div>
-                          <div className="fw-semibold">{task.order?.order_number}</div>
-                          <small className="text-muted">{task.order?.customer_name}</small>
+                          <div className="fw-semibold">{task.order_number || task.order?.order_number || '-'}</div>
                         </div>
                       </td>
                       <td>
-                        {task.assigned_worker ? (
+                        {task.assigned_to || task.assigned_to_name ? (
                           <div className="d-flex align-items-center">
                             <FaUser className="me-2 text-muted" />
-                            <div>
-                              <div className="fw-semibold">
-                                {task.assigned_worker.first_name} {task.assigned_worker.last_name}
-                              </div>
-                              <small className="text-muted">{task.assigned_worker.role}</small>
-                            </div>
+                            <div className="fw-semibold">{task.assigned_to_name || task.assigned_to}</div>
                           </div>
                         ) : (
                           <Badge bg="light" text="dark">Unassigned</Badge>

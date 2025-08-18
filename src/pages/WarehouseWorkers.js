@@ -45,7 +45,7 @@ const WarehouseWorkers = ({ currentUser }) => {
           || (Array.isArray(data) && data)
           || [];
       } else {
-        const data = await getUsersQuery(`role=${roleParam}`);
+      const data = await getUsersQuery(`role=${roleParam}`);
         list = Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []);
       }
       setUsers(list);
