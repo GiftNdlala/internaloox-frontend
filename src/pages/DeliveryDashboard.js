@@ -7,7 +7,7 @@ import {
   FaTruck, FaMapMarkerAlt, FaRoute, 
   FaCheckCircle, FaCamera, FaPhone, FaCompass,
   FaPlay, FaFlag, FaUser, FaMoneyBillWave,
-  FaClipboardCheck
+  FaClipboardCheck, FaWhatsapp
 } from 'react-icons/fa';
 import { getOrders } from '../components/api';
 
@@ -278,6 +278,24 @@ const DeliveryDashboard = ({ user, onLogout }) => {
     window.open(url, '_blank');
   };
 
+  // Format SA phone numbers to +27 for tel and WhatsApp deep links
+  const formatSANumber = (raw) => {
+    if (!raw) return '';
+    const trimmed = String(raw).trim();
+    const digitsOnly = trimmed.replace(/[^\d+]/g, '');
+    if (digitsOnly.startsWith('+27')) return digitsOnly;
+    if (digitsOnly.startsWith('27')) return `+${digitsOnly}`;
+    if (digitsOnly.startsWith('0')) return `+27${digitsOnly.slice(1)}`;
+    return digitsOnly.startsWith('+') ? digitsOnly : `+${digitsOnly}`;
+  };
+
+  const buildWhatsAppLink = (raw) => {
+    const formatted = formatSANumber(raw);
+    if (!formatted) return '#';
+    const numeric = formatted.replace(/\D/g, '');
+    return `https://wa.me/${numeric}`;
+  };
+
   // Filter orders by status
   const readyOrders = orders.filter(o => o.order_status === 'order_ready' && o.order_status !== 'out_for_delivery');
   const inTransitOrders = orders.filter(o => o.order_status === 'out_for_delivery');
@@ -424,7 +442,34 @@ const DeliveryDashboard = ({ user, onLogout }) => {
                   <h6>Customer Information</h6>
                   <ListGroup variant="flush">
                     <ListGroup.Item><strong>Name:</strong> {selectedOrder.customer?.name}</ListGroup.Item>
-                    <ListGroup.Item><strong>Phone:</strong> {selectedOrder.customer?.phone}</ListGroup.Item>
+                    <ListGroup.Item>
+                      <strong>Phone:</strong>{' '}
+                      {selectedOrder.customer?.phone ? (
+                        <>
+                          <span>{selectedOrder.customer.phone}</span>
+                          <Button
+                            size="sm"
+                            variant="outline-primary"
+                            href={`tel:${formatSANumber(selectedOrder.customer.phone)}`}
+                            className="ms-2"
+                          >
+                            <FaPhone className="me-1" /> Call
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="success"
+                            href={buildWhatsAppLink(selectedOrder.customer.phone)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ms-2"
+                          >
+                            <FaWhatsapp className="me-1" /> WhatsApp
+                          </Button>
+                        </>
+                      ) : (
+                        'No phone'
+                      )}
+                    </ListGroup.Item>
                     <ListGroup.Item><strong>Address:</strong> {selectedOrder.customer?.address}</ListGroup.Item>
                   </ListGroup>
                 </Col>

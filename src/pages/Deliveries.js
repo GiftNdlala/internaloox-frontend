@@ -4,7 +4,7 @@ import { Container, Row, Col, Card, Table, Button, Modal, Form, Alert, Badge, In
 import {
   FaTruck, FaMapMarkerAlt, FaEye, FaEdit, FaRoute, FaPhone, FaSearch, FaCalendarAlt, 
   FaSync, FaDownload, FaCheck, FaExclamationTriangle, FaSortUp, FaSortDown, 
-  FaClock, FaShippingFast, FaCheckCircle, FaTimesCircle, FaBoxes, FaClipboardCheck, FaPhoneAlt
+  FaClock, FaShippingFast, FaCheckCircle, FaTimesCircle, FaBoxes, FaClipboardCheck, FaPhoneAlt, FaWhatsapp
 } from 'react-icons/fa';
 import UniversalSidebar from '../components/UniversalSidebar';
 import EnhancedPageHeader from '../components/EnhancedPageHeader';
@@ -220,6 +220,24 @@ const Deliveries = ({ user, userRole, onLogout }) => {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  // Format SA phone numbers to +27 for tel and WhatsApp deep links
+  const formatSANumber = (raw) => {
+    if (!raw) return '';
+    const trimmed = String(raw).trim();
+    const digitsOnly = trimmed.replace(/[^\d+]/g, '');
+    if (digitsOnly.startsWith('+27')) return digitsOnly;
+    if (digitsOnly.startsWith('27')) return `+${digitsOnly}`;
+    if (digitsOnly.startsWith('0')) return `+27${digitsOnly.slice(1)}`;
+    return digitsOnly.startsWith('+') ? digitsOnly : `+${digitsOnly}`;
+  };
+
+  const buildWhatsAppLink = (raw) => {
+    const formatted = formatSANumber(raw);
+    if (!formatted) return '#';
+    const numeric = formatted.replace(/\D/g, '');
+    return `https://wa.me/${numeric}`;
   };
 
   const getDeliveryStatusBadge = (order) => {
@@ -744,7 +762,29 @@ const Deliveries = ({ user, userRole, onLogout }) => {
                       <div className="mb-3">
                         <strong>Phone:</strong><br />
                         <FaPhoneAlt className="me-2" />
-                        {selectedOrder.customer?.phone}
+                        <span>{selectedOrder.customer?.phone || 'No phone'}</span>
+                        {selectedOrder.customer?.phone && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline-primary"
+                              href={`tel:${formatSANumber(selectedOrder.customer.phone)}`}
+                              className="ms-2"
+                            >
+                              <FaPhoneAlt className="me-1" /> Call
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="success"
+                              href={buildWhatsAppLink(selectedOrder.customer.phone)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="ms-2"
+                            >
+                              <FaWhatsapp className="me-1" /> WhatsApp
+                            </Button>
+                          </>
+                        )}
                       </div>
                       <div className="mb-3">
                         <strong>Production Status:</strong><br />
