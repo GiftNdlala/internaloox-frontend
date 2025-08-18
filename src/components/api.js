@@ -147,6 +147,8 @@ export const getUsersQuery = (query = '') => {
   const qs = query ? (query.startsWith('?') ? query : `?${query}`) : '';
   return apiRequest(`/users/users/${qs}`);
 };
+// Manager-friendly list of warehouse workers/managers (backend-permitted)
+export const getWarehouseWorkersList = () => apiRequest('/users/users/warehouse_workers/');
 // Optional helper to fetch tasks filtered by worker (requires backend support)
 export const getTasksByWorker = (workerId) => apiRequest(`/tasks/tasks/?assigned_worker=${workerId}`);
 

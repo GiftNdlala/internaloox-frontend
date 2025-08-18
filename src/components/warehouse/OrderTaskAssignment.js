@@ -47,8 +47,9 @@ const OrderTaskAssignment = ({
 
       setOrderDetails(orderData);
       setTaskTypes(taskTypesData);
+      // Include warehouse managers (legacy 'warehouse') and warehouse workers
       setWorkers(usersData.filter(user => 
-        user.role === 'warehouse' || user.role === 'admin'
+        user.role === 'warehouse_worker' || user.role === 'warehouse'
       ));
       setTemplates(templatesData);
 

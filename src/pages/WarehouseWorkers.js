@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Button, Card, Table, Spinner, Alert, Form, Modal, InputGroup } from 'react-bootstrap';
 import { FaUserPlus, FaTrash, FaEdit, FaSearch, FaHistory } from 'react-icons/fa';
-import { getUsersQuery, createUser, updateUser, deleteUser, getTasksByWorker } from '../components/api';
+import { getUsersQuery, getWarehouseWorkersList, createUser, updateUser, deleteUser, getTasksByWorker } from '../components/api';
 
 const ROLE_OPTIONS = ['warehouse_worker', 'warehouse', 'delivery', 'admin', 'owner'];
 
@@ -35,9 +35,19 @@ const WarehouseWorkers = ({ currentUser }) => {
     setLoading(true);
     setError('');
     try {
+      let list = [];
       const roleParam = roleFilter === 'warehouse_manager' ? 'warehouse' : roleFilter;
-      const data = await getUsersQuery(`role=${roleParam}`);
-      const list = Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []);
+      // If current user is a warehouse manager and filtering for workers, use backend helper endpoint
+      if ((currentUser?.role === 'warehouse' || currentUser?.role === 'warehouse_manager') && roleParam === 'warehouse_worker') {
+        const data = await getWarehouseWorkersList().catch(() => ([]));
+        list = (Array.isArray(data?.warehouse_workers) && data.warehouse_workers)
+          || (Array.isArray(data?.results) && data.results)
+          || (Array.isArray(data) && data)
+          || [];
+      } else {
+        const data = await getUsersQuery(`role=${roleParam}`);
+        list = Array.isArray(data?.results) ? data.results : (Array.isArray(data) ? data : []);
+      }
       setUsers(list);
     } catch (e) {
       setError(e?.message || 'Failed to load users');
