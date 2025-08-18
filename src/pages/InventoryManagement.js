@@ -63,7 +63,7 @@ const InventoryManagement = () => {
     setForm({
       name: material.name || '',
       unit: material.unit || '',
-      unit_price: material.unit_price ?? '',
+      unit_price: (material.unit_price ?? material.cost_per_unit ?? ''),
       minimum_stock: material.minimum_stock ?? '',
       description: material.description || ''
     });
@@ -175,7 +175,7 @@ const InventoryManagement = () => {
                         <td>{m.name}</td>
                         <td>{categories.find((c) => c.id === (m.category_id ?? m.category))?.name || '-'}</td>
                         <td><Badge bg="secondary">{m.unit}</Badge></td>
-                        <td>R {Number(m.unit_price || 0).toFixed(2)}</td>
+                        <td>R {Number((m.unit_price ?? m.cost_per_unit ?? 0)).toFixed(2)}</td>
                         <td>{m.minimum_stock ?? '-'}</td>
                         <td className="text-truncate" style={{ maxWidth: 260 }}>{m.description}</td>
                         <td className="text-end">
