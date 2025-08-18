@@ -6,12 +6,13 @@ import {
 } from 'react-icons/fa';
 import { usePolling } from '../../hooks/usePolling';
 import { useTaskActions } from '../../hooks/useTaskActions';
-import { getTasksByOrder } from '../api';
+import { getTasksByOrder, getOrderDetailsForTasks } from '../api';
 import TaskCard from './TaskCard';
 
 const WorkerOrderTasks = () => {
   const [expandedOrders, setExpandedOrders] = useState(new Set());
   const [filterStatus, setFilterStatus] = useState('all');
+  const [orderDetailsMap, setOrderDetailsMap] = useState({});
   
   const { data, loading, error, refresh } = usePolling(
     () => getTasksByOrder(),
@@ -25,12 +26,21 @@ const WorkerOrderTasks = () => {
     refresh(); // Refresh the data to get latest state
   };
 
-  const toggleOrderExpansion = (orderId) => {
+  const toggleOrderExpansion = async (orderId) => {
     const newExpanded = new Set(expandedOrders);
     if (newExpanded.has(orderId)) {
       newExpanded.delete(orderId);
     } else {
       newExpanded.add(orderId);
+      // Lazy-load rich order details (items with color/fabric) when expanding
+      if (!orderDetailsMap[orderId]) {
+        try {
+          const details = await getOrderDetailsForTasks(orderId);
+          setOrderDetailsMap((prev) => ({ ...prev, [orderId]: details }));
+        } catch (_) {
+          // ignore; keep UI responsive even if extra details fail
+        }
+      }
     }
     setExpandedOrders(newExpanded);
   };
@@ -278,6 +288,23 @@ const WorkerOrderTasks = () => {
                     )}
                   </div>
                 </div>
+
+                {/* Order Items Specifications (visible when expanded and details available) */}
+                {isExpanded && orderDetailsMap[orderGroup.order_info.id]?.items && (
+                  <div className="mt-3">
+                    <small className="text-muted d-block mb-1">Order Items:</small>
+                    <div className="d-flex flex-wrap gap-2">
+                      {orderDetailsMap[orderGroup.order_info.id].items.map((item, idx) => (
+                        <Badge key={idx} bg="light" text="dark" className="border">
+                          {item.quantity}x {item.product_name || item.product}
+                          {item.color && ` • Color: ${item.color_name || item.color}`}
+                          {item.fabric && ` • Fabric: ${item.fabric_name || item.fabric}`}
+                          {item.product_description && ` • ${item.product_description}`}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </Card.Header>
 
               {/* Tasks List */}

@@ -88,7 +88,8 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
       const selected = products.find(p => String(p.id) === String(value));
       update.productName = selected ? selected.name : '';
       update.productDescription = selected ? selected.description : '';
-      update.unitPrice = selected ? selected.base_price : '';
+      // Prefer unit_price, then base_price, then price
+      update.unitPrice = selected ? (selected.unit_price ?? selected.base_price ?? selected.price ?? '') : '';
       update.color = '';
       update.fabric = '';
     }
@@ -102,7 +103,9 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
     if (!productForm.productId) newErrors.productId = 'Product is required';
     if (!productForm.unitPrice || parseFloat(productForm.unitPrice) <= 0) newErrors.unitPrice = 'Valid unit price is required';
     if (!productForm.quantity || parseInt(productForm.quantity) <= 0) newErrors.quantity = 'Valid quantity is required';
-    // Optionally validate color/fabric if required by product type
+    // Require color/fabric if the selected product has available options
+    if (showColor && !productForm.color) newErrors.color = 'Please select a color for this product';
+    if (showFabric && !productForm.fabric) newErrors.fabric = 'Please select a fabric for this product';
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -126,15 +129,49 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
 
   // Product option logic
   const selectedProduct = products.find(p => String(p.id) === String(productForm.productId));
-  const selectedType = selectedProduct ? selectedProduct.product_type : null;
-  const productOptionMap = {
-    Couch: { color: true, fabric: true },
-    TVStand: { color: true, fabric: false },
-    Accessory: { color: false, fabric: false },
-    // Add more as needed
+  const productColorsList = Array.isArray(selectedProduct?.colors)
+    ? selectedProduct.colors
+    : (Array.isArray(selectedProduct?.available_colors) ? selectedProduct.available_colors : []);
+  const productFabricsList = Array.isArray(selectedProduct?.fabrics)
+    ? selectedProduct.fabrics
+    : (Array.isArray(selectedProduct?.available_fabrics) ? selectedProduct.available_fabrics : []);
+
+  const normalizeValuesSet = (list) => {
+    const values = new Set();
+    (list || []).forEach((item) => {
+      if (!item) return;
+      if (typeof item === 'string') {
+        values.add(item.trim().toLowerCase());
+      } else if (typeof item === 'object') {
+        if (item.name) values.add(String(item.name).trim().toLowerCase());
+        if (item.code) values.add(String(item.code).trim().toLowerCase());
+        if (item.color_name) values.add(String(item.color_name).trim().toLowerCase());
+        if (item.color_code) values.add(String(item.color_code).trim().toLowerCase());
+        if (item.fabric_name) values.add(String(item.fabric_name).trim().toLowerCase());
+        if (item.fabric_letter) values.add(String(item.fabric_letter).trim().toLowerCase());
+      }
+    });
+    return values;
   };
-  const showColor = selectedType && productOptionMap[selectedType]?.color;
-  const showFabric = selectedType && productOptionMap[selectedType]?.fabric;
+
+  const colorValuesSet = normalizeValuesSet(productColorsList);
+  const fabricValuesSet = normalizeValuesSet(productFabricsList);
+
+  const allowedColors = (colors || []).filter((c) => {
+    const name = (c?.name || c?.color_name || '').toString().trim().toLowerCase();
+    const code = (c?.code || c?.color_code || '').toString().trim().toLowerCase();
+    if (colorValuesSet.size === 0) return false;
+    return (name && colorValuesSet.has(name)) || (code && colorValuesSet.has(code));
+  });
+  const allowedFabrics = (fabrics || []).filter((f) => {
+    const name = (f?.name || f?.fabric_name || '').toString().trim().toLowerCase();
+    const code = (f?.code || f?.fabric_letter || '').toString().trim().toLowerCase();
+    if (fabricValuesSet.size === 0) return false;
+    return (name && fabricValuesSet.has(name)) || (code && fabricValuesSet.has(code));
+  });
+
+  const showColor = colorValuesSet.size > 0;
+  const showFabric = fabricValuesSet.size > 0;
 
   // Validate and submit full order
   const validateOrder = () => {
@@ -310,19 +347,27 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
             {showColor && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Color</label>
-                <select name="color" value={productForm.color} onChange={handleProductChange} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                <select name="color" value={productForm.color} onChange={handleProductChange} className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${errors.color ? 'border-red-500' : 'border-gray-300'}`}>
                   <option value="">Select color</option>
-                  {colors.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  {(allowedColors.length > 0 ? allowedColors : colors).map(c => (
+                    <option key={c.id} value={c.id}>{c.name || c.color_name}</option>
+                  ))}
                 </select>
+                {errors.color && <p className="text-red-500 text-sm mt-1">{errors.color}</p>}
+                <p className="text-xs text-gray-500 mt-1">This product has multiple color options. Please select one.</p>
               </div>
             )}
             {showFabric && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Fabric</label>
-                <select name="fabric" value={productForm.fabric} onChange={handleProductChange} className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                <select name="fabric" value={productForm.fabric} onChange={handleProductChange} className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${errors.fabric ? 'border-red-500' : 'border-gray-300'}`}>
                   <option value="">Select fabric</option>
-                  {fabrics.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+                  {(allowedFabrics.length > 0 ? allowedFabrics : fabrics).map(f => (
+                    <option key={f.id} value={f.id}>{f.name || f.fabric_name}</option>
+                  ))}
                 </select>
+                {errors.fabric && <p className="text-red-500 text-sm mt-1">{errors.fabric}</p>}
+                <p className="text-xs text-gray-500 mt-1">This product has multiple fabric options. Please select one.</p>
               </div>
             )}
           </div>
