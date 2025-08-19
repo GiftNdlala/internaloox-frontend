@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Badge, Row, Col, ProgressBar } from 'react-bootstrap';
+import { Card, Button, Badge, Row, Col, ProgressBar, Modal } from 'react-bootstrap';
 import { 
   FaPlay, FaPause, FaStop, FaCheck, FaClock, 
   FaUser, FaBox, FaExclamationTriangle, FaStickyNote 
@@ -16,6 +16,8 @@ const TaskCard = ({
   const [loading, setLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [isRunning, setIsRunning] = useState(task.status === 'started');
+  const [showColorModal, setShowColorModal] = useState(false);
+  const [previewColor, setPreviewColor] = useState({ name: '', hex: '' });
 
   // Timer for active tasks
   useEffect(() => {
@@ -61,6 +63,17 @@ const TaskCard = ({
       setLoading(false);
     }
   };
+
+  const openColorModal = () => {
+    const details = task.order_item_details || {};
+    setPreviewColor({
+      name: details.color_name || 'Color',
+      hex: details.hex_color || ''
+    });
+    setShowColorModal(true);
+  };
+
+  const closeColorModal = () => setShowColorModal(false);
 
   const formatTime = (seconds) => {
     const hours = Math.floor(seconds / 3600);
@@ -181,9 +194,14 @@ const TaskCard = ({
                     bg="light" 
                     text="dark" 
                     className="border"
+                    onClick={openColorModal}
+                    role="button"
+                    title="Tap to preview color"
                     style={{
                       backgroundColor: task.order_item_details.hex_color || undefined,
-                      color: task.order_item_details.hex_color ? '#000' : undefined
+                      color: task.order_item_details.hex_color ? '#000' : undefined,
+                      cursor: 'pointer',
+                      boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.05)'
                     }}
                   >
                     Color: {task.order_item_details.color_name}
@@ -315,6 +333,36 @@ const TaskCard = ({
           </div>
         )}
       </Card.Body>
+
+      <Modal show={showColorModal} onHide={closeColorModal} centered size="sm">
+        <Modal.Header closeButton>
+          <Modal.Title>Color Preview</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="d-flex flex-column align-items-center text-center">
+            <div
+              className="mb-3"
+              style={{
+                width: '100%',
+                maxWidth: '320px',
+                height: '160px',
+                borderRadius: '12px',
+                backgroundColor: previewColor.hex || '#f8f9fa',
+                border: '1px solid #dee2e6'
+              }}
+            />
+            {previewColor.name && (
+              <div className="fw-semibold mb-1">{previewColor.name}</div>
+            )}
+            <code className="px-2 py-1 bg-light rounded">{previewColor.hex || 'N/A'}</code>
+          </div>
+        </Modal.Body>
+        <Modal.Footer className="justify-content-center">
+          <Button variant="secondary" size="sm" onClick={closeColorModal}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       <style jsx>{`
         .task-card:hover {
