@@ -313,8 +313,8 @@ const StockInHouse = () => {
                         <strong>{movement.material_name || 'Unknown'}</strong>
                       </td>
                       <td>
-                        <Badge bg={movement.direction === 'in' ? 'success' : 'warning'}>
-                          {movement.direction === 'in' ? (
+                        <Badge bg={(movement.movement_type || movement.direction) === 'in' ? 'success' : 'warning'}>
+                          {(movement.movement_type || movement.direction) === 'in' ? (
                             <><FaArrowDown className="me-1" />In</>
                           ) : (
                             <><FaArrowUp className="me-1" />Out</>

@@ -99,7 +99,9 @@ const LoginPage = ({ onLogin }) => {
         body: JSON.stringify({
           username: formData.username,
           password: formData.password,
-          selected_role: formData.role, // hint for backend; frontend uses for routing after login
+          // Send both for compatibility; backend reads 'role'
+          role: formData.role,
+          selected_role: formData.role,
         }),
       });
 
@@ -144,9 +146,21 @@ const LoginPage = ({ onLogin }) => {
       };
 
       setTimeout(() => {
-        const viewAs = localStorage.getItem('oox_selected_role');
-        const targetRole = viewAs && backendUser.role === 'owner' ? viewAs : role;
-        navigate(getDefaultRouteForRole(targetRole));
+        // Use selected role if backend permissions allow; otherwise fall back to actual role
+        const viewAs = localStorage.getItem('oox_selected_role') || formData.role;
+        const perms = data?.permissions || {};
+        const canAccess = (r) => {
+          const map = {
+            owner: perms.can_access_owner,
+            admin: perms.can_access_admin,
+            warehouse: perms.can_access_warehouse,
+            delivery: perms.can_access_delivery,
+            warehouse_worker: true // worker can still land on warehouse worker route under /warehouse
+          };
+          return map[r] === true;
+        };
+        const preferredRole = (viewAs && canAccess(viewAs)) ? viewAs : role;
+        navigate(getDefaultRouteForRole(preferredRole));
       }, 1500);
     } catch (err) {
       setError('Network error. Please check your connection.');

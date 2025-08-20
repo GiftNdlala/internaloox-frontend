@@ -130,8 +130,8 @@ const OwnerPaymentTransactions = ({ user, onLogout }) => {
 													<td>{tx.order_number || tx.order}</td>
 													<td>{tx.actor_user?.username || `${tx.actor_user?.first_name||''} ${tx.actor_user?.last_name||''}`}</td>
 													<td>{tx.payment_method}</td>
-													<td>{typeof tx.amount_delta === 'number' ? `R${tx.amount_delta.toFixed(2)}` : tx.amount_delta}</td>
-													<td>{typeof tx.new_balance === 'number' ? `R${tx.new_balance.toFixed(2)}` : tx.new_balance}</td>
+													<td>{tx.amount_delta != null && !Number.isNaN(Number(tx.amount_delta)) ? `R${Number(tx.amount_delta).toFixed(2)}` : '-'}</td>
+													<td>{tx.new_balance != null && !Number.isNaN(Number(tx.new_balance)) ? `R${Number(tx.new_balance).toFixed(2)}` : '-'}</td>
 													<td>{tx.payment_status}</td>
 													<td>{tx.proof?.id ? <a href={(tx.proof.absolute_url || tx.proof.proof_image || (tx.proof.id && (window?.OOX_API_BASE || 'https://internaloox-1.onrender.com/api') + `/payment-proofs/${tx.proof.id}/file/`))} target="_blank" rel="noreferrer">View</a> : '-'}</td>
 													<td>{tx.proof?.id ? <Button variant="outline-primary" size="sm" onClick={()=>openProof(tx)}>Preview</Button> : '-'}</td>
