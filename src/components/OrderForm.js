@@ -131,7 +131,20 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
       unitPrice: productForm.unitPrice
     });
     
-    setOrderItems(items => [...items, { ...productForm }]);
+    // Log the current state of colors and fabrics arrays
+    console.log('Current colors array:', colors);
+    console.log('Current fabrics array:', fabrics);
+    
+    // Create a copy of the product form to add to orderItems
+    const productToAdd = { ...productForm };
+    console.log('Product to add:', productToAdd);
+    
+    setOrderItems(items => {
+      const newItems = [...items, productToAdd];
+      console.log('Updated orderItems:', newItems);
+      return newItems;
+    });
+    
     setProductForm({ productId: '', productName: '', productDescription: '', quantity: 1, unitPrice: '', color: '', fabric: '' });
   };
   // Remove product from orderItems
@@ -509,16 +522,30 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
                   <tr><td colSpan="8" className="text-center text-gray-400 py-4">No products added yet</td></tr>
                 ) : orderItems.map((item, idx) => {
                   const prod = products.find(p => String(p.id) === String(item.productId));
+                  
+                  // Debug logging for color and fabric lookup
+                  console.log(`Item ${idx} - Color ID: ${item.color}, Fabric ID: ${item.fabric}`);
+                  console.log('Available colors:', colors);
+                  console.log('Available fabrics:', fabrics);
+                  
                   const colorObj = colors.find(c => String(c.id) === String(item.color));
                   const fabricObj = fabrics.find(f => String(f.id) === String(item.fabric));
+                  
+                  console.log(`Found color object:`, colorObj);
+                  console.log(`Found fabric object:`, fabricObj);
+                  
                   return (
                     <tr key={idx} className="border-b">
                       <td className="px-3 py-2">{prod ? prod.name : item.productName}</td>
                       <td className="px-3 py-2">{item.productDescription}</td>
                       <td className="px-3 py-2">{item.quantity}</td>
                       <td className="px-3 py-2">R{item.unitPrice}</td>
-                      <td className="px-3 py-2">{colorObj ? colorObj.name : ''}</td>
-                      <td className="px-3 py-2">{fabricObj ? fabricObj.name : ''}</td>
+                      <td className="px-3 py-2">
+                        {colorObj ? colorObj.name : (item.color || 'Not specified')}
+                      </td>
+                      <td className="px-3 py-2">
+                        {fabricObj ? fabricObj.name : (item.fabric || 'Not specified')}
+                      </td>
                       <td className="px-3 py-2">R{(parseFloat(item.unitPrice) * parseInt(item.quantity)).toFixed(2)}</td>
                       <td className="px-3 py-2">
                         <button type="button" onClick={() => handleRemoveProduct(idx)} className="text-red-600 hover:underline">Remove</button>
