@@ -679,10 +679,32 @@ const TaskManagement = ({ user }) => {
                           <small className="text-muted d-block">{task.description}</small>
                           {task.order_item_details && (
                             <small className="text-muted">
-                              {task.order_item_details.product_name}
-                              {task.order_item_details.fabric_name ? ` • ${task.order_item_details.fabric_name}` : ''}
-                              {task.order_item_details.color_name ? ` • ${task.order_item_details.color_name}` : ''}
-                              {` • Qty ${task.order_item_details.quantity}`}
+                              {task.order_item_details.order_items ? (
+                                // New format with multiple order items
+                                <>
+                                  {task.order_item_details.total_items} item{task.order_item_details.total_items !== 1 ? 's' : ''}
+                                  {task.order_item_details.order_items.slice(0, 2).map((item, idx) => (
+                                    <span key={idx}>
+                                      {idx > 0 ? ' • ' : ' • '}
+                                      {item.product_name}
+                                      {item.fabric_name ? ` (${item.fabric_name})` : ''}
+                                      {item.color_name ? ` - ${item.color_name}` : ''}
+                                      {` x${item.quantity}`}
+                                    </span>
+                                  ))}
+                                  {task.order_item_details.total_items > 2 && (
+                                    <span> • +{task.order_item_details.total_items - 2} more</span>
+                                  )}
+                                </>
+                              ) : (
+                                // Old format with single order item
+                                <>
+                                  {task.order_item_details.product_name}
+                                  {task.order_item_details.fabric_name ? ` • ${task.order_item_details.fabric_name}` : ''}
+                                  {task.order_item_details.color_name ? ` • ${task.order_item_details.color_name}` : ''}
+                                  {` • Qty ${task.order_item_details.quantity}`}
+                                </>
+                              )}
                             </small>
                           )}
                         </div>

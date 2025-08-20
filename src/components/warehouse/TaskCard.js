@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Button, Badge, Row, Col, ProgressBar, Modal } from 'react-bootstrap';
 import { 
   FaPlay, FaPause, FaStop, FaCheck, FaClock, 
-  FaUser, FaBox, FaExclamationTriangle, FaStickyNote 
+  FaUser, FaBox, FaExclamationTriangle, FaStickyNote, FaInfoCircle 
 } from 'react-icons/fa';
 import { warehouseAPI } from '../api';
 
@@ -183,37 +183,90 @@ const TaskCard = ({
         {/* Assigned Order Item (product specs) */}
         {task.order_item_details && (
           <div className="mb-3">
-            <div className="assigned-item p-2 rounded border bg-white">
-              <div className="d-flex align-items-center flex-wrap gap-2">
-                <FaBox className="text-primary" />
-                <span className="fw-semibold">
-                  {task.order_item_details.quantity}x {task.order_item_details.product_name}
-                </span>
-                {task.order_item_details.color_name && (
-                  <Badge 
-                    bg="light" 
-                    text="dark" 
-                    className="border"
-                    onClick={openColorModal}
-                    role="button"
-                    title="Tap to preview color"
-                    style={{
-                      backgroundColor: task.order_item_details.hex_color || undefined,
-                      color: task.order_item_details.hex_color ? '#000' : undefined,
-                      cursor: 'pointer',
-                      boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.05)'
-                    }}
-                  >
-                    Color: {task.order_item_details.color_name}
-                  </Badge>
+            {/* Handle new format with multiple order items */}
+            {task.order_item_details.order_items ? (
+              <div className="order-items-section">
+                <small className="text-muted fw-semibold d-block mb-2">
+                  Order Items ({task.order_item_details.total_items}):
+                </small>
+                {task.order_item_details.note && (
+                  <small className="text-info d-block mb-2">
+                    <FaInfoCircle className="me-1" />
+                    {task.order_item_details.note}
+                  </small>
                 )}
-                {task.order_item_details.fabric_name && (
-                  <Badge bg="light" text="dark" className="border">
-                    Fabric: {task.order_item_details.fabric_name}
-                  </Badge>
-                )}
+                <div className="space-y-2">
+                  {task.order_item_details.order_items.map((item, idx) => (
+                    <div key={idx} className="p-2 bg-light rounded border">
+                      <div className="d-flex align-items-center flex-wrap gap-2">
+                        <FaBox className="text-primary" />
+                        <span className="fw-semibold">
+                          {item.quantity}x {item.product_name}
+                        </span>
+                        {item.color_name && (
+                          <Badge 
+                            bg="light" 
+                            text="dark" 
+                            className="border"
+                            style={{
+                              backgroundColor: item.hex_color || undefined,
+                              color: item.hex_color ? '#000' : undefined,
+                              cursor: 'pointer',
+                              boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.05)'
+                            }}
+                          >
+                            Color: {item.color_name}
+                          </Badge>
+                        )}
+                        {item.fabric_name && (
+                          <Badge bg="light" text="dark" className="border">
+                            Fabric: {item.fabric_name}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="mt-1">
+                        <small className="text-muted">
+                          Unit: R{item.unit_price?.toFixed(2)} | Total: R{item.total_price?.toFixed(2)}
+                        </small>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            ) : (
+              /* Handle old format with single order item */
+              <div className="assigned-item p-2 rounded border bg-white">
+                <div className="d-flex align-items-center flex-wrap gap-2">
+                  <FaBox className="text-primary" />
+                  <span className="fw-semibold">
+                    {task.order_item_details.quantity}x {task.order_item_details.product_name}
+                  </span>
+                  {task.order_item_details.color_name && (
+                    <Badge 
+                      bg="light" 
+                      text="dark" 
+                      className="border"
+                      onClick={openColorModal}
+                      role="button"
+                      title="Tap to preview color"
+                      style={{
+                        backgroundColor: task.order_item_details.hex_color || undefined,
+                        color: task.order_item_details.hex_color ? '#000' : undefined,
+                        cursor: 'pointer',
+                        boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.05)'
+                      }}
+                    >
+                      Color: {task.order_item_details.color_name}
+                    </Badge>
+                  )}
+                  {task.order_item_details.fabric_name && (
+                    <Badge bg="light" text="dark" className="border">
+                      Fabric: {task.order_item_details.fabric_name}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
