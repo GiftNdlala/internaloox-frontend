@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Card, Button, Spinner, Alert, Row, Col, Badge, ListGroup } from 'react-bootstrap';
-import { getMyTasks, workerAction } from '../components/api';
+import { getMyTasks, getWorkerDashboard, workerAction } from '../components/api';
 
 const WorkerDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -14,7 +14,8 @@ const WorkerDashboard = () => {
     setLoading(true);
     setError('');
     try {
-      const d = await getMyTasks();
+      // Use the proper worker dashboard endpoint that includes enhanced color/fabric data
+      const d = await getWorkerDashboard();
       setData(d);
       if (d?.summary?.currently_running?.time_elapsed) {
         setElapsed(d.summary.currently_running.time_elapsed);
@@ -85,6 +86,34 @@ const WorkerDashboard = () => {
                 <div>
                   <div className="fw-semibold">{running.title}</div>
                   <div className="text-muted">Elapsed: {fmtTime(elapsed)}</div>
+                  {running.order_item_details && (
+                    <div className="mt-2">
+                      <div className="small text-muted">
+                        <strong>Product:</strong> {running.order_item_details.product_name}
+                        {running.order_item_details.quantity && ` (Qty: ${running.order_item_details.quantity})`}
+                      </div>
+                      <div className="d-flex gap-2 mt-1">
+                        {running.order_item_details.color_name && (
+                          <Badge 
+                            bg="light" 
+                            text="dark" 
+                            className="border"
+                            style={{
+                              backgroundColor: running.order_item_details.hex_color || '#f8f9fa',
+                              color: running.order_item_details.hex_color ? '#000' : '#6c757d'
+                            }}
+                          >
+                            {running.order_item_details.color_name}
+                          </Badge>
+                        )}
+                        {running.order_item_details.fabric_name && (
+                          <Badge bg="secondary" className="text-white">
+                            {running.order_item_details.fabric_name}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
                   <div className="mt-3 d-flex gap-2">
                     <Button variant="warning" disabled={submitting} onClick={() => doAction(running.id, 'pause', { reason: 'Manual pause' })}>Pause</Button>
                     <Button variant="primary" disabled={submitting} onClick={() => doAction(running.id, 'complete', { completion_notes: '' })}>Complete</Button>
@@ -100,12 +129,42 @@ const WorkerDashboard = () => {
             <Card.Header>Assigned Tasks</Card.Header>
             <ListGroup variant="flush">
               {assignedTasks.slice(0,5).map(t => (
-                <ListGroup.Item key={t.id} className="d-flex justify-content-between align-items-center">
-                  <div>
+                <ListGroup.Item key={t.id} className="d-flex justify-content-between align-items-start">
+                  <div className="flex-grow-1">
                     <div className="fw-semibold">{t.title}</div>
                     <small className="text-muted">Due: {t.due_date ? new Date(t.due_date).toLocaleString() : '-'}</small>
+                    {t.order_item_details && (
+                      <div className="mt-1">
+                        <div className="small text-muted">
+                          {t.order_item_details.product_name}
+                          {t.order_item_details.quantity && ` (Qty: ${t.order_item_details.quantity})`}
+                        </div>
+                        <div className="d-flex gap-1 mt-1">
+                          {t.order_item_details.color_name && (
+                            <Badge 
+                              size="sm"
+                              bg="light" 
+                              text="dark" 
+                              className="border"
+                              style={{
+                                backgroundColor: t.order_item_details.hex_color || '#f8f9fa',
+                                color: t.order_item_details.hex_color ? '#000' : '#6c757d',
+                                fontSize: '0.7rem'
+                              }}
+                            >
+                              {t.order_item_details.color_name}
+                            </Badge>
+                          )}
+                          {t.order_item_details.fabric_name && (
+                            <Badge bg="secondary" className="text-white" style={{ fontSize: '0.7rem' }}>
+                              {t.order_item_details.fabric_name}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="d-flex gap-2">
+                  <div className="d-flex gap-2 ms-2">
                     <Button size="sm" variant="success" disabled={submitting} onClick={() => doAction(t.id, 'start')}>Start</Button>
                     <Button size="sm" variant="outline-danger" disabled={submitting} onClick={() => doAction(t.id, 'flag', { reason: 'Issue' })}>Flag</Button>
                   </div>
@@ -123,12 +182,42 @@ const WorkerDashboard = () => {
             <Card.Header>Active Tasks</Card.Header>
             <ListGroup variant="flush">
               {activeTasks.slice(0,5).map(t => (
-                <ListGroup.Item key={t.id} className="d-flex justify-content-between align-items-center">
-                  <div>
+                <ListGroup.Item key={t.id} className="d-flex justify-content-between align-items-start">
+                  <div className="flex-grow-1">
                     <div className="fw-semibold">{t.title}</div>
                     <small className="text-muted">Status: {t.status}</small>
+                    {t.order_item_details && (
+                      <div className="mt-1">
+                        <div className="small text-muted">
+                          {t.order_item_details.product_name}
+                          {t.order_item_details.quantity && ` (Qty: ${t.order_item_details.quantity})`}
+                        </div>
+                        <div className="d-flex gap-1 mt-1">
+                          {t.order_item_details.color_name && (
+                            <Badge 
+                              size="sm"
+                              bg="light" 
+                              text="dark" 
+                              className="border"
+                              style={{
+                                backgroundColor: t.order_item_details.hex_color || '#f8f9fa',
+                                color: t.order_item_details.hex_color ? '#000' : '#6c757d',
+                                fontSize: '0.7rem'
+                              }}
+                            >
+                              {t.order_item_details.color_name}
+                            </Badge>
+                          )}
+                          {t.order_item_details.fabric_name && (
+                            <Badge bg="secondary" className="text-white" style={{ fontSize: '0.7rem' }}>
+                              {t.order_item_details.fabric_name}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="d-flex gap-2">
+                  <div className="d-flex gap-2 ms-2">
                     {t.status === 'paused' && <Button size="sm" variant="success" disabled={submitting} onClick={() => doAction(t.id, 'resume')}>Resume</Button>}
                     {t.status === 'started' && <Button size="sm" variant="warning" disabled={submitting} onClick={() => doAction(t.id, 'pause', { reason: 'Manual pause' })}>Pause</Button>}
                     <Button size="sm" variant="primary" disabled={submitting} onClick={() => doAction(t.id, 'complete', { completion_notes: '' })}>Complete</Button>
@@ -144,10 +233,40 @@ const WorkerDashboard = () => {
             <Card.Header>Recently Completed</Card.Header>
             <ListGroup variant="flush">
               {recentCompleted.slice(0,5).map(t => (
-                <ListGroup.Item key={t.id} className="d-flex justify-content-between align-items-center">
-                  <div>
+                <ListGroup.Item key={t.id} className="d-flex justify-content-between align-items-start">
+                  <div className="flex-grow-1">
                     <div className="fw-semibold">{t.title}</div>
                     <small className="text-muted">Completed</small>
+                    {t.order_item_details && (
+                      <div className="mt-1">
+                        <div className="small text-muted">
+                          {t.order_item_details.product_name}
+                          {t.order_item_details.quantity && ` (Qty: ${t.order_item_details.quantity})`}
+                        </div>
+                        <div className="d-flex gap-1 mt-1">
+                          {t.order_item_details.color_name && (
+                            <Badge 
+                              size="sm"
+                              bg="light" 
+                              text="dark" 
+                              className="border"
+                              style={{
+                                backgroundColor: t.order_item_details.hex_color || '#f8f9fa',
+                                color: t.order_item_details.hex_color ? '#000' : '#6c757d',
+                                fontSize: '0.7rem'
+                              }}
+                            >
+                              {t.order_item_details.color_name}
+                            </Badge>
+                          )}
+                          {t.order_item_details.fabric_name && (
+                            <Badge bg="secondary" className="text-white" style={{ fontSize: '0.7rem' }}>
+                              {t.order_item_details.fabric_name}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </ListGroup.Item>
               ))}
