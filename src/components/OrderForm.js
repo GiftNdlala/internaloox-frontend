@@ -26,6 +26,8 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
     paymentStatus: 'deposit_only',
     orderStatus: 'pending',
   });
+  // Delivery option
+  const [withDelivery, setWithDelivery] = useState(false);
   // Proof of Payment (required for EFT-only business at order creation)
   const [popFile, setPopFile] = useState(null);
   // Product being added
@@ -180,8 +182,8 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
     // Customer validation
     if (!customerData.customerName.trim()) newErrors.customerName = 'Customer name is required';
     if (!customerData.customerPhone.trim()) newErrors.customerPhone = 'Customer phone is required';
-    if (!customerData.customerAddress.trim()) newErrors.customerAddress = 'Customer address is required';
-    if (!customerData.expectedDeliveryDate) newErrors.expectedDeliveryDate = 'Expected delivery date is required';
+    if (withDelivery && !customerData.customerAddress.trim()) newErrors.customerAddress = 'Customer address is required for delivery';
+    if (withDelivery && !customerData.expectedDeliveryDate) newErrors.expectedDeliveryDate = 'Expected delivery date is required for delivery';
     
     // Financial validation
     if (!customerData.depositAmount || parseFloat(customerData.depositAmount) < 0) {
@@ -223,7 +225,7 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
           name: customerData.customerName,
           phone: customerData.customerPhone,
           email: customerData.customerEmail,
-          address: customerData.customerAddress
+          ...(withDelivery && { address: customerData.customerAddress })
         });
         customerId = newCustomer.id;
       }
@@ -308,14 +310,30 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
                 <input type="email" name="customerEmail" value={customerData.customerEmail} onChange={handleCustomerChange} className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter email address" />
               </div>
             </div>
+            <div className="md:col-span-2">
+              <div className="flex items-center mb-4">
+                <input
+                  type="checkbox"
+                  id="withDelivery"
+                  checked={withDelivery}
+                  onChange={(e) => setWithDelivery(e.target.checked)}
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                />
+                <label htmlFor="withDelivery" className="ml-2 text-sm font-medium text-gray-700">
+                  🚚 This order requires delivery
+                </label>
+              </div>
+            </div>
+            {withDelivery && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Address *</label>
                 <div className="relative">
                   <FaMapMarkerAlt className="absolute left-3 top-3 text-gray-400" />
-                <input type="text" name="customerAddress" value={customerData.customerAddress} onChange={handleCustomerChange} className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.customerAddress ? 'border-red-500' : 'border-gray-300'}`} placeholder="Enter address" />
+                <input type="text" name="customerAddress" value={customerData.customerAddress} onChange={handleCustomerChange} className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.customerAddress ? 'border-red-500' : 'border-gray-300'}`} placeholder="Enter delivery address" />
               </div>
               {errors.customerAddress && <p className="text-red-500 text-sm mt-1">{errors.customerAddress}</p>}
             </div>
+            )}
           </div>
         </div>
         {/* Product Cart Section */}
@@ -465,11 +483,13 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
             <FaCalendarAlt className="mr-2" /> Delivery Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {withDelivery && (
               <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Expected Delivery Date *</label>
               <input type="date" name="expectedDeliveryDate" value={customerData.expectedDeliveryDate} onChange={handleCustomerChange} min={new Date().toISOString().split('T')[0]} className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 ${errors.expectedDeliveryDate ? 'border-red-500' : 'border-gray-300'}`} />
               {errors.expectedDeliveryDate && <p className="text-red-500 text-sm mt-1">{errors.expectedDeliveryDate}</p>}
               </div>
+              )}
               <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Order Status</label>
               <select name="orderStatus" value={customerData.orderStatus || 'pending'} onChange={handleCustomerChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">

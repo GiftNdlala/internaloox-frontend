@@ -39,6 +39,8 @@ const Orders = ({ user, userRole, onLogout }) => {
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [statusForm, setStatusForm] = useState({ order_status: '', production_status: '' });
   const [statusOptions, setStatusOptions] = useState({ order_statuses: [], production_statuses: [] });
+  const [showAddressPrompt, setShowAddressPrompt] = useState(false);
+  const [addressInput, setAddressInput] = useState('');
 
   // Filter and search states
   const [searchTerm, setSearchTerm] = useState('');
@@ -291,6 +293,15 @@ const Orders = ({ user, userRole, onLogout }) => {
     try {
       // Split calls: production transitions via dedicated endpoint; order_status via generic
       const { order_status, production_status } = statusForm || {};
+      
+      // If moving to delivery and no address on record → prompt for it
+      if (order_status === 'out_for_delivery' && !selectedOrder?.customer?.address) {
+        setShowStatusModal(false);
+        setAddressInput('');
+        setShowAddressPrompt(true);
+        return;
+      }
+      
       if (production_status && production_status !== selectedOrder?.production_status) {
         await updateProductionStatus(selectedOrder.id, { production_status });
       }
@@ -638,6 +649,72 @@ const Orders = ({ user, userRole, onLogout }) => {
               </Modal.Footer>
             </Modal>
           )}
+
+          {/* Address Prompt Modal for Delivery */}
+          <Modal show={showAddressPrompt} onHide={() => setShowAddressPrompt(false)} size="lg">
+            <Modal.Header closeButton>
+              <Modal.Title>🚚 Enter Delivery Address</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <div className="mb-3">
+                <p className="text-muted">
+                  Order <strong>{selectedOrder?.order_number}</strong> is being sent for delivery. 
+                  Please provide the delivery address below.
+                </p>
+              </div>
+              <Form.Group className="mb-3">
+                <Form.Label>Delivery Address *</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter complete delivery address (street, city, postal code)"
+                  value={addressInput}
+                  onChange={(e) => setAddressInput(e.target.value)}
+                  className="mb-2"
+                />
+                <small className="text-muted">
+                  💡 Tip: Be as specific as possible for accurate delivery. 
+                  Google Maps integration coming soon for exact coordinates.
+                </small>
+              </Form.Group>
+              <div className="alert alert-info">
+                <strong>Future Enhancement:</strong> This form will soon include Google Maps API integration 
+                for precise location coordinates and route optimization.
+              </div>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={() => setShowAddressPrompt(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                disabled={!addressInput.trim()}
+                onClick={async () => {
+                  try {
+                    if (!addressInput.trim()) { 
+                      setError('Address is required to send for delivery'); 
+                      return; 
+                    }
+                    
+                    // Update customer address
+                    await updateOrder(selectedOrder.id, { 
+                      customer_update: { address: addressInput.trim() } 
+                    });
+                    
+                    // Update order status to out_for_delivery
+                    await patchOrderStatus(selectedOrder.id, { order_status: 'out_for_delivery' });
+                    
+                    setShowAddressPrompt(false);
+                    setSuccess(`Order ${selectedOrder.order_number} sent to delivery with address updated`);
+                    fetchAllData();
+                  } catch (err) {
+                    setError(err?.message || 'Failed to update address and send to delivery');
+                  }
+                }}
+              >
+                🚚 Confirm & Send to Delivery
+              </Button>
+            </Modal.Footer>
+          </Modal>
     </Container>
   );
   if (userRole === 'owner' || userRole === 'admin') {
