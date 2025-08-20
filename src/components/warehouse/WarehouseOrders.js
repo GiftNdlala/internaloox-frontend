@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Badge, Row, Col, Spinner, Alert } from 'react-bootstrap';
-import { FaBoxes, FaEye, FaPlus, FaSync, FaExclamationTriangle } from 'react-icons/fa';
+import { FaBoxes, FaEye, FaPlus, FaSync, FaExclamationTriangle, FaBox } from 'react-icons/fa';
 import { usePolling } from '../../hooks/usePolling';
 import { getWarehouseOrders } from '../api';
 
@@ -216,6 +216,50 @@ const WarehouseOrders = () => {
                     </Col>
                   </Row>
                 </div>
+
+                {/* Order Items with Specifications */}
+                {order.items && order.items.length > 0 && (
+                  <div className="mb-3">
+                    <small className="text-muted fw-semibold d-block mb-2">Order Items:</small>
+                    <div className="space-y-2">
+                      {order.items.map((item, idx) => (
+                        <div key={idx} className="p-2 bg-light rounded border">
+                          <div className="d-flex align-items-center flex-wrap gap-2">
+                            <FaBox className="text-primary" />
+                            <span className="fw-semibold">
+                              {item.quantity}x {item.product_name}
+                            </span>
+                            {item.color_name && (
+                              <Badge 
+                                bg="light" 
+                                text="dark" 
+                                className="border"
+                                style={{
+                                  backgroundColor: item.hex_color || undefined,
+                                  color: item.hex_color ? '#000' : undefined,
+                                  cursor: 'pointer',
+                                  boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.05)'
+                                }}
+                              >
+                                Color: {item.color_name}
+                              </Badge>
+                            )}
+                            {item.fabric_name && (
+                              <Badge bg="light" text="dark" className="border">
+                                Fabric: {item.fabric_name}
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="mt-1">
+                            <small className="text-muted">
+                              Unit: R{item.unit_price?.toFixed(2)} | Total: R{item.total_price?.toFixed(2)}
+                            </small>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Task Progress */}
                 <div className="mb-3">

@@ -541,6 +541,50 @@ const TaskManagement = ({ user }) => {
                       </Row>
                     </div>
 
+                    {/* Order Items with Specifications */}
+                    {order.items && order.items.length > 0 && (
+                      <div className="mb-3">
+                        <small className="text-muted fw-semibold d-block mb-2">Order Items:</small>
+                        <div className="space-y-2">
+                          {order.items.map((item, idx) => (
+                            <div key={idx} className="p-2 bg-light rounded border">
+                              <div className="d-flex align-items-center flex-wrap gap-2">
+                                <FaBox className="text-primary" />
+                                <span className="fw-semibold">
+                                  {item.quantity}x {item.product_name}
+                                </span>
+                                {item.color_name && (
+                                  <Badge 
+                                    bg="light" 
+                                    text="dark" 
+                                    className="border"
+                                    style={{
+                                      backgroundColor: item.hex_color || undefined,
+                                      color: item.hex_color ? '#000' : undefined,
+                                      cursor: 'pointer',
+                                      boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.05)'
+                                    }}
+                                  >
+                                    Color: {item.color_name}
+                                  </Badge>
+                                )}
+                                {item.fabric_name && (
+                                  <Badge bg="light" text="dark" className="border">
+                                    Fabric: {item.fabric_name}
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="mt-1">
+                                <small className="text-muted">
+                                  Unit: R{item.unit_price?.toFixed(2)} | Total: R{item.total_price?.toFixed(2)}
+                                </small>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     <div className="d-grid gap-2">
                       <Button
                         variant="primary"
