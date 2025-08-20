@@ -240,9 +240,10 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
         deposit_amount: depositAmount.toFixed(2),
         payment_status: customerData.paymentStatus,
         order_status: customerData.orderStatus,
+        production_status: 'not_started', // Add missing production_status field
         total_amount: totalAmount,
         balance_amount: balanceAmount,
-        items: orderItems.map(item => {
+        items_data: orderItems.map(item => {
           const colorObj = colors.find(c => String(c.id) === String(item.color));
           const fabricObj = fabrics.find(f => String(f.id) === String(item.fabric));
           return {
