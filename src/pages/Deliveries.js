@@ -72,7 +72,6 @@ const Deliveries = ({ user, userRole, onLogout }) => {
 
   // Delivery status configuration
   const deliveryStatusConfig = {
-    order_ready: { label: 'Ready', color: 'info', icon: FaBoxes },
     out_for_delivery: { label: 'Out for Delivery', color: 'warning', icon: FaTruck },
     delivered: { label: 'Delivered', color: 'success', icon: FaCheckCircle },
     failed_delivery: { label: 'Failed', color: 'danger', icon: FaTimesCircle },
@@ -82,7 +81,6 @@ const Deliveries = ({ user, userRole, onLogout }) => {
   // Get delivery-relevant orders
   const getDeliveryOrders = () => {
     return orders.filter(order => 
-      order.order_status === 'order_ready' || 
       ['out_for_delivery', 'delivered', 'failed_delivery', 'returned'].includes(order.order_status)
     );
   };
@@ -92,13 +90,7 @@ const Deliveries = ({ user, userRole, onLogout }) => {
     let filtered = getDeliveryOrders();
 
     // Filter by tab
-    if (activeTab === 'ready') {
-      filtered = filtered.filter(order => 
-        order.order_status === 'order_ready' && 
-        order.order_status !== 'out_for_delivery' &&
-        order.order_status !== 'delivered'
-      );
-    } else if (activeTab === 'transit') {
+    if (activeTab === 'transit') {
       filtered = filtered.filter(order => order.order_status === 'out_for_delivery');
     } else if (activeTab === 'delivered') {
       filtered = filtered.filter(order => order.order_status === 'delivered');
@@ -242,9 +234,6 @@ const Deliveries = ({ user, userRole, onLogout }) => {
 
   const getDeliveryStatusBadge = (order) => {
     let status = order.order_status;
-    if (order.order_status === 'order_ready' && !['out_for_delivery', 'delivered'].includes(order.order_status)) {
-      status = 'order_ready';
-    }
     
     const config = deliveryStatusConfig[status] || { label: status, color: 'secondary', icon: FaBoxes };
     const IconComponent = config.icon;
@@ -267,10 +256,6 @@ const Deliveries = ({ user, userRole, onLogout }) => {
     const deliveryOrders = getDeliveryOrders();
     return {
       total: deliveryOrders.length,
-      ready: deliveryOrders.filter(o => 
-        o.order_status === 'order_ready' && 
-        !['out_for_delivery', 'delivered'].includes(o.order_status)
-      ).length,
       transit: deliveryOrders.filter(o => o.order_status === 'out_for_delivery').length,
       delivered: deliveryOrders.filter(o => o.order_status === 'delivered').length,
       issues: deliveryOrders.filter(o => 
@@ -349,15 +334,7 @@ const Deliveries = ({ user, userRole, onLogout }) => {
 
         {/* Delivery Stats Cards */}
         <Row className="mb-4">
-          <Col md={2}>
-            <Card className="border-0 shadow-sm">
-              <Card.Body className="text-center">
-                <FaBoxes size={30} className="text-info mb-2" />
-                <h4 className="mb-1">{stats.ready}</h4>
-                <small className="text-muted">Ready</small>
-              </Card.Body>
-            </Card>
-          </Col>
+
           <Col md={2}>
             <Card className="border-0 shadow-sm">
               <Card.Body className="text-center">
@@ -409,7 +386,6 @@ const Deliveries = ({ user, userRole, onLogout }) => {
         <Card className="mb-4">
           <Card.Body>
             <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k)} className="mb-3">
-              <Tab eventKey="ready" title={`Ready (${stats.ready})`} />
               <Tab eventKey="transit" title={`In Transit (${stats.transit})`} />
               <Tab eventKey="delivered" title={`Delivered (${stats.delivered})`} />
               <Tab eventKey="issues" title={`Issues (${stats.issues})`} />

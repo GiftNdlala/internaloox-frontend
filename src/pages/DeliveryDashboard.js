@@ -40,8 +40,7 @@ const DeliveryDashboard = ({ user, onLogout }) => {
       setLoading(true);
       const ordersData = await getOrders();
       const deliveryOrders = (ordersData.results || ordersData).filter(
-        order => order.order_status === 'order_ready' ||
-                 order.order_status === 'out_for_delivery' ||
+        order => order.order_status === 'out_for_delivery' ||
                  order.order_status === 'delivered'
       );
       setOrders(deliveryOrders);
@@ -84,10 +83,7 @@ const DeliveryDashboard = ({ user, onLogout }) => {
           <div className="oox-mobile-stat-value">{orders.filter(o => o.order_status === 'delivered').length}</div>
           <div className="oox-mobile-stat-label">Delivered</div>
         </div>
-        <div className="oox-mobile-stat">
-          <div className="oox-mobile-stat-value">{orders.filter(o => o.order_status === 'order_ready').length}</div>
-          <div className="oox-mobile-stat-label">Ready</div>
-        </div>
+
         <div className="oox-mobile-stat">
           <div className="oox-mobile-stat-value">{orders.length}</div>
           <div className="oox-mobile-stat-label">Total</div>
@@ -297,7 +293,6 @@ const DeliveryDashboard = ({ user, onLogout }) => {
   };
 
   // Filter orders by status
-  const readyOrders = orders.filter(o => o.order_status === 'order_ready' && o.order_status !== 'out_for_delivery');
   const inTransitOrders = orders.filter(o => o.order_status === 'out_for_delivery');
   const deliveredOrders = orders.filter(o => o.order_status === 'delivered');
 
@@ -328,16 +323,7 @@ const DeliveryDashboard = ({ user, onLogout }) => {
 
       {/* Delivery Stats */}
       <Row className="mb-4">
-        <Col md={4} className="mb-3">
-          <StatsCard
-            title="Ready to Deliver"
-            value={readyOrders.length}
-            icon={FaTruck}
-            color="#6b7280"
-            bgColor="#6b7280"
-          />
-        </Col>
-        <Col md={4} className="mb-3">
+        <Col md={6} className="mb-3">
           <StatsCard
             title="In Transit"
             value={inTransitOrders.length}
@@ -346,7 +332,7 @@ const DeliveryDashboard = ({ user, onLogout }) => {
             bgColor="#fbbf24"
           />
         </Col>
-        <Col md={4} className="mb-3">
+        <Col md={6} className="mb-3">
           <StatsCard
             title="Delivered Today"
             value={deliveredOrders.length}

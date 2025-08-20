@@ -264,8 +264,18 @@ const Orders = ({ user, userRole, onLogout }) => {
   // Manager actions: mark ready or delay
   const markReadyForDelivery = async (order) => {
     try {
-      await patchOrderStatus(order.id, { order_status: 'order_ready' });
-      setSuccess(`Order ${order.order_number} marked as ready`);
+      // Check if order has address before marking ready for delivery
+      if (!order.customer?.address) {
+        setSelectedOrder(order);
+        setAddressInput('');
+        setShowAddressPrompt(true);
+        return;
+      }
+      
+      // Update production status to ready_for_delivery and order status to out_for_delivery
+      await updateProductionStatus(order.id, { production_status: 'ready_for_delivery' });
+      await patchOrderStatus(order.id, { order_status: 'out_for_delivery' });
+      setSuccess(`Order ${order.order_number} sent to delivery`);
       fetchAllData();
     } catch (e) { setError(e?.message || 'Failed to update'); }
   };
@@ -293,6 +303,14 @@ const Orders = ({ user, userRole, onLogout }) => {
     try {
       // Split calls: production transitions via dedicated endpoint; order_status via generic
       const { order_status, production_status } = statusForm || {};
+      
+      // If moving to ready_for_delivery and no address on record → prompt for it
+      if (production_status === 'ready_for_delivery' && !selectedOrder?.customer?.address) {
+        setShowStatusModal(false);
+        setAddressInput('');
+        setShowAddressPrompt(true);
+        return;
+      }
       
       // If moving to delivery and no address on record → prompt for it
       if (order_status === 'out_for_delivery' && !selectedOrder?.customer?.address) {
@@ -658,8 +676,8 @@ const Orders = ({ user, userRole, onLogout }) => {
             <Modal.Body>
               <div className="mb-3">
                 <p className="text-muted">
-                  Order <strong>{selectedOrder?.order_number}</strong> is being sent for delivery. 
-                  Please provide the delivery address below.
+                  Order <strong>{selectedOrder?.order_number}</strong> is ready for delivery. 
+                  Please provide the delivery address below to complete the process.
                 </p>
               </div>
               <Form.Group className="mb-3">
@@ -691,7 +709,7 @@ const Orders = ({ user, userRole, onLogout }) => {
                 onClick={async () => {
                   try {
                     if (!addressInput.trim()) { 
-                      setError('Address is required to send for delivery'); 
+                      setError('Address is required to complete delivery setup'); 
                       return; 
                     }
                     
@@ -700,18 +718,23 @@ const Orders = ({ user, userRole, onLogout }) => {
                       customer_update: { address: addressInput.trim() } 
                     });
                     
-                    // Update order status to out_for_delivery
+                    // Check if we need to update production status to ready_for_delivery
+                    if (selectedOrder.production_status !== 'ready_for_delivery') {
+                      await updateProductionStatus(selectedOrder.id, { production_status: 'ready_for_delivery' });
+                    }
+                    
+                    // Update order status directly to out_for_delivery (for delivery dashboard)
                     await patchOrderStatus(selectedOrder.id, { order_status: 'out_for_delivery' });
                     
                     setShowAddressPrompt(false);
                     setSuccess(`Order ${selectedOrder.order_number} sent to delivery with address updated`);
                     fetchAllData();
                   } catch (err) {
-                    setError(err?.message || 'Failed to update address and send to delivery');
+                    setError(err?.message || 'Failed to update address and mark ready for delivery');
                   }
                 }}
               >
-                🚚 Confirm & Send to Delivery
+                🚚 Confirm & Mark Ready for Delivery
               </Button>
             </Modal.Footer>
           </Modal>
