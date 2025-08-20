@@ -183,7 +183,17 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
     if (!customerData.customerName.trim()) newErrors.customerName = 'Customer name is required';
     if (!customerData.customerPhone.trim()) newErrors.customerPhone = 'Customer phone is required';
     if (withDelivery && !customerData.customerAddress.trim()) newErrors.customerAddress = 'Customer address is required for delivery';
-    if (withDelivery && !customerData.expectedDeliveryDate) newErrors.expectedDeliveryDate = 'Expected delivery date is required for delivery';
+    if (withDelivery && !customerData.expectedDeliveryDate) {
+      newErrors.expectedDeliveryDate = 'Expected delivery date is required for delivery';
+    } else if (withDelivery && customerData.expectedDeliveryDate) {
+      // Validate date format
+      const date = new Date(customerData.expectedDeliveryDate);
+      if (isNaN(date.getTime())) {
+        newErrors.expectedDeliveryDate = 'Please enter a valid delivery date';
+      } else if (date < new Date()) {
+        newErrors.expectedDeliveryDate = 'Delivery date cannot be in the past';
+      }
+    }
     
     // Financial validation
     if (!customerData.depositAmount || parseFloat(customerData.depositAmount) < 0) {
@@ -233,9 +243,37 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
       const totalAmount = calculateTotal();
       const depositAmount = parseFloat(customerData.depositAmount);
       const balanceAmount = (parseFloat(totalAmount) - depositAmount).toFixed(2);
+      
+      // Format the delivery date properly for backend
+      let deliveryDate = null;
+      if (customerData.expectedDeliveryDate) {
+        try {
+          // Ensure the date is in YYYY-MM-DD format
+          const date = new Date(customerData.expectedDeliveryDate);
+          if (!isNaN(date.getTime())) {
+            deliveryDate = date.toISOString().split('T')[0];
+          } else {
+            // Fallback: try to parse the date string directly
+            const dateStr = customerData.expectedDeliveryDate;
+            if (typeof dateStr === 'string' && dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+              deliveryDate = dateStr;
+            }
+          }
+          
+          // Final validation: ensure the date is in the correct format
+          if (deliveryDate && !deliveryDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            console.error('Invalid date format:', deliveryDate);
+            deliveryDate = null;
+          }
+        } catch (error) {
+          console.error('Error formatting delivery date:', error);
+          deliveryDate = null;
+        }
+      }
+      
       const payload = {
         customer_id: customerId,
-        expected_delivery_date: customerData.expectedDeliveryDate,
+        expected_delivery_date: deliveryDate,
         admin_notes: customerData.adminNotes,
         deposit_amount: depositAmount.toFixed(2),
         payment_status: customerData.paymentStatus,
@@ -262,6 +300,18 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
         popFile: popFile || null,
         popNotes: customerData.adminNotes || '',
       };
+      
+      // Debug logging
+      console.log('OrderForm - Delivery Date:', customerData.expectedDeliveryDate);
+      console.log('OrderForm - Formatted Date:', deliveryDate);
+      console.log('OrderForm - Full Payload:', payload);
+      
+      // Final validation: if delivery is required but date is invalid, show error
+      if (withDelivery && !deliveryDate) {
+        setErrors(prev => ({ ...prev, expectedDeliveryDate: 'Please enter a valid delivery date in YYYY-MM-DD format' }));
+        return;
+      }
+      
       onSubmit(payload);
     } catch (err) {
       setErrors(prev => ({ ...prev, customer: 'Failed to create or find customer: ' + (err.message || 'Unknown error') }));
@@ -487,8 +537,16 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
               {withDelivery && (
               <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Expected Delivery Date *</label>
-              <input type="date" name="expectedDeliveryDate" value={customerData.expectedDeliveryDate} onChange={handleCustomerChange} min={new Date().toISOString().split('T')[0]} className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 ${errors.expectedDeliveryDate ? 'border-red-500' : 'border-gray-300'}`} />
+              <input 
+                type="date" 
+                name="expectedDeliveryDate" 
+                value={customerData.expectedDeliveryDate} 
+                onChange={handleCustomerChange} 
+                min={new Date().toISOString().split('T')[0]} 
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 ${errors.expectedDeliveryDate ? 'border-red-500' : 'border-gray-300'}`} 
+              />
               {errors.expectedDeliveryDate && <p className="text-red-500 text-sm mt-1">{errors.expectedDeliveryDate}</p>}
+              <p className="text-xs text-gray-500 mt-1">Format: YYYY-MM-DD</p>
               </div>
               )}
               <div>
