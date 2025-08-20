@@ -409,6 +409,11 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
       setErrors(prev => ({ ...prev, customer: 'Failed to create or find customer: ' + (err.message || 'Unknown error') }));
     } finally {
       setSubmitting(false);
+            if (!payload.items_data || !Array.isArray(payload.items_data) || payload.items_data.length === 0) {
+              console.error('ERROR: items_data is missing or empty in the payload!', payload.items_data);
+            } else {
+              console.log('DEBUG: items_data included in payload:', payload.items_data);
+            }
     }
   };
 
