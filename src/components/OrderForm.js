@@ -51,9 +51,41 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    getProducts().then(data => setProducts(data.results || data)).catch(() => setProducts([]));
-    getColors().then(data => setColors(data.results || data)).catch(() => setColors([]));
-    getFabrics().then(data => setFabrics(data.results || data)).catch(() => setFabrics([]));
+    // Load all required data with better error handling
+    const loadData = async () => {
+      try {
+        const [productsData, colorsData, fabricsData] = await Promise.all([
+          getProducts().catch(err => {
+            console.error('Failed to load products:', err);
+            return { results: [] };
+          }),
+          getColors().catch(err => {
+            console.error('Failed to load colors:', err);
+            return { results: [] };
+          }),
+          getFabrics().catch(err => {
+            console.error('Failed to load fabrics:', err);
+            return { results: [] };
+          })
+        ]);
+        
+        const products = productsData.results || productsData || [];
+        const colors = colorsData.results || colorsData || [];
+        const fabrics = fabricsData.results || fabricsData || [];
+        
+        console.log('Loaded products:', products.length);
+        console.log('Loaded colors:', colors.length, colors);
+        console.log('Loaded fabrics:', fabrics.length, fabrics);
+        
+        setProducts(products);
+        setColors(colors);
+        setFabrics(fabrics);
+      } catch (error) {
+        console.error('Error loading form data:', error);
+      }
+    };
+    
+    loadData();
   }, []);
 
   // Populate form if editing
@@ -110,10 +142,12 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
     if (showColor && !productForm.color) {
       newErrors.color = 'Please select a color for this product';
       console.log('Color validation failed: showColor =', showColor, 'selected color =', productForm.color);
+      console.log('Available colors:', allowedColors);
     }
     if (showFabric && !productForm.fabric) {
       newErrors.fabric = 'Please select a fabric for this product';
       console.log('Fabric validation failed: showFabric =', showFabric, 'selected fabric =', productForm.fabric);
+      console.log('Available fabrics:', allowedFabrics);
     }
     
     if (Object.keys(newErrors).length > 0) {
@@ -123,17 +157,23 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
     }
     
     // Log the product being added for debugging
+    const colorObj = colors.find(c => String(c.id) === String(productForm.color));
+    const fabricObj = fabrics.find(f => String(f.id) === String(productForm.fabric));
+    
     console.log('Adding product to order:', {
       productId: productForm.productId,
-      color: productForm.color,
-      fabric: productForm.fabric,
+      productName: productForm.productName,
+      colorId: productForm.color,
+      colorName: colorObj ? (colorObj.name || colorObj.color_name || colorObj.color_code) : 'Not found',
+      fabricId: productForm.fabric,
+      fabricName: fabricObj ? (fabricObj.name || fabricObj.fabric_name || fabricObj.fabric_letter) : 'Not found',
       quantity: productForm.quantity,
       unitPrice: productForm.unitPrice
     });
     
     // Log the current state of colors and fabrics arrays
-    console.log('Current colors array:', colors);
-    console.log('Current fabrics array:', fabrics);
+    console.log('Current colors array:', colors.length, 'items');
+    console.log('Current fabrics array:', fabrics.length, 'items');
     
     // Create a copy of the product form to add to orderItems
     const productToAdd = { ...productForm };
@@ -205,12 +245,14 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
   const allowedColors = colors || [];
   const allowedFabrics = fabrics || [];
 
-  // Always show color/fabric dropdowns if the product has any options
-  const showColor = colorValuesSet.size > 0 || allowedColors.length > 0;
-  const showFabric = fabricValuesSet.size > 0 || allowedFabrics.length > 0;
+  // Always show color/fabric dropdowns if there are colors/fabrics available in the system
+  // and a product is selected (this ensures users can always select color/fabric for any product)
+  const showColor = productForm.productId && allowedColors.length > 0;
+  const showFabric = productForm.productId && allowedFabrics.length > 0;
 
-  console.log('Show color dropdown:', showColor, 'Color values:', colorValuesSet.size);
-  console.log('Show fabric dropdown:', showFabric, 'Fabric values:', fabricValuesSet.size);
+  console.log('Show color dropdown:', showColor, 'Available colors:', allowedColors.length);
+  console.log('Show fabric dropdown:', showFabric, 'Available fabrics:', allowedFabrics.length);
+  console.log('Product selected:', productForm.productId, 'Product name:', productForm.productName);
 
   // Validate and submit full order
   const validateOrder = () => {
@@ -318,10 +360,20 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
         production_status: 'not_started', // Add missing production_status field
         total_amount: totalAmount,
         balance_amount: balanceAmount,
-        items_data: orderItems.map(item => {
+        items_data: orderItems.map((item, index) => {
           const colorObj = colors.find(c => String(c.id) === String(item.color));
           const fabricObj = fabrics.find(f => String(f.id) === String(item.fabric));
-          return {
+          
+          // Debug logging for each item
+          console.log(`Item ${index} - Processing:`, {
+            productId: item.productId,
+            colorId: item.color,
+            fabricId: item.fabric,
+            colorObj: colorObj,
+            fabricObj: fabricObj
+          });
+          
+          const processedItem = {
             product: item.productId,
             quantity: parseInt(item.quantity),
             unit_price: parseFloat(item.unitPrice),
@@ -333,6 +385,9 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
             assigned_fabric_letter: fabricObj?.fabric_letter || fabricObj?.code || null,
             product_description: item.productDescription || '',
           };
+          
+          console.log(`Item ${index} - Processed:`, processedItem);
+          return processedItem;
         }),
         popFile: popFile || null,
         popNotes: customerData.adminNotes || '',
@@ -463,13 +518,18 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
                 <label className="block text-sm font-medium text-gray-700 mb-2">Color *</label>
                 <select name="color" value={productForm.color} onChange={handleProductChange} className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${errors.color ? 'border-red-500' : 'border-gray-300'}`} required>
                   <option value="">Select color</option>
-                  {allowedColors.map(c => (
+                  {allowedColors.length > 0 ? allowedColors.map(c => (
                     <option key={c.id} value={c.id}>
                       {c.name || c.color_name || c.color_code || 'Unknown Color'}
                     </option>
-                  ))}
+                  )) : (
+                    <option value="" disabled>No colors available</option>
+                  )}
                 </select>
                 {errors.color && <p className="text-red-500 text-sm mt-1">{errors.color}</p>}
+                {allowedColors.length === 0 && (
+                  <p className="text-red-500 text-sm mt-1">No colors loaded. Please refresh the page.</p>
+                )}
                 <p className="text-xs text-gray-500 mt-1">
                   {productColorsList.length > 0 
                     ? `This product has ${productColorsList.length} color options. Please select one.`
@@ -483,13 +543,18 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
                 <label className="block text-sm font-medium text-gray-700 mb-2">Fabric *</label>
                 <select name="fabric" value={productForm.fabric} onChange={handleProductChange} className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${errors.fabric ? 'border-red-500' : 'border-gray-300'}`} required>
                   <option value="">Select fabric</option>
-                  {allowedFabrics.map(f => (
+                  {allowedFabrics.length > 0 ? allowedFabrics.map(f => (
                     <option key={f.id} value={f.id}>
                       {f.name || f.fabric_name || f.fabric_letter || 'Unknown Fabric'}
                     </option>
-                  ))}
+                  )) : (
+                    <option value="" disabled>No fabrics available</option>
+                  )}
                 </select>
                 {errors.fabric && <p className="text-red-500 text-sm mt-1">{errors.fabric}</p>}
+                {allowedFabrics.length === 0 && (
+                  <p className="text-red-500 text-sm mt-1">No fabrics loaded. Please refresh the page.</p>
+                )}
                 <p className="text-xs text-gray-500 mt-1">
                   {productFabricsList.length > 0 
                     ? `This product has ${productFabricsList.length} fabric options. Please select one.`
@@ -541,10 +606,10 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
                       <td className="px-3 py-2">{item.quantity}</td>
                       <td className="px-3 py-2">R{item.unitPrice}</td>
                       <td className="px-3 py-2">
-                        {colorObj ? colorObj.name : (item.color || 'Not specified')}
+                        {colorObj ? (colorObj.name || colorObj.color_name || colorObj.color_code || 'Unknown Color') : (item.color ? `Color ID: ${item.color}` : 'Not specified')}
                       </td>
                       <td className="px-3 py-2">
-                        {fabricObj ? fabricObj.name : (item.fabric || 'Not specified')}
+                        {fabricObj ? (fabricObj.name || fabricObj.fabric_name || fabricObj.fabric_letter || 'Unknown Fabric') : (item.fabric ? `Fabric ID: ${item.fabric}` : 'Not specified')}
                       </td>
                       <td className="px-3 py-2">R{(parseFloat(item.unitPrice) * parseInt(item.quantity)).toFixed(2)}</td>
                       <td className="px-3 py-2">
