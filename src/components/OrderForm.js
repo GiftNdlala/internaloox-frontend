@@ -105,13 +105,32 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
     if (!productForm.productId) newErrors.productId = 'Product is required';
     if (!productForm.unitPrice || parseFloat(productForm.unitPrice) <= 0) newErrors.unitPrice = 'Valid unit price is required';
     if (!productForm.quantity || parseInt(productForm.quantity) <= 0) newErrors.quantity = 'Valid quantity is required';
-    // Require color/fabric if the selected product has available options
-    if (showColor && !productForm.color) newErrors.color = 'Please select a color for this product';
-    if (showFabric && !productForm.fabric) newErrors.fabric = 'Please select a fabric for this product';
+    
+    // Enhanced validation: Always require color/fabric if dropdowns are shown
+    if (showColor && !productForm.color) {
+      newErrors.color = 'Please select a color for this product';
+      console.log('Color validation failed: showColor =', showColor, 'selected color =', productForm.color);
+    }
+    if (showFabric && !productForm.fabric) {
+      newErrors.fabric = 'Please select a fabric for this product';
+      console.log('Fabric validation failed: showFabric =', showFabric, 'selected fabric =', productForm.fabric);
+    }
+    
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+      console.log('Product validation errors:', newErrors);
       return;
     }
+    
+    // Log the product being added for debugging
+    console.log('Adding product to order:', {
+      productId: productForm.productId,
+      color: productForm.color,
+      fabric: productForm.fabric,
+      quantity: productForm.quantity,
+      unitPrice: productForm.unitPrice
+    });
+    
     setOrderItems(items => [...items, { ...productForm }]);
     setProductForm({ productId: '', productName: '', productDescription: '', quantity: 1, unitPrice: '', color: '', fabric: '' });
   };
@@ -131,20 +150,28 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
 
   // Product option logic
   const selectedProduct = products.find(p => String(p.id) === String(productForm.productId));
-  const productColorsList = Array.isArray(selectedProduct?.colors)
-    ? selectedProduct.colors
-    : (Array.isArray(selectedProduct?.available_colors) ? selectedProduct.available_colors : []);
-  const productFabricsList = Array.isArray(selectedProduct?.fabrics)
-    ? selectedProduct.fabrics
-    : (Array.isArray(selectedProduct?.available_fabrics) ? selectedProduct.available_fabrics : []);
+  
+  // Fix: Properly extract colors and fabrics from product data
+  const productColorsList = selectedProduct?.colors || selectedProduct?.available_colors || [];
+  const productFabricsList = selectedProduct?.fabrics || selectedProduct?.available_fabrics || [];
+
+  // Debug logging to understand the data structure
+  console.log('Selected product:', selectedProduct);
+  console.log('Product colors:', productColorsList);
+  console.log('Product fabrics:', productFabricsList);
 
   const normalizeValuesSet = (list) => {
     const values = new Set();
-    (list || []).forEach((item) => {
+    if (!list || !Array.isArray(list)) return values;
+    
+    list.forEach((item) => {
       if (!item) return;
+      
       if (typeof item === 'string') {
+        // Handle simple string arrays like ["Brown", "Green", "Navy Blue"]
         values.add(item.trim().toLowerCase());
       } else if (typeof item === 'object') {
+        // Handle object arrays with name/code properties
         if (item.name) values.add(String(item.name).trim().toLowerCase());
         if (item.code) values.add(String(item.code).trim().toLowerCase());
         if (item.color_name) values.add(String(item.color_name).trim().toLowerCase());
@@ -153,27 +180,24 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
         if (item.fabric_letter) values.add(String(item.fabric_letter).trim().toLowerCase());
       }
     });
+    
+    console.log('Normalized values:', Array.from(values));
     return values;
   };
 
   const colorValuesSet = normalizeValuesSet(productColorsList);
   const fabricValuesSet = normalizeValuesSet(productFabricsList);
 
-  const allowedColors = (colors || []).filter((c) => {
-    const name = (c?.name || c?.color_name || '').toString().trim().toLowerCase();
-    const code = (c?.code || c?.color_code || '').toString().trim().toLowerCase();
-    if (colorValuesSet.size === 0) return false;
-    return (name && colorValuesSet.has(name)) || (code && colorValuesSet.has(code));
-  });
-  const allowedFabrics = (fabrics || []).filter((f) => {
-    const name = (f?.name || f?.fabric_name || '').toString().trim().toLowerCase();
-    const code = (f?.code || f?.fabric_letter || '').toString().trim().toLowerCase();
-    if (fabricValuesSet.size === 0) return false;
-    return (name && fabricValuesSet.has(name)) || (code && fabricValuesSet.has(code));
-  });
+  // Fix: Simplify the filtering logic to show all available colors/fabrics
+  const allowedColors = colors || [];
+  const allowedFabrics = fabrics || [];
 
-  const showColor = colorValuesSet.size > 0;
-  const showFabric = fabricValuesSet.size > 0;
+  // Always show color/fabric dropdowns if the product has any options
+  const showColor = colorValuesSet.size > 0 || allowedColors.length > 0;
+  const showFabric = fabricValuesSet.size > 0 || allowedFabrics.length > 0;
+
+  console.log('Show color dropdown:', showColor, 'Color values:', colorValuesSet.size);
+  console.log('Show fabric dropdown:', showFabric, 'Fabric values:', fabricValuesSet.size);
 
   // Validate and submit full order
   const validateOrder = () => {
@@ -423,28 +447,42 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
               </div>
             {showColor && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Color</label>
-                <select name="color" value={productForm.color} onChange={handleProductChange} className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${errors.color ? 'border-red-500' : 'border-gray-300'}`}>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Color *</label>
+                <select name="color" value={productForm.color} onChange={handleProductChange} className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${errors.color ? 'border-red-500' : 'border-gray-300'}`} required>
                   <option value="">Select color</option>
-                  {(allowedColors.length > 0 ? allowedColors : colors).map(c => (
-                    <option key={c.id} value={c.id}>{c.name || c.color_name}</option>
+                  {allowedColors.map(c => (
+                    <option key={c.id} value={c.id}>
+                      {c.name || c.color_name || c.color_code || 'Unknown Color'}
+                    </option>
                   ))}
                 </select>
                 {errors.color && <p className="text-red-500 text-sm mt-1">{errors.color}</p>}
-                <p className="text-xs text-gray-500 mt-1">This product has multiple color options. Please select one.</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {productColorsList.length > 0 
+                    ? `This product has ${productColorsList.length} color options. Please select one.`
+                    : 'Select a color for this product.'
+                  }
+                </p>
               </div>
             )}
             {showFabric && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Fabric</label>
-                <select name="fabric" value={productForm.fabric} onChange={handleProductChange} className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${errors.fabric ? 'border-red-500' : 'border-gray-300'}`}>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Fabric *</label>
+                <select name="fabric" value={productForm.fabric} onChange={handleProductChange} className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${errors.fabric ? 'border-red-500' : 'border-gray-300'}`} required>
                   <option value="">Select fabric</option>
-                  {(allowedFabrics.length > 0 ? allowedFabrics : fabrics).map(f => (
-                    <option key={f.id} value={f.id}>{f.name || f.fabric_name}</option>
+                  {allowedFabrics.map(f => (
+                    <option key={f.id} value={f.id}>
+                      {f.name || f.fabric_name || f.fabric_letter || 'Unknown Fabric'}
+                    </option>
                   ))}
                 </select>
                 {errors.fabric && <p className="text-red-500 text-sm mt-1">{errors.fabric}</p>}
-                <p className="text-xs text-gray-500 mt-1">This product has multiple fabric options. Please select one.</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {productFabricsList.length > 0 
+                    ? `This product has ${productFabricsList.length} fabric options. Please select one.`
+                    : 'Select a fabric for this product.'
+                  }
+                </p>
               </div>
             )}
           </div>
