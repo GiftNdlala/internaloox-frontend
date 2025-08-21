@@ -176,7 +176,8 @@ const DeliveryDashboard = ({ user, onLogout }) => {
                       isInTransit ? '2px solid #fbbf24' : '1px solid #e5e7eb'
             }}>
         <Card.Body className="p-3">
-          <Row className="align-items-center">
+          {/* Order Header */}
+          <Row className="align-items-center mb-3">
             <Col md={8}>
               <div className="d-flex align-items-center mb-2">
                 <Badge
@@ -213,82 +214,6 @@ const DeliveryDashboard = ({ user, onLogout }) => {
                   {order.payment_status === 'fully_paid' ? '(Paid)' : '(Balance Due)'}
                 </span>
               </div>
-
-              {/* Order Items with Specifications for Delivery Verification */}
-              {order.items && order.items.length > 0 && (
-                <div className="mt-3 p-2 bg-light rounded border">
-                  <small className="text-muted fw-semibold d-block mb-2">
-                    <FaBox className="me-1" />
-                    Items to Deliver ({order.total_items || order.items.length}):
-                  </small>
-                  <div className="space-y-2">
-                    {order.items.map((item, idx) => (
-                      <div key={idx} className="p-2 bg-white rounded border-start border-3 border-primary">
-                        <div className="d-flex align-items-center flex-wrap gap-2 mb-1">
-                          <span className="fw-semibold text-primary">
-                            {item.quantity}x {item.product_name}
-                          </span>
-                          <span className="text-muted small">
-                            R{item.total_price}
-                          </span>
-                        </div>
-                        
-                        {/* Color Badge with Hex Color Display */}
-                        {item.color_name && (
-                          <div className="d-flex align-items-center gap-2 mb-1">
-                            <FaPalette className="text-muted" size={12} />
-                            <Badge 
-                              bg="light" 
-                              text="dark" 
-                              className="border"
-                              onClick={() => openColorModal({
-                                name: item.color_name,
-                                code: item.color_code,
-                                hex: item.hex_color
-                              })}
-                              role="button"
-                              title="Tap to preview color"
-                              style={{
-                                backgroundColor: item.hex_color || '#f8f9fa',
-                                color: item.hex_color ? '#000' : '#6c757d',
-                                cursor: 'pointer',
-                                boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.1)',
-                                fontSize: '0.75rem'
-                              }}
-                            >
-                              {item.color_name}
-                            </Badge>
-                            {item.hex_color && (
-                              <small className="text-muted">
-                                #{item.hex_color.replace('#', '')}
-                              </small>
-                            )}
-                          </div>
-                        )}
-                        
-                        {/* Fabric Badge */}
-                        {item.fabric_name && (
-                          <div className="d-flex align-items-center gap-2">
-                            <FaLayerGroup className="text-muted" size={12} />
-                            <Badge 
-                              bg="secondary" 
-                              text="white" 
-                              className="border"
-                              style={{ fontSize: '0.75rem' }}
-                              title={`Fabric: ${item.fabric_name} (${item.fabric_letter})`}
-                            >
-                              {item.fabric_name}
-                            </Badge>
-                            <small className="text-muted">
-                              {item.fabric_letter}
-                            </small>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </Col>
 
             <Col md={4}>
@@ -337,6 +262,99 @@ const DeliveryDashboard = ({ user, onLogout }) => {
               </Button>
             </Col>
           </Row>
+
+          {/* Order Items Section - Always Visible */}
+          {order.items && order.items.length > 0 && (
+            <div className="mt-3 p-3 bg-light rounded border">
+              <div className="d-flex align-items-center mb-3">
+                <FaBox className="text-primary me-2" size={16} />
+                <h6 className="mb-0 fw-bold text-primary">
+                  Items to Deliver ({order.total_items || order.items.length})
+                </h6>
+              </div>
+              
+              <div className="row">
+                {order.items.map((item, idx) => (
+                  <div key={idx} className="col-12 mb-2">
+                    <div className="p-3 bg-white rounded border border-primary">
+                      {/* Item Header */}
+                      <div className="d-flex justify-content-between align-items-start mb-2">
+                        <div className="flex-grow-1">
+                          <h6 className="mb-1 fw-bold text-primary">
+                            {item.quantity}x {item.product_name}
+                          </h6>
+                          <div className="text-muted small">
+                            Unit: R{item.unit_price} | Total: R{item.total_price}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Specifications Row */}
+                      <div className="row">
+                        {/* Color Specification */}
+                        {item.color_name && (
+                          <div className="col-6 mb-2">
+                            <div className="d-flex align-items-center gap-2">
+                              <FaPalette className="text-muted" size={12} />
+                              <span className="small text-muted">Color:</span>
+                              <Badge 
+                                bg="light" 
+                                text="dark" 
+                                className="border"
+                                onClick={() => openColorModal({
+                                  name: item.color_name,
+                                  code: item.color_code,
+                                  hex: item.hex_color
+                                })}
+                                role="button"
+                                title="Tap to preview color"
+                                style={{
+                                  backgroundColor: item.hex_color || '#f8f9fa',
+                                  color: item.hex_color ? '#000' : '#6c757d',
+                                  cursor: 'pointer',
+                                  boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.1)',
+                                  fontSize: '0.75rem'
+                                }}
+                              >
+                                {item.color_name}
+                              </Badge>
+                            </div>
+                            {item.hex_color && (
+                              <small className="text-muted ms-4">
+                                #{item.hex_color.replace('#', '')}
+                              </small>
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Fabric Specification */}
+                        {item.fabric_name && (
+                          <div className="col-6 mb-2">
+                            <div className="d-flex align-items-center gap-2">
+                              <FaLayerGroup className="text-muted" size={12} />
+                              <span className="small text-muted">Fabric:</span>
+                              <Badge 
+                                bg="secondary" 
+                                text="white" 
+                                className="border"
+                                style={{ fontSize: '0.75rem' }}
+                                title={`Fabric: ${item.fabric_name} (${item.fabric_letter})`}
+                              >
+                                {item.fabric_name}
+                              </Badge>
+                            </div>
+                            <small className="text-muted ms-4">
+                              Code: {item.fabric_letter}
+                            </small>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </Card.Body>
       </Card>
     );
