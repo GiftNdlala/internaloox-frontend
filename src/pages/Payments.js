@@ -576,9 +576,46 @@ const Payments = ({ user, userRole, onLogout }) => {
                         </div>
                       </td>
                       <td>
-                        <div className="fw-bold text-success fs-5">
-                          {formatCurrency(order.total_amount)}
+                        <div className="d-flex align-items-center">
+                          <FaMoneyBillWave className="text-success me-2" size={14} />
+                          <span className="fw-bold text-success">R{order.total_amount}</span>
+                          <span className="text-muted ms-2 small">
+                            {order.payment_status === 'fully_paid' ? '(Paid)' : '(Balance Due)'}
+                          </span>
                         </div>
+
+                        {/* Payment Transaction History */}
+                        {order.payment_transactions && order.payment_transactions.length > 0 && (
+                          <div className="mt-2 p-2 bg-light rounded border">
+                            <small className="text-muted fw-semibold d-block mb-2">
+                              <FaMoneyBillWave className="me-1" />
+                              Payment History:
+                            </small>
+                            <div className="space-y-1">
+                              {order.payment_transactions.slice(0, 3).map((tx, idx) => (
+                                <div key={idx} className="d-flex justify-content-between align-items-center p-1">
+                                  <span className="small text-muted">
+                                    {new Date(tx.created_at).toLocaleDateString()}
+                                  </span>
+                                  <span className="fw-semibold text-success">
+                                    {tx.transaction_amount ? `R${Number(tx.transaction_amount).toFixed(2)}` : 
+                                     tx.amount_delta ? `R${Number(tx.amount_delta).toFixed(2)}` : '-'}
+                                  </span>
+                                  <span className="small text-muted">
+                                    {tx.payment_method || 'Payment'}
+                                  </span>
+                                </div>
+                              ))}
+                              {order.payment_transactions.length > 3 && (
+                                <div className="text-center">
+                                  <small className="text-muted">
+                                    +{order.payment_transactions.length - 3} more transactions
+                                  </small>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </td>
                       <td>
                         <div className="text-info">

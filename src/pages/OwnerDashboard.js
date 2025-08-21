@@ -573,23 +573,15 @@ const OwnerDashboard = ({ user, onLogout }) => {
 
   const PaymentTransactionsTable = () => (
     <div className="oox-mobile-card">
-      <div className="oox-mobile-flex-between oox-mobile-mb-3">
-        <h3 style={{ margin: 0, color: '#1e293b', fontWeight: '700' }}>
-          <FaMoneyBillWave style={{ marginRight: '0.5rem', color: '#10b981' }} />
-          Recent Payment Transactions
-        </h3>
-        <div className="d-flex gap-2">
-          <button className="oox-mobile-btn" onClick={()=>loadTransactions(1, txPageSize, txFilters)}>Refresh</button>
-        </div>
-      </div>
       <div className="table-responsive">
-        <table className="table">
-          <thead>
+        <table className="table table-hover mb-0">
+          <thead className="bg-light">
             <tr>
               <th>Date</th>
               <th>Order #</th>
               <th>Actor</th>
               <th>Method</th>
+              <th>Transaction Amount</th>
               <th>Amount Δ</th>
               <th>New Balance</th>
               <th>Status</th>
@@ -603,10 +595,16 @@ const OwnerDashboard = ({ user, onLogout }) => {
                 <td>{tx.order_number || tx.order}</td>
                 <td>{tx.actor_user?.username || `${tx.actor_user?.first_name||''} ${tx.actor_user?.last_name||''}`}</td>
                 <td>{tx.payment_method}</td>
-                <td>{typeof tx.amount_delta === 'number' ? `R${tx.amount_delta.toFixed(2)}` : tx.amount_delta}</td>
+                <td className="fw-bold text-primary">
+                  {tx.transaction_amount != null && !Number.isNaN(Number(tx.transaction_amount)) ? 
+                    `R${Number(tx.transaction_amount).toFixed(2)}` : '-'}
+                </td>
+                <td className="text-muted">
+                  {typeof tx.amount_delta === 'number' ? `R${tx.amount_delta.toFixed(2)}` : tx.amount_delta}
+                </td>
                 <td>{typeof tx.new_balance === 'number' ? `R${tx.new_balance.toFixed(2)}` : tx.new_balance}</td>
                 <td>{tx.payment_status}</td>
-                <td>{tx.proof?.id ? <a href={(tx.proof.absolute_url || tx.proof.proof_image || (tx.proof.id && (window?.OOX_API_BASE || 'https://internaloox-1.onrender.com/api') + `/payment-proofs/${tx.proof.id}/file/`))} target="_blank" rel="noreferrer">View</a> : '-'}</td>
+                <td>{tx.proof?.id ? <a href={(tx.proof.absolute_url || tx.proof.proof_image || (tx.proof.id && (window?.OOX_API_BASE || 'https://internaloox-1.onrender.com/api') + `/payment-proofs/${tx.proof.id}/file/`))} target="_blank" rel="noopener noreferrer">View</a> : '-'}</td>
               </tr>
             ))}
             {transactions.length === 0 && (

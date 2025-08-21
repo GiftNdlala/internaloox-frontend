@@ -7,9 +7,9 @@ import {
   FaTruck, FaMapMarkerAlt, FaRoute, 
   FaCheckCircle, FaCamera, FaPhone, FaCompass,
   FaPlay, FaFlag, FaUser, FaMoneyBillWave,
-  FaClipboardCheck, FaWhatsapp
+  FaClipboardCheck, FaWhatsapp, FaBox, FaPalette, FaFabric
 } from 'react-icons/fa';
-import { getOrders } from '../components/api';
+import { getDeliveryOrdersDashboard } from '../components/api';
 
 const DeliveryDashboard = ({ user, onLogout }) => {
   const [orders, setOrders] = useState([]);
@@ -21,6 +21,9 @@ const DeliveryDashboard = ({ user, onLogout }) => {
   const [showPODModal, setShowPODModal] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeDelivery, setActiveDelivery] = useState(null);
+  const [dashboardData, setDashboardData] = useState(null);
+  const [showColorModal, setShowColorModal] = useState(false);
+  const [selectedColor, setSelectedColor] = useState(null);
 
   // Real-time clock
   useEffect(() => {
@@ -29,23 +32,34 @@ const DeliveryDashboard = ({ user, onLogout }) => {
   }, []);
 
   useEffect(() => {
-    fetchOrders();
+    fetchDeliveryData();
     // Auto-refresh every 30 seconds
-    const interval = setInterval(fetchOrders, 30000);
+    const interval = setInterval(fetchDeliveryData, 30000);
     return () => clearInterval(interval);
   }, []);
 
-  const fetchOrders = async () => {
+  const fetchDeliveryData = async () => {
     try {
       setLoading(true);
-      const ordersData = await getOrders();
-      const deliveryOrders = (ordersData.results || ordersData).filter(
-        order => order.order_status === 'out_for_delivery' ||
-                 order.order_status === 'delivered'
+      const data = await getDeliveryOrdersDashboard();
+      setDashboardData(data);
+      
+      // Combine all delivery orders for display
+      const allOrders = [
+        ...(data.delivery_stages?.out_for_delivery || []),
+        ...(data.delivery_stages?.delivered || []),
+        ...(data.my_deliveries || []),
+        ...(data.todays_deliveries || [])
+      ];
+      
+      // Remove duplicates based on order ID
+      const uniqueOrders = allOrders.filter((order, index, self) => 
+        index === self.findIndex(o => o.id === order.id)
       );
-      setOrders(deliveryOrders);
+      
+      setOrders(uniqueOrders);
     } catch (err) {
-      setError('Failed to load delivery orders');
+      setError('Failed to load delivery data');
       console.error(err);
     } finally {
       setLoading(false);
@@ -199,6 +213,82 @@ const DeliveryDashboard = ({ user, onLogout }) => {
                   {order.payment_status === 'fully_paid' ? '(Paid)' : '(Balance Due)'}
                 </span>
               </div>
+
+              {/* Order Items with Specifications for Delivery Verification */}
+              {order.items && order.items.length > 0 && (
+                <div className="mt-3 p-2 bg-light rounded border">
+                  <small className="text-muted fw-semibold d-block mb-2">
+                    <FaBox className="me-1" />
+                    Items to Deliver ({order.total_items || order.items.length}):
+                  </small>
+                  <div className="space-y-2">
+                    {order.items.map((item, idx) => (
+                      <div key={idx} className="p-2 bg-white rounded border-start border-3 border-primary">
+                        <div className="d-flex align-items-center flex-wrap gap-2 mb-1">
+                          <span className="fw-semibold text-primary">
+                            {item.quantity}x {item.product_name}
+                          </span>
+                          <span className="text-muted small">
+                            R{item.total_price}
+                          </span>
+                        </div>
+                        
+                        {/* Color Badge with Hex Color Display */}
+                        {item.color_name && (
+                          <div className="d-flex align-items-center gap-2 mb-1">
+                            <FaPalette className="text-muted" size={12} />
+                            <Badge 
+                              bg="light" 
+                              text="dark" 
+                              className="border"
+                              onClick={() => openColorModal({
+                                name: item.color_name,
+                                code: item.color_code,
+                                hex: item.hex_color
+                              })}
+                              role="button"
+                              title="Tap to preview color"
+                              style={{
+                                backgroundColor: item.hex_color || '#f8f9fa',
+                                color: item.hex_color ? '#000' : '#6c757d',
+                                cursor: 'pointer',
+                                boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.1)',
+                                fontSize: '0.75rem'
+                              }}
+                            >
+                              {item.color_name}
+                            </Badge>
+                            {item.hex_color && (
+                              <small className="text-muted">
+                                #{item.hex_color.replace('#', '')}
+                              </small>
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Fabric Badge */}
+                        {item.fabric_name && (
+                          <div className="d-flex align-items-center gap-2">
+                            <FaFabric className="text-muted" size={12} />
+                            <Badge 
+                              bg="secondary" 
+                              text="white" 
+                              className="border"
+                              style={{ fontSize: '0.75rem' }}
+                              title={`Fabric: ${item.fabric_name} (${item.fabric_letter})`}
+                            >
+                              {item.fabric_name}
+                            </Badge>
+                            <small className="text-muted">
+                              {item.fabric_letter}
+                            </small>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </Col>
 
             <Col md={4}>
@@ -469,6 +559,92 @@ const DeliveryDashboard = ({ user, onLogout }) => {
                 </Col>
               </Row>
 
+              {/* Order Items with Specifications for Delivery Verification */}
+              {selectedOrder.items && selectedOrder.items.length > 0 && (
+                <div className="mt-4">
+                  <h6 className="mb-3">
+                    <FaBox className="me-2" />
+                    Items to Deliver ({selectedOrder.total_items || selectedOrder.items.length}):
+                  </h6>
+                  <div className="row">
+                    {selectedOrder.items.map((item, idx) => (
+                      <div key={idx} className="col-md-6 mb-3">
+                        <Card className="h-100 border-primary">
+                          <Card.Body className="p-3">
+                            <div className="d-flex justify-content-between align-items-start mb-2">
+                              <h6 className="mb-0 text-primary fw-bold">
+                                {item.quantity}x {item.product_name}
+                              </h6>
+                              <Badge bg="primary" className="ms-2">
+                                R{item.total_price}
+                              </Badge>
+                            </div>
+                            
+                            {/* Color Specification */}
+                            {item.color_name && (
+                              <div className="mb-2">
+                                <div className="d-flex align-items-center gap-2">
+                                  <FaPalette className="text-muted" size={14} />
+                                  <span className="small text-muted">Color:</span>
+                                  <Badge 
+                                    bg="light" 
+                                    text="dark" 
+                                    className="border"
+                                    onClick={() => openColorModal({
+                                      name: item.color_name,
+                                      code: item.color_code,
+                                      hex: item.hex_color
+                                    })}
+                                    role="button"
+                                    title="Tap to preview color"
+                                    style={{
+                                      backgroundColor: item.hex_color || '#f8f9fa',
+                                      color: item.hex_color ? '#000' : '#6c757d',
+                                      cursor: 'pointer'
+                                    }}
+                                  >
+                                    {item.color_name}
+                                  </Badge>
+                                  {item.hex_color && (
+                                    <small className="text-muted">
+                                      #{item.hex_color.replace('#', '')}
+                                    </small>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Fabric Specification */}
+                            {item.fabric_name && (
+                              <div className="mb-2">
+                                <div className="d-flex align-items-center gap-2">
+                                  <FaFabric className="text-muted" size={14} />
+                                  <span className="small text-muted">Fabric:</span>
+                                  <Badge 
+                                    bg="secondary" 
+                                    text="white"
+                                    title={`Fabric: ${item.fabric_name} (${item.fabric_letter})`}
+                                  >
+                                    {item.fabric_name}
+                                  </Badge>
+                                  <small className="text-muted">
+                                    Code: {item.fabric_letter}
+                                  </small>
+                                </div>
+                              </div>
+                            )}
+                            
+                            <div className="text-muted small">
+                              Unit Price: R{item.unit_price}
+                            </div>
+                          </Card.Body>
+                        </Card>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="text-center">
                 <DeliveryButton
                   variant="primary"
@@ -529,13 +705,42 @@ const DeliveryDashboard = ({ user, onLogout }) => {
               setActiveDelivery(null);
               setSuccess('Delivery completed successfully!');
               setTimeout(() => setSuccess(null), 3000);
-              fetchOrders();
+              fetchDeliveryData();
             }}
           >
             <FaCheckCircle className="me-2" />
             Complete Delivery
           </Button>
         </Modal.Footer>
+      </Modal>
+
+      {/* Color Modal */}
+      <Modal show={showColorModal} onHide={() => setShowColorModal(false)} size="sm" centered>
+        <Modal.Header closeButton className="bg-info text-white">
+          <Modal.Title>
+            <FaPalette className="me-2" />
+            Color Preview: {selectedColor?.name}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="text-center py-4">
+          <div className="d-flex justify-content-center align-items-center" style={{
+            width: '100px',
+            height: '100px',
+            borderRadius: '50%',
+            backgroundColor: selectedColor?.hex || '#f8f9fa',
+            border: '1px solid #e0e0e0',
+            margin: '0 auto 10px'
+          }}>
+            {selectedColor?.hex && (
+              <span style={{ fontSize: '2rem', color: selectedColor.hex.includes('#') ? '#000' : '#6c757d' }}>
+                {selectedColor.hex.replace('#', '')}
+              </span>
+            )}
+          </div>
+          <p className="mb-1 text-muted">Color Name:</p>
+          <h5 className="mb-0">{selectedColor?.name}</h5>
+          <p className="text-muted small">Color Code: {selectedColor?.code}</p>
+        </Modal.Body>
       </Modal>
 
       {/* Custom Styles */}
