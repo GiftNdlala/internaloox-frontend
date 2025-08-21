@@ -7,7 +7,7 @@ import {
   FaTruck, FaMapMarkerAlt, FaRoute, 
   FaCheckCircle, FaCamera, FaPhone, FaCompass,
   FaPlay, FaFlag, FaUser, FaMoneyBillWave,
-  FaClipboardCheck, FaWhatsapp, FaBox, FaPalette, FaFabric
+  FaClipboardCheck, FaWhatsapp, FaBox, FaPalette, FaLayerGroup
 } from 'react-icons/fa';
 import { getDeliveryOrdersDashboard } from '../components/api';
 
@@ -269,7 +269,7 @@ const DeliveryDashboard = ({ user, onLogout }) => {
                         {/* Fabric Badge */}
                         {item.fabric_name && (
                           <div className="d-flex align-items-center gap-2">
-                            <FaFabric className="text-muted" size={12} />
+                            <FaLayerGroup className="text-muted" size={12} />
                             <Badge 
                               bg="secondary" 
                               text="white" 
@@ -618,7 +618,7 @@ const DeliveryDashboard = ({ user, onLogout }) => {
                             {item.fabric_name && (
                               <div className="mb-2">
                                 <div className="d-flex align-items-center gap-2">
-                                  <FaFabric className="text-muted" size={14} />
+                                  <FaLayerGroup className="text-muted" size={14} />
                                   <span className="small text-muted">Fabric:</span>
                                   <Badge 
                                     bg="secondary" 
