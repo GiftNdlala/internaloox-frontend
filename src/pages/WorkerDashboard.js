@@ -17,11 +17,14 @@ const WorkerDashboard = () => {
       // Use the proper worker dashboard endpoint that includes enhanced color/fabric data
       const d = await getWorkerDashboard();
       setData(d);
-      if (d?.summary?.currently_running?.time_elapsed) {
-        setElapsed(d.summary.currently_running.time_elapsed);
-      } else {
-        setElapsed(0);
-      }
+      const running = d?.active_task;
+      const tt = d?.time_tracking || {};
+      // Use server-provided total elapsed seconds for persistence across refresh/login
+      if (running && (typeof tt.task_total_elapsed_seconds === 'number')) {
+        setElapsed(tt.task_total_elapsed_seconds);
+      } else if (running && (typeof tt.current_elapsed_seconds === 'number')) {
+        setElapsed(tt.current_elapsed_seconds);
+      } else { setElapsed(0); }
     } catch (e) {
       setError(e?.message || 'Failed to load worker dashboard');
     } finally { setLoading(false); }
@@ -29,9 +32,9 @@ const WorkerDashboard = () => {
 
   useEffect(() => { load(); }, []);
 
-  // simple local timer when a task is running
+  // simple local ticker: increments elapsed locally while server persists real time
   useEffect(() => {
-    if (data?.summary?.currently_running) {
+    if (data?.active_task && data?.time_tracking?.is_timer_running) {
       if (!timerRef.current) {
         timerRef.current = setInterval(() => setElapsed(prev => prev + 1), 1000);
       }
@@ -41,7 +44,7 @@ const WorkerDashboard = () => {
       setElapsed(0);
     }
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [data?.summary?.currently_running]);
+  }, [data?.active_task, data?.time_tracking?.is_timer_running]);
 
   const fmtTime = (s) => {
     const h = Math.floor(s / 3600);
@@ -63,11 +66,11 @@ const WorkerDashboard = () => {
   if (loading) return <div className="text-center py-5"><Spinner animation="border"/></div>;
   if (error) return <Alert variant="danger">{error}</Alert>;
 
-  const summary = data?.summary || {};
+  const summary = data?.task_summary || data?.summary || {};
   const assignedTasks = data?.assigned_tasks || [];
   const activeTasks = data?.active_tasks || [];
   const recentCompleted = data?.completed_tasks || [];
-  const running = summary.currently_running || null;
+  const running = data?.active_task || null;
 
   return (
     <div className="worker-dashboard">

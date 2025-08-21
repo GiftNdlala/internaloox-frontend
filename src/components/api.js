@@ -254,6 +254,12 @@ export const getMyTasks = () => apiRequest('/tasks/tasks/my_tasks/');
 export const workerAction = (taskId, action, data = {}) => 
   apiRequest(`/tasks/tasks/${taskId}/worker_action/`, { method: 'POST', data: { action, ...data } });
 export const getTasksByOrder = () => apiRequest('/tasks/dashboard/tasks_by_order/');
+// QA approval queue for supervisors (completed tasks awaiting approval)
+export const getQAQueue = (params = {}) => {
+  const entries = Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== '');
+  const qs = entries.length ? `?${entries.map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&')}` : '';
+  return apiRequest(`/tasks/tasks/qa_queue/${qs}`);
+};
 
 // Supervisor Dashboard  
 export const getSupervisorDashboard = () => apiRequest('/tasks/dashboard/supervisor_dashboard/');

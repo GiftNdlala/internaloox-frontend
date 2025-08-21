@@ -13,7 +13,7 @@ import {
 import { 
   warehouseAPI, getWarehouseOrders, getTasksByOrder,
   getWorkerDashboard, getSupervisorDashboard, getUnreadNotifications,
-  getWarehouseDashboard, getLowStockAlerts
+  getWarehouseDashboard, getLowStockAlerts, getQAQueue, taskAction
 } from '../components/api';
 import TaskCard from '../components/warehouse/TaskCard';
 import OrderTaskAssignment from '../components/warehouse/OrderTaskAssignment';
@@ -51,6 +51,8 @@ const EnhancedWarehouseDashboard = ({ user: propUser, onLogout: propOnLogout }) 
   const [orders, setOrders] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [qaQueue, setQaQueue] = useState([]);
+  const [qaSubmittingId, setQaSubmittingId] = useState(null);
   const [inventoryData, setInventoryData] = useState(null);
   const [lowStockAlerts, setLowStockAlerts] = useState([]);
   
@@ -147,7 +149,7 @@ const EnhancedWarehouseDashboard = ({ user: propUser, onLogout: propOnLogout }) 
       if (user?.role === 'warehouse_worker') {
         await loadWorkerDashboard();
       } else if (canManageTasks()) {
-        await loadSupervisorDashboard();
+        await Promise.all([loadSupervisorDashboard(), loadQAQueue()]);
       }
       
       await loadNotifications();
@@ -184,6 +186,44 @@ const EnhancedWarehouseDashboard = ({ user: propUser, onLogout: propOnLogout }) 
       setTasks(supervisorData.tasks || []);
     } catch (err) {
       console.error('Failed to load supervisor dashboard:', err);
+    }
+  };
+
+  const loadQAQueue = async () => {
+    try {
+      const res = await getQAQueue();
+      const items = Array.isArray(res?.results) ? res.results : (Array.isArray(res) ? res : []);
+      setQaQueue(items);
+    } catch (err) {
+      console.error('Failed to load QA queue:', err);
+      setQaQueue([]);
+    }
+  };
+
+  const approveTaskInline = async (taskId) => {
+    setQaSubmittingId(taskId);
+    try {
+      await taskAction(taskId, 'approve');
+      await loadQAQueue();
+      setSuccess('Task approved');
+    } catch (e) {
+      setError(e?.message || 'Approval failed');
+    } finally {
+      setQaSubmittingId(null);
+    }
+  };
+
+  const rejectTaskInline = async (taskId) => {
+    const reason = window.prompt('Reason for rejection?') || '';
+    setQaSubmittingId(taskId);
+    try {
+      await taskAction(taskId, 'reject', { reason });
+      await loadQAQueue();
+      setSuccess('Task rejected');
+    } catch (e) {
+      setError(e?.message || 'Rejection failed');
+    } finally {
+      setQaSubmittingId(null);
     }
   };
 
@@ -458,23 +498,26 @@ const EnhancedWarehouseDashboard = ({ user: propUser, onLogout: propOnLogout }) 
         <Col md={12}>
           <Card className="shadow-sm">
             <Card.Header className="bg-warning text-dark d-flex justify-content-between align-items-center">
-              <h6 className="mb-0">Approval Queue</h6>
-              <Badge bg="dark">{orders.filter(o => o.order_status === 'pending').length}</Badge>
+              <h6 className="mb-0">Task Approval (QA)</h6>
+              <Badge bg="dark">{qaQueue.length}</Badge>
             </Card.Header>
-            <Card.Body style={{ maxHeight: '300px', overflowY: 'auto' }}>
-              {orders.filter(o => o.order_status === 'pending').slice(0, 8).map(order => (
-                <div key={order.id} className="d-flex justify-content-between align-items-center mb-2 p-2 rounded bg-light">
-                  <div>
-                    <div className="fw-bold">{order.order_number}</div>
-                    <small className="text-muted">{order.customer_name}</small>
+            <Card.Body style={{ maxHeight: '320px', overflowY: 'auto' }}>
+              {qaQueue.slice(0, 10).map(t => (
+                <div key={t.id} className="d-flex justify-content-between align-items-center mb-2 p-2 rounded bg-light">
+                  <div className="me-2">
+                    <div className="fw-bold">{t.title}</div>
+                    <small className="text-muted">Worker: {t.assigned_to || '-'}</small>
+                    {t.order && (<div className="small text-muted">Order: {t.order.order_number || t.order_number || '-'}</div>)}
                   </div>
-                  <Button size="sm" variant="outline-success" onClick={() => navigate(getOrdersPathForRole())}>
-                    Review
-                  </Button>
+                  <div className="d-flex gap-2">
+                    <Button size="sm" variant="success" disabled={qaSubmittingId===t.id} onClick={() => approveTaskInline(t.id)}>Approve</Button>
+                    <Button size="sm" variant="outline-danger" disabled={qaSubmittingId===t.id} onClick={() => rejectTaskInline(t.id)}>Reject</Button>
+                    <Button size="sm" variant="outline-secondary" onClick={() => navigate(getOrdersPathForRole())}>Review</Button>
+                  </div>
                 </div>
               ))}
-              {orders.filter(o => o.order_status === 'pending').length === 0 && (
-                <div className="text-center text-muted">No pending approvals</div>
+              {qaQueue.length === 0 && (
+                <div className="text-center text-muted">No tasks awaiting QA</div>
               )}
             </Card.Body>
           </Card>
