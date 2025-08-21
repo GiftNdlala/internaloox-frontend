@@ -66,6 +66,8 @@ async function apiRequest(endpoint, { method = 'GET', data, isForm = false } = {
 // Orders
 export const getOrders = () => apiRequest('/orders/');
 export const getOrder = (id) => apiRequest(`/orders/${id}/`);
+// Order items
+export const getOrderItems = (orderId) => apiRequest(`/order-items/?order=${orderId}`);
 export const createOrder = (data) => apiRequest('/orders/', { method: 'POST', data });
 export const updateOrder = (id, data) => apiRequest(`/orders/${id}/`, { method: 'PUT', data });
 export const deleteOrder = (id) => apiRequest(`/orders/${id}/`, { method: 'DELETE' });

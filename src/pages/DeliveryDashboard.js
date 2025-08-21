@@ -76,7 +76,7 @@ const DeliveryDashboard = ({ user, onLogout }) => {
         });
         
         // Fallback: Use regular orders endpoint and filter for delivery orders
-        const { getOrders, getOrder } = await import('../components/api');
+        const { getOrders, getOrder, getOrderItems } = await import('../components/api');
         const ordersData = await getOrders();
         const deliveryOrders = (ordersData.results || ordersData).filter(
           order => order.order_status === 'out_for_delivery' ||
@@ -89,11 +89,34 @@ const DeliveryDashboard = ({ user, onLogout }) => {
           deliveryOrders.map(async (o) => {
             try {
               const full = await getOrder(o.id);
+              let items = Array.isArray(full.items) ? full.items : [];
+              // If embedded items are empty, try fetching via order-items endpoint as a fallback
+              if (!items || items.length === 0) {
+                try {
+                  const itemsResp = await getOrderItems(o.id);
+                  const itemsArr = (Array.isArray(itemsResp?.results) ? itemsResp.results : (Array.isArray(itemsResp) ? itemsResp : []));
+                  items = itemsArr.map(it => ({
+                    id: it.id,
+                    product_name: it.product_name || it.product?.name || 'Item',
+                    quantity: it.quantity,
+                    unit_price: it.unit_price,
+                    fabric_letter: it.assigned_fabric_letter,
+                    color_code: it.assigned_color_code,
+                    fabric_name: it.fabric_name,
+                    color_name: it.color_name,
+                    hex_color: it.hex_color,
+                    total_price: it.total_price ?? (it.quantity && it.unit_price ? Number(it.quantity) * Number(it.unit_price) : undefined)
+                  }));
+                } catch (e) {
+                  console.warn('Fallback order-items fetch failed for order', o.id, e);
+                  items = [];
+                }
+              }
               return {
                 ...o,
                 ...full,
-                items: Array.isArray(full.items) ? full.items : [],
-                total_items: Array.isArray(full.items) ? full.items.length : 0,
+                items,
+                total_items: Array.isArray(items) ? items.length : 0,
                 customer: full.customer || o.customer,
               };
             } catch (e) {
