@@ -41,26 +41,54 @@ const DeliveryDashboard = ({ user, onLogout }) => {
   const fetchDeliveryData = async () => {
     try {
       setLoading(true);
-      const data = await getDeliveryOrdersDashboard();
-      setDashboardData(data);
       
-      // Combine all delivery orders for display
-      const allOrders = [
-        ...(data.delivery_stages?.out_for_delivery || []),
-        ...(data.delivery_stages?.delivered || []),
-        ...(data.my_deliveries || []),
-        ...(data.todays_deliveries || [])
-      ];
+      // Debug: Log the current user and API base
+      console.log('Current user:', user);
+      console.log('API Base:', process.env.REACT_APP_API_BASE || 'https://internaloox-1.onrender.com/api');
       
-      // Remove duplicates based on order ID
-      const uniqueOrders = allOrders.filter((order, index, self) => 
-        index === self.findIndex(o => o.id === order.id)
-      );
-      
-      setOrders(uniqueOrders);
+      // Try the delivery dashboard endpoint first
+      try {
+        console.log('Attempting to fetch delivery dashboard data...');
+        const data = await getDeliveryOrdersDashboard();
+        console.log('Delivery dashboard data received:', data);
+        setDashboardData(data);
+        
+        // Combine all delivery orders for display
+        const allOrders = [
+          ...(data.delivery_stages?.out_for_delivery || []),
+          ...(data.delivery_stages?.delivered || []),
+          ...(data.my_deliveries || []),
+          ...(data.todays_deliveries || [])
+        ];
+        
+        // Remove duplicates based on order ID
+        const uniqueOrders = allOrders.filter((order, index, self) => 
+          index === self.findIndex(o => o.id === order.id)
+        );
+        
+        setOrders(uniqueOrders);
+      } catch (deliveryError) {
+        console.warn('Delivery dashboard endpoint failed, falling back to regular orders:', deliveryError);
+        console.log('Error details:', {
+          status: deliveryError.status,
+          message: deliveryError.message,
+          data: deliveryError.data
+        });
+        
+        // Fallback: Use regular orders endpoint and filter for delivery orders
+        const { getOrders } = await import('../components/api');
+        const ordersData = await getOrders();
+        const deliveryOrders = (ordersData.results || ordersData).filter(
+          order => order.order_status === 'out_for_delivery' ||
+                   order.order_status === 'delivered' ||
+                   order.order_status === 'order_ready'
+        );
+        setOrders(deliveryOrders);
+        setDashboardData(null);
+      }
     } catch (err) {
       setError('Failed to load delivery data');
-      console.error(err);
+      console.error('Delivery data fetch error:', err);
     } finally {
       setLoading(false);
     }
