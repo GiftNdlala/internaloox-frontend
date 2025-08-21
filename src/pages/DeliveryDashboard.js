@@ -76,14 +76,34 @@ const DeliveryDashboard = ({ user, onLogout }) => {
         });
         
         // Fallback: Use regular orders endpoint and filter for delivery orders
-        const { getOrders } = await import('../components/api');
-      const ordersData = await getOrders();
-      const deliveryOrders = (ordersData.results || ordersData).filter(
-        order => order.order_status === 'out_for_delivery' ||
+        const { getOrders, getOrder } = await import('../components/api');
+        const ordersData = await getOrders();
+        const deliveryOrders = (ordersData.results || ordersData).filter(
+          order => order.order_status === 'out_for_delivery' ||
                    order.order_status === 'delivered' ||
                    order.order_status === 'order_ready'
-      );
-      setOrders(deliveryOrders);
+        );
+
+        // Enrich each order with full details (items, customer, etc.) in parallel
+        const enrichedOrders = await Promise.all(
+          deliveryOrders.map(async (o) => {
+            try {
+              const full = await getOrder(o.id);
+              return {
+                ...o,
+                ...full,
+                items: Array.isArray(full.items) ? full.items : [],
+                total_items: Array.isArray(full.items) ? full.items.length : 0,
+                customer: full.customer || o.customer,
+              };
+            } catch (e) {
+              console.warn('Failed to enrich order', o.id, e);
+              return { ...o, items: [], total_items: 0 };
+            }
+          })
+        );
+
+        setOrders(enrichedOrders);
         setDashboardData(null);
       }
     } catch (err) {
