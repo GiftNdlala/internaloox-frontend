@@ -77,13 +77,13 @@ const DeliveryDashboard = ({ user, onLogout }) => {
         
         // Fallback: Use regular orders endpoint and filter for delivery orders
         const { getOrders } = await import('../components/api');
-        const ordersData = await getOrders();
-        const deliveryOrders = (ordersData.results || ordersData).filter(
-          order => order.order_status === 'out_for_delivery' ||
+      const ordersData = await getOrders();
+      const deliveryOrders = (ordersData.results || ordersData).filter(
+        order => order.order_status === 'out_for_delivery' ||
                    order.order_status === 'delivered' ||
                    order.order_status === 'order_ready'
-        );
-        setOrders(deliveryOrders);
+      );
+      setOrders(deliveryOrders);
         setDashboardData(null);
       }
     } catch (err) {
@@ -286,7 +286,7 @@ const DeliveryDashboard = ({ user, onLogout }) => {
                 style={{ borderRadius: '10px' }}
               >
                 <FaMapMarkerAlt className="me-1" />
-                View Route
+                View Order
               </Button>
             </Col>
           </Row>
