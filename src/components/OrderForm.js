@@ -134,21 +134,11 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
   const handleAddProduct = () => {
     // Validate productForm
     const newErrors = {};
-    if (!productForm.productId) newErrors.productId = 'Product is required';
-    if (!productForm.unitPrice || parseFloat(productForm.unitPrice) <= 0) newErrors.unitPrice = 'Valid unit price is required';
-    if (!productForm.quantity || parseInt(productForm.quantity) <= 0) newErrors.quantity = 'Valid quantity is required';
-    
-    // Enhanced validation: Always require color/fabric if dropdowns are shown
-    if (showColor && !productForm.color) {
-      newErrors.color = 'Please select a color for this product';
-      console.log('Color validation failed: showColor =', showColor, 'selected color =', productForm.color);
-      console.log('Available colors:', allowedColors);
-    }
-    if (showFabric && !productForm.fabric) {
-      newErrors.fabric = 'Please select a fabric for this product';
-      console.log('Fabric validation failed: showFabric =', showFabric, 'selected fabric =', productForm.fabric);
-      console.log('Available fabrics:', allowedFabrics);
-    }
+    // Relaxed validation: allow adding product entries without forcing selection fields,
+    // but still guard against non-positive quantity or price
+    if (!productForm.productId) newErrors.productId = 'Please select a product';
+    if (!productForm.quantity || parseInt(productForm.quantity) <= 0) newErrors.quantity = 'Quantity must be at least 1';
+    if (!productForm.unitPrice || parseFloat(productForm.unitPrice) < 0) newErrors.unitPrice = 'Unit price cannot be negative';
     
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -493,7 +483,7 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">Product *</label>
-              <select name="productId" value={productForm.productId} onChange={handleProductChange} className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${errors.productId ? 'border-red-500' : 'border-gray-300'}`} required>
+              <select name="productId" value={productForm.productId} onChange={handleProductChange} className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${errors.productId ? 'border-red-500' : 'border-gray-300'}`}>
                 <option value="">Select a product</option>
                 {products.filter(p => p.available_for_order).map(product => (
                   <option key={product.id} value={product.id}>{product.name} ({product.model_code})</option>
@@ -521,7 +511,7 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
             {showColor && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Color *</label>
-                <select name="color" value={productForm.color} onChange={handleProductChange} className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${errors.color ? 'border-red-500' : 'border-gray-300'}`} required>
+                <select name="color" value={productForm.color} onChange={handleProductChange} className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${errors.color ? 'border-red-500' : 'border-gray-300'}`}>
                   <option value="">Select color</option>
                   {allowedColors.length > 0 ? allowedColors.map(c => (
                     <option key={c.id} value={c.id}>
@@ -546,7 +536,7 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
             {showFabric && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Fabric *</label>
-                <select name="fabric" value={productForm.fabric} onChange={handleProductChange} className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${errors.fabric ? 'border-red-500' : 'border-gray-300'}`} required>
+                <select name="fabric" value={productForm.fabric} onChange={handleProductChange} className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${errors.fabric ? 'border-red-500' : 'border-gray-300'}`}>
                   <option value="">Select fabric</option>
                   {allowedFabrics.length > 0 ? allowedFabrics.map(f => (
                     <option key={f.id} value={f.id}>
