@@ -138,7 +138,6 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
     // but still guard against non-positive quantity or price
     if (!productForm.productId) newErrors.productId = 'Please select a product';
     if (!productForm.quantity || parseInt(productForm.quantity) <= 0) newErrors.quantity = 'Quantity must be at least 1';
-    if (!productForm.unitPrice || parseFloat(productForm.unitPrice) < 0) newErrors.unitPrice = 'Unit price cannot be negative';
     
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -501,7 +500,7 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
               {errors.quantity && <p className="text-red-500 text-sm mt-1">{errors.quantity}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Unit Price (R) *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Unit Price (R)</label>
               <div className="relative">
                 <FaDollarSign className="absolute left-3 top-3 text-gray-400" />
                 <input type="number" name="unitPrice" value={productForm.unitPrice} onChange={handleProductChange} step="0.01" min="0" className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${errors.unitPrice ? 'border-red-500' : 'border-gray-300'}`} placeholder="0.00" />
