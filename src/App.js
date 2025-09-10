@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, useParams, useNavigate } from 'react-router-dom';
-import { Container, Alert } from 'react-bootstrap';
+import { Container, Alert, Modal } from 'react-bootstrap';
 import AdminDashboard from './components/admin/AdminDashboard';
 import EnhancedWarehouseDashboard from './pages/EnhancedWarehouseDashboard';
 import DeliveryDashboard from './pages/DeliveryDashboard';
@@ -80,9 +80,14 @@ function App() {
     const { orderId } = useParams();
     const navigate = useNavigate();
     return (
-      <div className="p-3">
-        <OrderDetail orderId={orderId} onBack={() => navigate(-1)} />
-      </div>
+      <Modal show onHide={() => navigate(-1)} size="lg" backdrop="static" keyboard>
+        <Modal.Header closeButton>
+          <Modal.Title>Order Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <OrderDetail orderId={orderId} onBack={() => navigate(-1)} />
+        </Modal.Body>
+      </Modal>
     );
   };
 
