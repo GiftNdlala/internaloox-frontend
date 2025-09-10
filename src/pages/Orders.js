@@ -14,6 +14,7 @@ import {
   createOrder, updateOrder, deleteOrder, advanceOrderWorkflow
 } from '../components/api';
 import OrderForm from '../components/OrderForm';
+import OrderDetail from '../components/OrderDetail';
 import SharedHeader from '../components/SharedHeader';
 import UniversalSidebar from '../components/UniversalSidebar';
 import { getOrderManagementData, patchOrderStatus } from '../components/api';
@@ -41,6 +42,8 @@ const Orders = ({ user, userRole, onLogout }) => {
   const [statusOptions, setStatusOptions] = useState({ order_statuses: [], production_statuses: [] });
   const [showAddressPrompt, setShowAddressPrompt] = useState(false);
   const [addressInput, setAddressInput] = useState('');
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewOrderId, setViewOrderId] = useState(null);
 
   // Filter and search states
   const [searchTerm, setSearchTerm] = useState('');
@@ -211,6 +214,11 @@ const Orders = ({ user, userRole, onLogout }) => {
   const handleDeleteOrder = (order) => {
     setSelectedOrder(order);
     setShowDeleteModal(true);
+  };
+
+  const handleViewOrder = (order) => {
+    setViewOrderId(order.id);
+    setShowViewModal(true);
   };
 
   const confirmDelete = async () => {
@@ -491,7 +499,7 @@ const Orders = ({ user, userRole, onLogout }) => {
                       <td className="text-end">
                         <ButtonGroup size="sm">
                           <OverlayTrigger placement="top" overlay={<Tooltip>View</Tooltip>}>
-                            <Button variant="outline-secondary"><FaEye /></Button>
+                            <Button variant="outline-secondary" onClick={() => handleViewOrder(order)}><FaEye /></Button>
                           </OverlayTrigger>
                           {canEdit && (
                             <OverlayTrigger placement="top" overlay={<Tooltip>Edit</Tooltip>}>
@@ -595,6 +603,18 @@ const Orders = ({ user, userRole, onLogout }) => {
               </Modal.Footer>
             </Modal>
           )}
+
+          {/* View Order Details Modal */}
+          <Modal show={showViewModal} onHide={() => setShowViewModal(false)} size="lg">
+            <Modal.Header closeButton>
+              <Modal.Title>Order Details</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              {viewOrderId && (
+                <OrderDetail orderId={viewOrderId} onBack={() => setShowViewModal(false)} />
+              )}
+            </Modal.Body>
+          </Modal>
 
           {/* Status Change Modal */}
           {canEdit && (

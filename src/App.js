@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate, useParams, useNavigate } from 'react-router-dom';
 import { Container, Alert } from 'react-bootstrap';
 import AdminDashboard from './components/admin/AdminDashboard';
 import EnhancedWarehouseDashboard from './pages/EnhancedWarehouseDashboard';
@@ -28,6 +28,7 @@ import ApprovalQueue from './pages/ApprovalQueue';
 import OrdersWorkflowDashboard from './pages/OrdersWorkflowDashboard';
 import AdminWarehouseOverview from './pages/AdminWarehouseOverview';
 import OwnerPaymentTransactions from './pages/OwnerPaymentTransactions';
+import OrderDetail from './components/OrderDetail';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -73,6 +74,16 @@ function App() {
     }
     
     return children;
+  };
+
+  const OrderDetailsScreen = () => {
+    const { orderId } = useParams();
+    const navigate = useNavigate();
+    return (
+      <div className="p-3">
+        <OrderDetail orderId={orderId} onBack={() => navigate(-1)} />
+      </div>
+    );
   };
 
   // Map roles to their default dashboard route
@@ -214,6 +225,16 @@ function App() {
                   <DeliveryDashboard user={user} onLogout={handleLogout} />
                 </ProtectedRoute>
               } 
+            />
+
+            {/* Global Order Details Route */}
+            <Route
+              path="/orders/:orderId/details"
+              element={
+                <ProtectedRoute>
+                  <OrderDetailsScreen />
+                </ProtectedRoute>
+              }
             />
 
             {/* Orders Routes - Shared across roles */}
