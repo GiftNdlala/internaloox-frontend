@@ -97,6 +97,15 @@ const WorkerDashboard = () => {
                   <div className="text-muted">Elapsed: {fmtTime(elapsed)}</div>
                   {running.order_item_details && (
                     <div className="mt-2">
+                      {running.order_item_details.product_image_url && (
+                        <div className="mb-2">
+                          <img
+                            src={running.order_item_details.product_image_url}
+                            alt={running.order_item_details.product_name || 'Product'}
+                            style={{ maxHeight: 80, maxWidth: 120, objectFit: 'cover', borderRadius: 6, border: '1px solid #eee' }}
+                          />
+                        </div>
+                      )}
                       <div className="small text-muted">
                         <strong>Product:</strong> {running.order_item_details.product_name}
                         {running.order_item_details.quantity && ` (Qty: ${running.order_item_details.quantity})`}
@@ -144,6 +153,15 @@ const WorkerDashboard = () => {
                     <small className="text-muted">Due: {t.due_date ? new Date(t.due_date).toLocaleString() : '-'}</small>
                     {t.order_item_details && (
                       <div className="mt-1">
+                        {t.order_item_details.product_image_url && (
+                          <div className="mb-1">
+                            <img
+                              src={t.order_item_details.product_image_url}
+                              alt={t.order_item_details.product_name || 'Product'}
+                              style={{ maxHeight: 60, maxWidth: 100, objectFit: 'cover', borderRadius: 4, border: '1px solid #eee' }}
+                            />
+                          </div>
+                        )}
                         <div className="small text-muted">
                           {t.order_item_details.product_name}
                           {t.order_item_details.quantity && ` (Qty: ${t.order_item_details.quantity})`}
@@ -197,6 +215,15 @@ const WorkerDashboard = () => {
                     <small className="text-muted">Status: {t.status}</small>
                     {t.order_item_details && (
                       <div className="mt-1">
+                        {t.order_item_details.product_image_url && (
+                          <div className="mb-1">
+                            <img
+                              src={t.order_item_details.product_image_url}
+                              alt={t.order_item_details.product_name || 'Product'}
+                              style={{ maxHeight: 60, maxWidth: 100, objectFit: 'cover', borderRadius: 4, border: '1px solid #eee' }}
+                            />
+                          </div>
+                        )}
                         <div className="small text-muted">
                           {t.order_item_details.product_name}
                           {t.order_item_details.quantity && ` (Qty: ${t.order_item_details.quantity})`}
@@ -248,6 +275,15 @@ const WorkerDashboard = () => {
                     <small className="text-muted">Completed</small>
                     {t.order_item_details && (
                       <div className="mt-1">
+                        {t.order_item_details.product_image_url && (
+                          <div className="mb-1">
+                            <img
+                              src={t.order_item_details.product_image_url}
+                              alt={t.order_item_details.product_name || 'Product'}
+                              style={{ maxHeight: 60, maxWidth: 100, objectFit: 'cover', borderRadius: 4, border: '1px solid #eee' }}
+                            />
+                          </div>
+                        )}
                         <div className="small text-muted">
                           {t.order_item_details.product_name}
                           {t.order_item_details.quantity && ` (Qty: ${t.order_item_details.quantity})`}

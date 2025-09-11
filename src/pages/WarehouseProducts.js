@@ -17,6 +17,7 @@ import {
   FaTag, FaTags, FaImage
 } from 'react-icons/fa';
 import ProductColorFabricManager from '../components/warehouse/ProductColorFabricManager';
+import SecureImage from '../components/SecureImage';
 import { confirmDelete } from '../utils/confirm';
 import { useNotify } from '../hooks/useNotify';
 
@@ -405,9 +406,9 @@ const WarehouseProducts = () => {
             <Card.Body className="d-flex flex-column">
               {/* Product image */}
               <div className="mb-3 d-flex justify-content-center align-items-center" style={{ height: 180, background: '#f8f9fa', borderRadius: 8, overflow: 'hidden', border: '1px solid #eee' }}>
-                {product.main_image_url || product.main_image_present ? (
-                  <img
-                    src={product.main_image_url || getProductMainImageUrl(product.id)}
+                {product.main_image_present || product.main_image_url ? (
+                  <SecureImage
+                    srcUrl={product.main_image_url || getProductMainImageUrl(product.id)}
                     alt={product.name}
                     style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
                   />
