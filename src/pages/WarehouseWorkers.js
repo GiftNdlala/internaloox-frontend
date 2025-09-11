@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Button, Card, Table, Spinner, Alert, Form, Modal, InputGroup } from 'react-bootstrap';
 import { FaUserPlus, FaTrash, FaEdit, FaSearch, FaHistory } from 'react-icons/fa';
 import { getUsersQuery, getWarehouseWorkersList, createUser, updateUser, deleteUser, getTasksByWorker } from '../components/api';
+import { confirmDelete } from '../utils/confirm';
+import { useNotify } from '../hooks/useNotify';
 
 const ROLE_OPTIONS = ['warehouse_worker', 'warehouse', 'delivery', 'admin', 'owner'];
 
@@ -75,13 +77,17 @@ const WarehouseWorkers = ({ currentUser }) => {
     setShowEdit(true);
   };
 
+  const { notifySuccess, notifyError } = useNotify();
+
   const handleDelete = async (u) => {
-    if (!window.confirm(`Delete user ${u.username}?`)) return;
+    const ok = await confirmDelete(`Delete user ${u.username}?`);
+    if (!ok) return;
     try {
       await deleteUser(u.id);
       await loadUsers();
+      notifySuccess('User deleted');
     } catch (e) {
-      alert(e?.message || 'Failed to delete user');
+      notifyError(e?.message || 'Failed to delete user');
     }
   };
 

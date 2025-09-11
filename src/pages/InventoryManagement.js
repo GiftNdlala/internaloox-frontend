@@ -9,6 +9,8 @@ import {
   deleteMaterial,
   getMaterialCategories
 } from '../components/api';
+import { confirmDelete } from '../utils/confirm';
+import { useNotify } from '../hooks/useNotify';
 // Removed SharedHeader to rely on WarehouseLayout navbar
 
 const defaultMaterial = {
@@ -74,13 +76,17 @@ const InventoryManagement = () => {
     setShowForm(true);
   };
 
+  const { notifySuccess, notifyError } = useNotify();
+
   const handleDelete = async (material) => {
-    if (!window.confirm(`Delete material "${material.name}"?`)) return;
+    const ok = await confirmDelete(`Delete material "${material.name}"?`);
+    if (!ok) return;
     try {
       await deleteMaterial(material.id);
       setMaterials((prev) => prev.filter((m) => m.id !== material.id));
+      notifySuccess('Material deleted');
     } catch (e) {
-      alert('Delete failed: ' + (e?.message || 'Unknown error'));
+      notifyError('Delete failed: ' + (e?.message || 'Unknown error'));
     }
   };
 

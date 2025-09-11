@@ -13,6 +13,8 @@ import {
 } from 'react-icons/fa';
 import UniversalSidebar from '../components/UniversalSidebar';
 import { getDashboardStats, getOrders, getUsers, createUser, updateUser, deleteUser, getPaymentTransactions } from '../components/api';
+import { confirmDelete } from '../utils/confirm';
+import { useNotify } from '../hooks/useNotify';
 import '../styles/MobileFirst.css';
 
 const OwnerDashboard = ({ user, onLogout }) => {
@@ -176,15 +178,19 @@ const OwnerDashboard = ({ user, onLogout }) => {
     }
   };
 
+  const { notifySuccess, notifyError } = useNotify();
+
   const handleDeleteUser = async (userId) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
-      try {
-        await deleteUser(userId);
-        setSuccess('User deleted successfully!');
-        fetchDashboardData();
-      } catch (err) {
-        setError('Failed to delete user');
-      }
+    const ok = await confirmDelete('Are you sure you want to delete this user?');
+    if (!ok) return;
+    try {
+      await deleteUser(userId);
+      setSuccess('User deleted successfully!');
+      notifySuccess('User deleted');
+      fetchDashboardData();
+    } catch (err) {
+      setError('Failed to delete user');
+      notifyError('Failed to delete user');
     }
   };
 

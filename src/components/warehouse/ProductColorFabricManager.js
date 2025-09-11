@@ -18,6 +18,8 @@ import {
   // Reference creates (use these for new entries)
   createColorReference, createFabricReference
 } from '../api';
+import { confirmDelete } from '../../utils/confirm';
+import { useNotify } from '../../hooks/useNotify';
 
 const ProductColorFabricManager = ({ 
   show, 
@@ -128,6 +130,7 @@ const ProductColorFabricManager = ({
   };
 
   // Color Management Functions
+  const { notifySuccess, notifyError } = useNotify();
   const handleAddColor = async () => {
     if (!newColor.name.trim()) {
       setError('Color name is required');
@@ -178,7 +181,8 @@ const ProductColorFabricManager = ({
   };
 
   const handleDeleteColor = async (colorId) => {
-    if (!window.confirm('Are you sure you want to delete this color?')) return;
+    const ok = await confirmDelete('Are you sure you want to delete this color?');
+    if (!ok) return;
 
     try {
       setError('');
@@ -191,8 +195,11 @@ const ProductColorFabricManager = ({
       setAllColors(allColors.filter(c => c.id !== colorId));
       setProductColors(productColors.filter(c => c.id !== colorId));
       setSuccess('Color deleted successfully!');
+      notifySuccess('Color deleted');
     } catch (err) {
-      setError('Failed to delete color: ' + (err?.message || 'Unknown error'));
+      const msg = 'Failed to delete color: ' + (err?.message || 'Unknown error');
+      setError(msg);
+      notifyError(msg);
     }
   };
 
@@ -256,7 +263,8 @@ const ProductColorFabricManager = ({
   };
 
   const handleDeleteFabric = async (fabricId) => {
-    if (!window.confirm('Are you sure you want to delete this fabric?')) return;
+    const ok = await confirmDelete('Are you sure you want to delete this fabric?');
+    if (!ok) return;
 
     try {
       setError('');
@@ -269,8 +277,11 @@ const ProductColorFabricManager = ({
       setAllFabrics(allFabrics.filter(f => f.id !== fabricId));
       setProductFabrics(productFabrics.filter(f => f.id !== fabricId));
       setSuccess('Fabric deleted successfully!');
+      notifySuccess('Fabric deleted');
     } catch (err) {
-      setError('Failed to delete fabric: ' + (err?.message || 'Unknown error'));
+      const msg = 'Failed to delete fabric: ' + (err?.message || 'Unknown error');
+      setError(msg);
+      notifyError(msg);
     }
   };
 
