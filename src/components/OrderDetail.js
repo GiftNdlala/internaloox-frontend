@@ -24,7 +24,13 @@ const OrderDetail = ({ orderId, onBack }) => {
       
       setOrder(data);
       setForm({
-        customer: { ...data.customer },
+        customer: {
+          ...(data.customer || {}),
+          name: (data.customer && data.customer.name) || data.customer_name || '',
+          phone: (data.customer && data.customer.phone) || '',
+          email: (data.customer && data.customer.email) || '',
+          address: (data.customer && data.customer.address) || ''
+        },
         expected_delivery_date: data.expected_delivery_date,
         admin_notes: data.admin_notes,
         deposit_amount: data.deposit_amount,
@@ -57,7 +63,13 @@ const OrderDetail = ({ orderId, onBack }) => {
   const handleCancel = () => {
     setEditMode(false);
     setForm({
-      customer: { ...order.customer },
+      customer: {
+        ...(order.customer || {}),
+        name: (order.customer && order.customer.name) || order.customer_name || '',
+        phone: (order.customer && order.customer.phone) || '',
+        email: (order.customer && order.customer.email) || '',
+        address: (order.customer && order.customer.address) || ''
+      },
       expected_delivery_date: order.expected_delivery_date,
       admin_notes: order.admin_notes,
       deposit_amount: order.deposit_amount,
@@ -144,9 +156,9 @@ const OrderDetail = ({ orderId, onBack }) => {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  // Keep showing loading until order is fetched; reference lists can load lazily
+  if (loading || !order) return <div>Loading...</div>;
   if (error) return <Alert variant="danger">{error}</Alert>;
-  if (!order) return null;
 
   return (
     <div className="order-detail">
@@ -259,7 +271,7 @@ const OrderDetail = ({ orderId, onBack }) => {
       ) : (
         <>
           <h4>Order Details</h4>
-          <p><strong>Customer:</strong> {order.customer.name} ({order.customer.phone})<br/>{order.customer.email}<br/>{order.customer.address}</p>
+          <p><strong>Customer:</strong> {(order.customer && order.customer.name) || order.customer_name || '—'} ({(order.customer && order.customer.phone) || '—'})<br/>{(order.customer && order.customer.email) || '—'}<br/>{(order.customer && order.customer.address) || '—'}</p>
           <p><strong>Expected Delivery:</strong> {order.expected_delivery_date}</p>
           <p><strong>Status:</strong> {order.order_status}</p>
           <p><strong>Admin Notes:</strong> {order.admin_notes}</p>
@@ -279,12 +291,12 @@ const OrderDetail = ({ orderId, onBack }) => {
               {order.items && order.items.length > 0 ? (
                 order.items.map((item, idx) => (
                   <tr key={idx}>
-                    <td>{products.find(p => String(p.id) === String(item.product))?.name || item.product_name}</td>
+                    <td>{(products.find(p => String(p.id) === String(item.product))?.name) || item.product_name || '—'}</td>
                     <td>{item.product_description}</td>
                     <td>{item.quantity}</td>
                     <td>R{item.unit_price}</td>
-                    <td>{colors.find(c => String(c.id) === String(item.color))?.name || ''}</td>
-                    <td>{fabrics.find(f => String(f.id) === String(item.fabric))?.name || ''}</td>
+                    <td>{(colors.find(c => String(c.id) === String(item.color))?.name) || item.color_name || ''}</td>
+                    <td>{(fabrics.find(f => String(f.id) === String(item.fabric))?.name) || item.fabric_name || ''}</td>
                   </tr>
                 ))
               ) : (

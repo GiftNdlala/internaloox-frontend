@@ -31,6 +31,7 @@ const Orders = ({ user, userRole, onLogout }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [creating, setCreating] = useState(false);
 
   // Modal states
   const [showOrderModal, setShowOrderModal] = useState(false);
@@ -203,6 +204,8 @@ const Orders = ({ user, userRole, onLogout }) => {
   const handleCreateOrder = () => {
     if (!canCreate) return;
     setEditingOrder(null);
+    setError('');
+    setSuccess('');
     setShowOrderModal(true);
   };
 
@@ -233,6 +236,9 @@ const Orders = ({ user, userRole, onLogout }) => {
   };
 
   const handleOrderSubmit = async (orderData) => {
+    setError('');
+    setSuccess('');
+    setCreating(true);
     try {
       if (editingOrder) {
         await updateOrder(editingOrder.id, orderData);
@@ -240,32 +246,51 @@ const Orders = ({ user, userRole, onLogout }) => {
       } else {
         // Step 1: create order
         const { popFile, popNotes, ...pureOrder } = orderData;
-        const created = await createOrder(pureOrder);
+        let created;
+        try {
+          created = await createOrder(pureOrder);
+        } catch (e) {
+          throw new Error(e?.message || 'Order creation failed');
+        }
         const newOrderId = created?.id;
+        if (!newOrderId) throw new Error('Order creation failed (missing ID)');
+
         // Step 2: upload PoP (PDF/Image) for EFT
-        if (!newOrderId) throw new Error('Order creation failed');
         if (!popFile) throw new Error('Payment proof required for EFT payments');
         const form = new FormData();
         form.append('order', newOrderId);
         if (pureOrder?.deposit_amount) form.append('amount', pureOrder.deposit_amount);
         form.append('payment_type', 'deposit');
-        form.append('proof_image', popFile); // backend accepts PDFs and images
+        form.append('proof_image', popFile);
         if (popNotes) form.append('notes', popNotes);
-        const proof = await createPayment(form, true);
-        if (!proof?.id) throw new Error('Failed to upload payment proof');
+
+        let proof;
+        try {
+          proof = await createPayment(form, true);
+        } catch (e) {
+          throw new Error(e?.message || 'Failed to upload payment proof');
+        }
+        if (!proof?.id) throw new Error('Failed to upload payment proof (no id)');
+
         // Step 3: commit deposit via update_payment with proof_id
-        await updateOrderPayment(newOrderId, {
-          payment_method: 'EFT',
-          payment_status: 'deposit_paid',
-          deposit_amount: Number(pureOrder?.deposit_amount) || 0,
-          proof_id: proof.id
-        });
-        setSuccess('Order created and deposit recorded');
+        try {
+          await updateOrderPayment(newOrderId, {
+            payment_method: 'EFT',
+            payment_status: (Number(pureOrder?.deposit_amount) >= Number(pureOrder?.total_amount)) ? 'fully_paid' : 'deposit_paid',
+            deposit_amount: Number(pureOrder?.deposit_amount) || 0,
+            proof_id: proof.id
+          });
+        } catch (e) {
+          throw new Error(e?.message || 'Failed to record payment');
+        }
+        setSuccess('Order created and payment recorded');
       }
       setShowOrderModal(false);
       fetchAllData();
     } catch (err) {
-      setError('Failed to save order: ' + err.message);
+      setError(err?.message ? String(err.message) : 'Failed to save order');
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -415,6 +440,16 @@ const Orders = ({ user, userRole, onLogout }) => {
     <Container fluid className="py-3">
       <Card className="mb-3">
         <Card.Body>
+          {!!error && (
+            <Alert variant="danger" dismissible onClose={() => setError('')} className="mb-3">
+              {error}
+            </Alert>
+          )}
+          {!!success && (
+            <Alert variant="success" dismissible onClose={() => setSuccess('')} className="mb-3">
+              {success}
+            </Alert>
+          )}
           <Row className="g-2 align-items-center">
             <Col md={4}>
               <InputGroup>

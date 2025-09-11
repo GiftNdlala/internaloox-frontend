@@ -48,6 +48,8 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
   const [fabrics, setFabrics] = useState([]);
   // Error state
   const [errors, setErrors] = useState({});
+  const [formError, setFormError] = useState('');
+  const [formSuccess, setFormSuccess] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -285,7 +287,10 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateOrder()) return;
+    if (!validateOrder()) {
+      setFormError('Please correct the highlighted errors before submitting.');
+      return;
+    }
     setSubmitting(true);
     try {
       // 1. Try to find existing customer by name+phone
@@ -393,16 +398,14 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
         return;
       }
       
-      onSubmit(payload);
+      await onSubmit(payload);
+      setFormSuccess(isEdit ? 'Order updated successfully.' : 'Order created successfully.');
+      setFormError('');
     } catch (err) {
-      setErrors(prev => ({ ...prev, customer: 'Failed to create or find customer: ' + (err.message || 'Unknown error') }));
+      setFormError(err?.message || 'Failed to submit order');
     } finally {
       setSubmitting(false);
-            if (!payload.items_data || !Array.isArray(payload.items_data) || payload.items_data.length === 0) {
-              console.error('ERROR: items_data is missing or empty in the payload!', payload.items_data);
-            } else {
-              console.log('DEBUG: items_data included in payload:', payload.items_data);
-            }
+      // Debug logging can be added here if needed
     }
   };
 
@@ -421,6 +424,17 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
             </button>
           </div>
         </div>
+        {/* Inline Alerts */}
+        {formError && (
+          <div className="px-6 pt-3">
+            <div className="alert alert-danger py-2 px-3">{formError}</div>
+          </div>
+        )}
+        {formSuccess && (
+          <div className="px-6 pt-3">
+            <div className="alert alert-success py-2 px-3">{formSuccess}</div>
+          </div>
+        )}
         {/* Customer Info */}
           <div className="bg-blue-50 p-4 rounded-lg">
             <h3 className="text-lg font-semibold text-blue-900 mb-4 flex items-center">
