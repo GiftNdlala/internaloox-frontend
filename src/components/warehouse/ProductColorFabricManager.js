@@ -10,9 +10,13 @@ import {
   FaCheck, FaExclamationTriangle
 } from 'react-icons/fa';
 import { 
-  getColors, getFabrics, createColor, createFabric, 
+  getColors, getFabrics,
+  // Legacy CRUD (kept for editing/deleting non-reference rows)
   updateColor, updateFabric, deleteColor, deleteFabric,
-  updateWarehouseProduct
+  // Product update
+  updateWarehouseProduct,
+  // Reference creates (use these for new entries)
+  createColorReference, createFabricReference
 } from '../api';
 
 const ProductColorFabricManager = ({ 
@@ -132,11 +136,24 @@ const ProductColorFabricManager = ({
 
     try {
       setError('');
-      const createdColor = await createColor(newColor);
+      // Create in reference table
+      const created = await createColorReference({
+        color_name: newColor.name,
+        color_code: newColor.code,
+        hex_color: newColor.hex_value
+      });
+      // Normalize to local shape and mark as reference
+      const createdColor = {
+        id: created?.id,
+        name: created?.color_name || newColor.name,
+        code: created?.color_code || newColor.code,
+        hex_value: created?.hex_color || newColor.hex_value,
+        is_reference: true,
+      };
       setAllColors([...allColors, createdColor]);
       setNewColor({ name: '', code: '', hex_value: '#000000' });
       setShowAddColorForm(false);
-      setSuccess('Color added successfully!');
+      setSuccess('Color added to reference list successfully!');
     } catch (err) {
       setError('Failed to add color: ' + (err?.message || 'Unknown error'));
     }
@@ -198,11 +215,24 @@ const ProductColorFabricManager = ({
 
     try {
       setError('');
-      const createdFabric = await createFabric(newFabric);
+      // Create in reference table
+      const created = await createFabricReference({
+        fabric_name: newFabric.name,
+        fabric_letter: newFabric.code,
+        fabric_type: newFabric.description
+      });
+      // Normalize to local shape and mark as reference
+      const createdFabric = {
+        id: created?.id,
+        name: created?.fabric_name || newFabric.name,
+        code: created?.fabric_letter || newFabric.code,
+        description: created?.fabric_type || newFabric.description,
+        is_reference: true,
+      };
       setAllFabrics([...allFabrics, createdFabric]);
       setNewFabric({ name: '', code: '', description: '' });
       setShowAddFabricForm(false);
-      setSuccess('Fabric added successfully!');
+      setSuccess('Fabric added to reference list successfully!');
     } catch (err) {
       setError('Failed to add fabric: ' + (err?.message || 'Unknown error'));
     }
