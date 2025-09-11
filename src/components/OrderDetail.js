@@ -50,9 +50,9 @@ const OrderDetail = ({ orderId, onBack }) => {
 
   useEffect(() => {
     fetchData();
-    getProducts().then(setProducts);
-    getColors().then(setColors);
-    getFabrics().then(setFabrics);
+    getProducts().then((data) => setProducts((data && (data.results || data)) || []));
+    getColors().then((data) => setColors((data && (data.results || data)) || []));
+    getFabrics().then((data) => setFabrics((data && (data.results || data)) || []));
   }, [fetchData]);
 
   const handleEdit = () => {
@@ -289,16 +289,24 @@ const OrderDetail = ({ orderId, onBack }) => {
             </thead>
             <tbody>
               {order.items && order.items.length > 0 ? (
-                order.items.map((item, idx) => (
+                order.items.map((item, idx) => {
+                  const productsList = Array.isArray(products) ? products : (products && products.results) || [];
+                  const colorsList = Array.isArray(colors) ? colors : (colors && colors.results) || [];
+                  const fabricsList = Array.isArray(fabrics) ? fabrics : (fabrics && fabrics.results) || [];
+                  const productName = (productsList.find(p => String(p.id) === String(item.product))?.name) || item.product_name || '—';
+                  const colorName = (colorsList.find(c => String(c.id) === String(item.color))?.name) || item.color_name || '';
+                  const fabricName = (fabricsList.find(f => String(f.id) === String(item.fabric))?.name) || item.fabric_name || '';
+                  return (
                   <tr key={idx}>
-                    <td>{(products.find(p => String(p.id) === String(item.product))?.name) || item.product_name || '—'}</td>
+                    <td>{productName}</td>
                     <td>{item.product_description}</td>
                     <td>{item.quantity}</td>
                     <td>R{item.unit_price}</td>
-                    <td>{(colors.find(c => String(c.id) === String(item.color))?.name) || item.color_name || ''}</td>
-                    <td>{(fabrics.find(f => String(f.id) === String(item.fabric))?.name) || item.fabric_name || ''}</td>
+                    <td>{colorName}</td>
+                    <td>{fabricName}</td>
                   </tr>
-                ))
+                  );
+                })
               ) : (
                 <tr>
                   <td colSpan="6" className="text-center text-muted">No products in this order</td>
