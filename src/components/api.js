@@ -203,6 +203,15 @@ export const createWarehouseProduct = (data) => apiRequest('/products/', { metho
 export const updateWarehouseProduct = (id, data) => apiRequest(`/products/${id}/`, { method: 'PUT', data });
 export const deleteWarehouseProduct = (id) => apiRequest(`/products/${id}/`, { method: 'DELETE' });
 
+// Product main image helpers (backend under /orders/products/<id>/)
+export const getProductMainImageUrl = (productId) => `${API_BASE}/orders/products/${productId}/main_image/`;
+export const uploadProductMainImage = (productId, file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return apiRequest(`/orders/products/${productId}/upload_main_image/`, { method: 'POST', data: formData, isForm: true });
+};
+export const deleteProductMainImage = (productId) => apiRequest(`/orders/products/${productId}/main_image/`, { method: 'DELETE' });
+
 // Color and Fabric Management
 export const createColor = (data) => apiRequest('/colors/', { method: 'POST', data });
 export const updateColor = (id, data) => apiRequest(`/colors/${id}/`, { method: 'PUT', data });

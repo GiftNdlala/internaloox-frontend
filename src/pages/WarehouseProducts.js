@@ -7,13 +7,14 @@ import {
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { 
   getWarehouseProducts, getColors, getFabrics, createWarehouseProduct, 
-  updateWarehouseProduct, deleteWarehouseProduct, getInventoryDashboard 
+  updateWarehouseProduct, deleteWarehouseProduct, getInventoryDashboard,
+  getProductMainImageUrl, uploadProductMainImage, deleteProductMainImage
 } from '../components/api';
 import { 
   FaPlus, FaSearch, FaEdit, FaTrash, FaEye, FaPalette, 
   FaCouch, FaBoxes, FaLayerGroup, FaCog, FaChartBar,
   FaSync, FaFilter, FaSortAmountDown, FaSortAmountUp,
-  FaTag, FaTags
+  FaTag, FaTags, FaImage
 } from 'react-icons/fa';
 import ProductColorFabricManager from '../components/warehouse/ProductColorFabricManager';
 import { confirmDelete } from '../utils/confirm';
@@ -322,6 +323,32 @@ const WarehouseProducts = () => {
     setShowColorFabricModal(true);
   };
 
+  // Image upload handlers
+  const handleMainImageChange = async (product, file) => {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      notifyError('Image exceeds 5 MB limit');
+      return;
+    }
+    try {
+      await uploadProductMainImage(product.id, file);
+      notifySuccess('Main image uploaded');
+      await loadData();
+    } catch (e) {
+      notifyError(e?.message || 'Upload failed');
+    }
+  };
+
+  const handleDeleteMainImage = async (product) => {
+    try {
+      await deleteProductMainImage(product.id);
+      notifySuccess('Main image deleted');
+      await loadData();
+    } catch (e) {
+      notifyError(e?.message || 'Delete failed');
+    }
+  };
+
   const handleProductUpdate = (updatedProduct) => {
     setProducts(products.map(p => p.id === updatedProduct.id ? updatedProduct : p));
     setSuccess('Product updated successfully!');
@@ -376,6 +403,21 @@ const WarehouseProducts = () => {
         <Col key={product.id} lg={4} md={6} className="mb-4">
           <Card className="h-100 shadow-sm product-card" style={{ transition: 'all 0.3s ease' }}>
             <Card.Body className="d-flex flex-column">
+              {/* Product image */}
+              <div className="mb-3 d-flex justify-content-center align-items-center" style={{ height: 180, background: '#f8f9fa', borderRadius: 8, overflow: 'hidden', border: '1px solid #eee' }}>
+                {product.main_image_url || product.main_image_present ? (
+                  <img
+                    src={product.main_image_url || getProductMainImageUrl(product.id)}
+                    alt={product.name}
+                    style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
+                  />
+                ) : (
+                  <div className="text-muted small d-flex flex-column align-items-center">
+                    <FaImage className="mb-2" size={28} />
+                    No image
+                  </div>
+                )}
+              </div>
               <div className="d-flex justify-content-between align-items-start mb-3">
                 <div>
                   <h5 className="card-title mb-1">{product.name}</h5>
@@ -416,6 +458,19 @@ const WarehouseProducts = () => {
                   </OverlayTrigger>
                   {canManageProducts() && (
                     <>
+                      <OverlayTrigger overlay={<Tooltip>Upload Main Image</Tooltip>}>
+                        <Button as="label" variant="outline-success">
+                          <FaImage />
+                          <input type="file" accept="image/*" hidden onChange={(e) => handleMainImageChange(product, e.target.files?.[0])} />
+                        </Button>
+                      </OverlayTrigger>
+                      {(product.main_image_url || product.main_image_present) && (
+                        <OverlayTrigger overlay={<Tooltip>Delete Image</Tooltip>}>
+                          <Button variant="outline-danger" onClick={() => handleDeleteMainImage(product)}>
+                            <FaTrash />
+                          </Button>
+                        </OverlayTrigger>
+                      )}
                       <OverlayTrigger overlay={<Tooltip>Manage Colors & Fabrics</Tooltip>}>
                         <Button variant="outline-info" onClick={() => handleManageColorsFabrics(product)}>
                           <FaPalette />
