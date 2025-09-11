@@ -16,6 +16,8 @@ import {
   FaTag, FaTags
 } from 'react-icons/fa';
 import ProductColorFabricManager from '../components/warehouse/ProductColorFabricManager';
+import { confirmDelete } from '../utils/confirm';
+import { useNotify } from '../hooks/useNotify';
 
 const WarehouseProducts = () => {
   const navigate = useNavigate();
@@ -226,6 +228,7 @@ const WarehouseProducts = () => {
   }, [products, query, filterBy, sortBy, sortOrder]);
 
   // Handle product actions
+  const { notifySuccess, notifyError } = useNotify();
   const handleViewProduct = (product) => {
     setSelectedProduct(product);
     setModalMode('view');
@@ -294,15 +297,19 @@ const WarehouseProducts = () => {
       setError('You do not have permission to delete products.');
       return;
     }
-    
-    if (window.confirm(`Are you sure you want to delete "${product.name}"?`)) {
-      try {
-        await deleteWarehouseProduct(product.id);
-        setSuccess('Product deleted successfully!');
-        loadData();
-      } catch (err) {
-        setError('Failed to delete product: ' + (err?.message || 'Unknown error'));
-      }
+
+    const ok = await confirmDelete(`Are you sure you want to delete "${product.name}"?`);
+    if (!ok) return;
+
+    try {
+      await deleteWarehouseProduct(product.id);
+      setSuccess('Product deleted successfully!');
+      notifySuccess('Product deleted');
+      loadData();
+    } catch (err) {
+      const msg = 'Failed to delete product: ' + (err?.message || 'Unknown error');
+      setError(msg);
+      notifyError(msg);
     }
   };
 

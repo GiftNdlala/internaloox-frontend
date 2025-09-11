@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Button, Card, Table, Spinner, Alert, Form, Modal, InputGroup } from 'react-bootstrap';
 import { FaUserPlus, FaTrash, FaEdit, FaSearch, FaHistory } from 'react-icons/fa';
 import { getUsersQuery, getWarehouseWorkersList, createUser, updateUser, deleteUser, getTasksByWorker } from '../components/api';
+import { useNotify } from '../hooks/useNotify';
+import { confirmDelete } from '../utils/confirm';
 
 const ROLE_OPTIONS = ['warehouse_worker', 'warehouse', 'delivery', 'admin', 'owner'];
 
@@ -15,6 +17,7 @@ function getAllowedCreateRoles(currentRole) {
 
 const WarehouseWorkers = ({ currentUser }) => {
   const [loading, setLoading] = useState(true);
+  const { notifyError, notifySuccess } = useNotify();
   const [error, setError] = useState('');
   const [users, setUsers] = useState([]);
   const [query, setQuery] = useState('');
@@ -76,12 +79,14 @@ const WarehouseWorkers = ({ currentUser }) => {
   };
 
   const handleDelete = async (u) => {
-    if (!window.confirm(`Delete user ${u.username}?`)) return;
+    const ok = await confirmDelete(`Delete user ${u.username}?`);
+    if (!ok) return;
     try {
       await deleteUser(u.id);
       await loadUsers();
+      notifySuccess('User deleted');
     } catch (e) {
-      alert(e?.message || 'Failed to delete user');
+      notifyError(e?.message || 'Failed to delete user');
     }
   };
 
@@ -89,16 +94,16 @@ const WarehouseWorkers = ({ currentUser }) => {
     // Frontend confirm-password validation when setting/updating password
     if (!editingUser) {
       if (!form.password || form.password.length < 4) {
-        alert('Password is required (min 4 chars)');
+        notifyError('Password is required (min 4 chars)');
         return;
       }
       if (form.password !== form.confirmPassword) {
-        alert('Passwords do not match');
+        notifyError('Passwords do not match');
         return;
       }
     } else if (form.password) {
       if (form.password !== form.confirmPassword) {
-        alert('Passwords do not match');
+        notifyError('Passwords do not match');
         return;
       }
     }
@@ -123,7 +128,7 @@ const WarehouseWorkers = ({ currentUser }) => {
       setShowEdit(false);
       await loadUsers();
     } catch (e) {
-      alert(e?.message || 'Save failed');
+      notifyError(e?.message || 'Save failed');
     } finally { setSubmitting(false); }
   };
 

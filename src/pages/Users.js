@@ -9,6 +9,8 @@ import {
 import { 
   getUsers, createUser, updateUser, deleteUser
 } from '../components/api';
+import { confirmDelete } from '../utils/confirm';
+import { useNotify } from '../hooks/useNotify';
 import SharedHeader from '../components/SharedHeader';
 import EnhancedPageHeader from '../components/EnhancedPageHeader';
 import UniversalSidebar from '../components/UniversalSidebar';
@@ -52,6 +54,7 @@ const Users = ({ user, userRole, onLogout }) => {
   const [usersPerPage] = useState(10);
 
   // Load data on component mount
+  const { notifySuccess, notifyError } = useNotify();
   useEffect(() => {
     fetchUsers();
     // Auto-refresh disabled for better user experience
@@ -65,7 +68,9 @@ const Users = ({ user, userRole, onLogout }) => {
       setUsers(usersData.results || usersData);
       setError('');
     } catch (err) {
-      setError('Failed to load users: ' + err.message);
+      const msg = 'Failed to load users: ' + err.message;
+      setError(msg);
+      notifyError(msg);
     } finally {
       setLoading(false);
     }
@@ -202,10 +207,13 @@ const Users = ({ user, userRole, onLogout }) => {
     try {
       await deleteUser(selectedUser.id);
       setSuccess('User deleted successfully');
+      notifySuccess('User deleted');
       setShowDeleteModal(false);
       fetchUsers();
     } catch (err) {
-      setError('Failed to delete user: ' + err.message);
+      const msg = 'Failed to delete user: ' + err.message;
+      setError(msg);
+      notifyError(msg);
     }
   };
 
@@ -249,13 +257,17 @@ const Users = ({ user, userRole, onLogout }) => {
       if (editingUser) {
         await updateUser(editingUser.id, submitData);
         setSuccess('User updated successfully');
+        notifySuccess('User updated');
       } else {
         const response = await createUser(submitData);
         // Handle new API response format
         if (response.success && response.user) {
-          setSuccess(response.message || `User "${response.user.username}" created successfully`);
+          const msg = response.message || `User "${response.user.username}" created successfully`;
+          setSuccess(msg);
+          notifySuccess(msg);
         } else {
           setSuccess('User created successfully');
+          notifySuccess('User created successfully');
         }
       }
       
@@ -265,7 +277,9 @@ const Users = ({ user, userRole, onLogout }) => {
       setError(null);
       fetchUsers();
     } catch (err) {
-      setError('Failed to save user: ' + err.message);
+      const msg = 'Failed to save user: ' + err.message;
+      setError(msg);
+      notifyError(msg);
     }
   };
 

@@ -11,12 +11,14 @@ import {
   getMaterials, quickStockEntry, getStockLocations,
   getMaterialCategories 
 } from '../api';
+import { useNotify } from '../../hooks/useNotify';
 
 const StockEntry = ({ 
   show, 
   onHide, 
   onStockUpdated 
 }) => {
+  const { notifySuccess, notifyError } = useNotify();
   const [loading, setLoading] = useState(false);
   const [materials, setMaterials] = useState([]);
   const [locations, setLocations] = useState([]);
@@ -58,7 +60,9 @@ const StockEntry = ({
       setLocations(locationsData);
       setCategories(categoriesData);
     } catch (err) {
-      setError('Failed to load stock entry data: ' + err.message);
+      const msg = 'Failed to load stock entry data: ' + err.message;
+      setError(msg);
+      notifyError(msg);
     } finally {
       setLoading(false);
     }
@@ -107,7 +111,9 @@ const StockEntry = ({
     e.preventDefault();
     
     if (quickEntries.length === 0) {
-      setError('Please add at least one stock entry');
+      const msg = 'Please add at least one stock entry';
+      setError(msg);
+      notifyError(msg);
       return;
     }
 
@@ -131,7 +137,9 @@ const StockEntry = ({
 
       await quickStockEntry(stockData);
       
-      setSuccess(`Successfully processed ${quickEntries.length} stock entries`);
+      const successMsg = `Successfully processed ${quickEntries.length} stock entries`;
+      setSuccess(successMsg);
+      notifySuccess(successMsg);
       setQuickEntries([]);
       
       // Notify parent component
@@ -142,7 +150,9 @@ const StockEntry = ({
         onHide();
       }, 2000);
     } catch (err) {
-      setError('Failed to process stock entries: ' + err.message);
+      const msg = 'Failed to process stock entries: ' + err.message;
+      setError(msg);
+      notifyError(msg);
     } finally {
       setLoading(false);
     }

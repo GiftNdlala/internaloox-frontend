@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Card, Button, Spinner, Alert, Row, Col, Badge, ListGroup } from 'react-bootstrap';
+import { useNotify } from '../hooks/useNotify';
 import { getMyTasks, getWorkerDashboard, workerAction } from '../components/api';
 
 const WorkerDashboard = () => {
@@ -9,6 +10,8 @@ const WorkerDashboard = () => {
   const [submitting, setSubmitting] = useState(false);
   const timerRef = useRef(null);
   const [elapsed, setElapsed] = useState(0);
+
+  const { notifyError, notifySuccess } = useNotify();
 
   const load = async () => {
     setLoading(true);
@@ -26,7 +29,9 @@ const WorkerDashboard = () => {
         setElapsed(tt.current_elapsed_seconds);
       } else { setElapsed(0); }
     } catch (e) {
-      setError(e?.message || 'Failed to load worker dashboard');
+      const msg = e?.message || 'Failed to load worker dashboard';
+      setError(msg);
+      notifyError(msg);
     } finally { setLoading(false); }
   };
 
@@ -58,8 +63,9 @@ const WorkerDashboard = () => {
     try {
       await workerAction(taskId, action, extra);
       await load();
+      notifySuccess(`Task ${action}ed`);
     } catch (e) {
-      alert(e?.message || 'Action failed');
+      notifyError(e?.message || 'Action failed');
     } finally { setSubmitting(false); }
   };
 
