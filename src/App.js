@@ -123,6 +123,8 @@ function App() {
     <WarehouseProvider>
       <Router>
         <div className="App">
+          {/* Global Toaster for cross-app notifications */}
+          {require('./components/GlobalToaster') && React.createElement(require('./components/GlobalToaster').default)}
           {error && (
             <Alert 
               variant="danger" 
