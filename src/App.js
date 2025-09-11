@@ -57,11 +57,19 @@ function App() {
     localStorage.setItem('oox_user', JSON.stringify(userData));
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      const { confirmLogout } = require('./utils/confirm');
+      const { useNotify } = require('./hooks/useNotify');
+      // Access hook in a non-component isn't allowed; fall back to toast event
+      const ok = await confirmLogout('Are you sure you want to log out?');
+      if (!ok) return;
+    } catch {}
     setUser(null);
     setError(null);
     localStorage.removeItem('oox_user');
     localStorage.removeItem('oox_token');
+    try { window.dispatchEvent(new CustomEvent('oox:toast', { detail: { type: 'success', message: 'Logged out' } })); } catch {}
   };
 
   const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -123,8 +131,9 @@ function App() {
     <WarehouseProvider>
       <Router>
         <div className="App">
-          {/* Global Toaster for cross-app notifications */}
+          {/* Global UI helpers */}
           {require('./components/GlobalToaster') && React.createElement(require('./components/GlobalToaster').default)}
+          {require('./components/GlobalConfirm') && React.createElement(require('./components/GlobalConfirm').default)}
           {error && (
             <Alert 
               variant="danger" 

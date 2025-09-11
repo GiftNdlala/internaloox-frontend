@@ -16,6 +16,8 @@ import {
   updateTask, deleteTask, getTasksByStatus, assignWorkerToTask,
   getTaskTemplates, bulkAssignTasks, getOrderDetailsForTasks
 } from '../api';
+import { confirmDelete } from '../../utils/confirm';
+import { useNotify } from '../../hooks/useNotify';
 
 const TaskManagement = ({ user }) => {
   // State Management
@@ -213,16 +215,22 @@ const TaskManagement = ({ user }) => {
     }
   };
 
+  const { notifySuccess, notifyError } = useNotify();
+
   const handleDeleteTask = async (taskId) => {
-    if (!window.confirm('Are you sure you want to delete this task?')) return;
+    const ok = await confirmDelete('Are you sure you want to delete this task?');
+    if (!ok) return;
 
     setLoading(true);
     try {
       await deleteTask(taskId);
       setSuccess('Task deleted successfully!');
+      notifySuccess('Task deleted');
       refreshTasks();
     } catch (err) {
-      setError('Failed to delete task: ' + err.message);
+      const msg = 'Failed to delete task: ' + err.message;
+      setError(msg);
+      notifyError(msg);
     } finally {
       setLoading(false);
     }
