@@ -480,7 +480,7 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-2xl">
           <div className="flex items-center justify-between">
@@ -493,7 +493,8 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
             </button>
           </div>
         </div>
-        <div className="px-6 pb-4 overflow-y-auto flex-1">
+        {/* Body */}
+        <div className="px-6 pb-4">
         {/* Inline Alerts */}
         {formError && (
           <div className="px-6 pt-3">
