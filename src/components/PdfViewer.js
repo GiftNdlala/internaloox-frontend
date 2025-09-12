@@ -3,19 +3,15 @@ import { Document, Page, pdfjs } from 'react-pdf';
 import { Spinner, Button, ButtonGroup } from 'react-bootstrap';
 import { FaSearchPlus, FaSearchMinus, FaDownload } from 'react-icons/fa';
 
-// Configure pdfjs worker with multiple fallback options
+// Configure pdfjs worker to a locally bundled worker for reliability
 const setupPdfWorker = () => {
   try {
-    // Prefer jsDelivr which reliably hosts pdfjs-dist versions
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+    // Bundle worker from node_modules (esm mjs build)
+    // CRA/Webpack can resolve this URL during build
+    // eslint-disable-next-line no-new
+    pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url);
   } catch (error) {
-    try {
-      // Fallback to unpkg
-      pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
-    } catch (fallbackError) {
-      // Last resort: cdnjs
-      pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/build/pdf.worker.min.js`;
-    }
+    // As an absolute last resort, keep default (may show fake worker warning)
   }
 };
 
