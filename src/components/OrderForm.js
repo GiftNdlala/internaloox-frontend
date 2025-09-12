@@ -480,7 +480,7 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-2xl">
           <div className="flex items-center justify-between">
@@ -492,6 +492,8 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
               <FaTimes className="text-gray-500" />
             </button>
           </div>
+        </div>
+        <div className="px-6 pb-4 overflow-y-auto flex-1">
         {/* Inline Alerts */}
         {formError && (
           <div className="px-6 pt-3">
@@ -574,10 +576,18 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
               </label>
             </div>
             <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Search Product</label>
+              <input
+                type="text"
+                value={productSearch}
+                onChange={(e)=>setProductSearch(e.target.value)}
+                placeholder="Type to filter products..."
+                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 mb-2"
+              />
               <label className="block text-sm font-medium text-gray-700 mb-2">Product *</label>
               <select name="productId" value={productForm.productId} onChange={handleProductChange} className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${errors.productId ? 'border-red-500' : 'border-gray-300'}`}>
                 <option value="">Select a product</option>
-                {products.filter(p => p.available_for_order).map(product => (
+                {filteredProducts.map(product => (
                   <option key={product.id} value={product.id}>{product.name} ({product.model_code})</option>
                 ))}
               </select>
