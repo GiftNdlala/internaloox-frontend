@@ -6,15 +6,15 @@ import { FaSearchPlus, FaSearchMinus, FaDownload } from 'react-icons/fa';
 // Configure pdfjs worker with multiple fallback options
 const setupPdfWorker = () => {
   try {
-    // Try CDNJS first (correct build path)
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/build/pdf.worker.min.js`;
+    // Prefer jsDelivr which reliably hosts pdfjs-dist versions
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
   } catch (error) {
     try {
       // Fallback to unpkg
       pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
     } catch (fallbackError) {
-      // Final fallback to jsdelivr
-      pdfjs.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+      // Last resort: cdnjs
+      pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/build/pdf.worker.min.js`;
     }
   }
 };
