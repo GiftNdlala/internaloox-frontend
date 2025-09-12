@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Spinner, Button, ButtonGroup } from 'react-bootstrap';
 import { FaSearchPlus, FaSearchMinus, FaDownload } from 'react-icons/fa';
@@ -6,8 +6,8 @@ import { FaSearchPlus, FaSearchMinus, FaDownload } from 'react-icons/fa';
 // Configure pdfjs worker with multiple fallback options
 const setupPdfWorker = () => {
   try {
-    // Try CDN first
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+    // Try CDNJS first (correct build path)
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/build/pdf.worker.min.js`;
   } catch (error) {
     try {
       // Fallback to unpkg
@@ -28,6 +28,15 @@ const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
 	const [scale, setScale] = useState(1.1);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState('');
+  const containerRef = useRef(null);
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  useEffect(() => {
+    const update = () => setContainerWidth(containerRef.current ? containerRef.current.clientWidth : 0);
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
 
 	useEffect(() => {
 		setPageNumber(1);
@@ -62,8 +71,14 @@ const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
 		}
 	};
 
+	const isImage = (() => {
+		const name = fileName || '';
+		const testUrl = url || '';
+		return /(\.png|\.jpe?g|\.webp|\.gif)$/i.test(name) || /(\.png|\.jpe?g|\.webp|\.gif)$/i.test(testUrl);
+	})();
+
 	return (
-		<div>
+		<div ref={containerRef}>
 			<div className="d-flex justify-content-between align-items-center mb-3">
 				<div className="small text-muted">{fileName}</div>
 				<ButtonGroup>
@@ -86,7 +101,12 @@ const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
 						</Button>
 					</div>
 				)}
-				{!error && (
+				{!error && isImage && (
+					<div className="d-flex justify-content-center py-3">
+						<img src={url} alt={fileName} style={{ maxWidth: '100%', maxHeight: `calc(${height} - 40px)`, objectFit: 'contain' }} />
+					</div>
+				)}
+				{!error && !isImage && (
 					<Document 
 						file={url} 
 						onLoadSuccess={onDocumentLoadSuccess} 
@@ -97,7 +117,7 @@ const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
 						<div className="d-flex flex-column align-items-center py-3">
 							{Array.from(new Array(numPages || 0), (el, index) => (
 								<div key={`page_${index + 1}`} className="mb-3" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.1)', background: 'white' }}>
-									<Page pageNumber={index + 1} scale={scale} renderTextLayer={false} renderAnnotationLayer={false} />
+									<Page pageNumber={index + 1} width={Math.max(320, Math.min(1200, Math.floor((containerWidth || 800) * scale)))} renderTextLayer={false} renderAnnotationLayer={false} />
 								</div>
 							))}
 						</div>
