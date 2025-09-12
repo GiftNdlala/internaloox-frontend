@@ -39,9 +39,21 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
     unitPrice: '',
     color: '',
     fabric: '',
+    // Discount inputs (per-item)
+    discountPercent: '', // 0-100
+    discountAmount: '',  // final per-unit price after discount
   });
   // Cart of products for this order
   const [orderItems, setOrderItems] = useState([]);
+  // Discount & Lay-Buy toggles
+  const [enableItemDiscounts, setEnableItemDiscounts] = useState(false);
+  const [enableOrderDiscount, setEnableOrderDiscount] = useState(false);
+  const [orderDiscountType, setOrderDiscountType] = useState('percent'); // 'percent' | 'amount'
+  const [orderDiscountPercent, setOrderDiscountPercent] = useState('');
+  const [orderDiscountAmount, setOrderDiscountAmount] = useState(''); // final total after discount
+  const [requestLaybuyAfterCreate, setRequestLaybuyAfterCreate] = useState(false);
+  const [laybuyTerms, setLaybuyTerms] = useState('60_days');
+  const [laybuyDueDate, setLaybuyDueDate] = useState('');
   // Option lists
   const [products, setProducts] = useState([]);
   const [colors, setColors] = useState([]);
@@ -128,6 +140,8 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
       update.unitPrice = selected ? (selected.unit_price ?? selected.base_price ?? selected.price ?? '') : '';
       update.color = '';
       update.fabric = '';
+      update.discountPercent = '';
+      update.discountAmount = '';
     }
     setProductForm(prev => ({ ...prev, ...update }));
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
@@ -176,7 +190,7 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
       return newItems;
     });
     
-    setProductForm({ productId: '', productName: '', productDescription: '', quantity: 1, unitPrice: '', color: '', fabric: '' });
+    setProductForm({ productId: '', productName: '', productDescription: '', quantity: 1, unitPrice: '', color: '', fabric: '', discountPercent: '', discountAmount: '' });
   };
   // Remove product from orderItems
   const handleRemoveProduct = (idx) => {
@@ -184,8 +198,31 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
   };
   // Edit product in orderItems (optional, for now just remove+re-add)
 
-  // Calculate totals
-  const calculateTotal = () => orderItems.reduce((sum, item) => sum + (parseFloat(item.unitPrice) || 0) * (parseInt(item.quantity) || 0), 0).toFixed(2);
+  // Calculate totals with discounts
+  const computeItemUnitFinal = (item) => {
+    const base = parseFloat(item.unitPrice) || 0;
+    const pct = parseFloat(item.discountPercent);
+    const finalAmt = item.discountAmount !== '' ? parseFloat(item.discountAmount) : NaN;
+    if (enableItemDiscounts) {
+      if (!isNaN(finalAmt)) return Math.max(0, finalAmt);
+      if (!isNaN(pct)) return Math.max(0, base * (1 - Math.min(Math.max(pct, 0), 100) / 100));
+    }
+    return base;
+  };
+  const calculateSubtotal = () => orderItems.reduce((sum, item) => sum + computeItemUnitFinal(item) * (parseInt(item.quantity) || 0), 0);
+  const calculateTotal = () => {
+    const subtotal = calculateSubtotal();
+    if (enableOrderDiscount) {
+      if (orderDiscountType === 'percent') {
+        const pct = Math.min(Math.max(parseFloat(orderDiscountPercent) || 0, 0), 100);
+        return (subtotal * (1 - pct / 100)).toFixed(2);
+      } else if (orderDiscountType === 'amount') {
+        const finalTotal = parseFloat(orderDiscountAmount);
+        if (!isNaN(finalTotal) && finalTotal >= 0) return finalTotal.toFixed(2);
+      }
+    }
+    return subtotal.toFixed(2);
+  };
   const calculateBalance = () => {
     const total = parseFloat(calculateTotal());
     const deposit = parseFloat(customerData.depositAmount) || 0;
@@ -354,6 +391,9 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
         production_status: 'not_started', // Add missing production_status field
         total_amount: totalAmount,
         balance_amount: balanceAmount,
+        // Order-level discounts
+        ...(enableOrderDiscount && orderDiscountType === 'percent' ? { order_discount_percent: Math.min(Math.max(parseFloat(orderDiscountPercent) || 0, 0), 100) } : {}),
+        ...(enableOrderDiscount && orderDiscountType === 'amount' ? { order_discount_amount: (orderDiscountAmount || '').toString() } : {}),
         items_data: orderItems.map((item, index) => {
           const colorObj = colors.find(c => String(c.id) === String(item.color));
           const fabricObj = fabrics.find(f => String(f.id) === String(item.fabric));
@@ -379,6 +419,16 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
             assigned_fabric_letter: fabricObj?.fabric_letter || fabricObj?.code || null,
             product_description: item.productDescription || '',
           };
+          // Item-level discounts: choose one
+          if (enableItemDiscounts) {
+            const pct = parseFloat(item.discountPercent);
+            const amt = item.discountAmount !== '' ? item.discountAmount : '';
+            if (amt !== '') {
+              processedItem.discount_amount = amt.toString();
+            } else if (!isNaN(pct)) {
+              processedItem.discount_percent = Math.min(Math.max(pct, 0), 100);
+            }
+          }
           
           console.log(`Item ${index} - Processed:`, processedItem);
           return processedItem;
@@ -398,6 +448,14 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
         return;
       }
       
+      // Provide lay-buy request metadata to parent handler
+      if (requestLaybuyAfterCreate) {
+        payload.__laybuy_request__ = {
+          deposit_amount: depositAmount.toFixed(2),
+          laybuy_terms: laybuyTerms,
+          laybuy_due_date: laybuyTerms === 'custom' ? laybuyDueDate || null : null
+        };
+      }
       await onSubmit(payload);
       setFormSuccess(isEdit ? 'Order updated successfully.' : 'Order created successfully.');
       setFormError('');
@@ -423,7 +481,6 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
               <FaTimes className="text-gray-500" />
             </button>
           </div>
-        </div>
         {/* Inline Alerts */}
         {formError && (
           <div className="px-6 pt-3">
@@ -494,7 +551,18 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
             </h3>
           {/* Add Product Form */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div className="md:col-span-2">
+            <div className="md:col-span-2">
+              <label className="inline-flex items-center">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
+                  checked={enableItemDiscounts}
+                  onChange={(e)=>setEnableItemDiscounts(e.target.checked)}
+                />
+                <span className="ml-2 text-sm text-gray-700">Apply per-item discounts</span>
+              </label>
+            </div>
+            <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">Product *</label>
               <select name="productId" value={productForm.productId} onChange={handleProductChange} className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${errors.productId ? 'border-red-500' : 'border-gray-300'}`}>
                 <option value="">Select a product</option>
@@ -520,56 +588,44 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
                 <input type="number" name="unitPrice" value={productForm.unitPrice} onChange={handleProductChange} step="0.01" min="0" className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${errors.unitPrice ? 'border-red-500' : 'border-gray-300'}`} placeholder="0.00" />
               </div>
               {errors.unitPrice && <p className="text-red-500 text-sm mt-1">{errors.unitPrice}</p>}
-              </div>
-            {showColor && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Color *</label>
-                <select name="color" value={productForm.color} onChange={handleProductChange} className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${errors.color ? 'border-red-500' : 'border-gray-300'}`}>
-                  <option value="">Select color</option>
-                  {allowedColors.length > 0 ? allowedColors.map(c => (
-                    <option key={c.id} value={c.id}>
-                      {c.name || c.color_name || c.color_code || 'Unknown Color'}
-                    </option>
-                  )) : (
-                    <option value="" disabled>No colors available</option>
-                  )}
-                </select>
-                {errors.color && <p className="text-red-500 text-sm mt-1">{errors.color}</p>}
-                {allowedColors.length === 0 && (
-                  <p className="text-red-500 text-sm mt-1">No colors loaded. Please refresh the page.</p>
-                )}
-                <p className="text-xs text-gray-500 mt-1">
-                  {productColorsList.length > 0 
-                    ? `This product has ${productColorsList.length} color options. Please select one.`
-                    : 'Select a color for this product.'
-                  }
-                </p>
-              </div>
-            )}
-            {showFabric && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Fabric *</label>
-                <select name="fabric" value={productForm.fabric} onChange={handleProductChange} className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${errors.fabric ? 'border-red-500' : 'border-gray-300'}`}>
-                  <option value="">Select fabric</option>
-                  {allowedFabrics.length > 0 ? allowedFabrics.map(f => (
-                    <option key={f.id} value={f.id}>
-                      {f.name || f.fabric_name || f.fabric_letter || 'Unknown Fabric'}
-                    </option>
-                  )) : (
-                    <option value="" disabled>No fabrics available</option>
-                  )}
-                </select>
-                {errors.fabric && <p className="text-red-500 text-sm mt-1">{errors.fabric}</p>}
-                {allowedFabrics.length === 0 && (
-                  <p className="text-red-500 text-sm mt-1">No fabrics loaded. Please refresh the page.</p>
-                )}
-                <p className="text-xs text-gray-500 mt-1">
-                  {productFabricsList.length > 0 
-                    ? `This product has ${productFabricsList.length} fabric options. Please select one.`
-                    : 'Select a fabric for this product.'
-                  }
-                </p>
-              </div>
+            </div>
+            {enableItemDiscounts && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Discount Percent (%)</label>
+                  <input
+                    type="number"
+                    name="discountPercent"
+                    value={productForm.discountPercent}
+                    onChange={(e)=>{
+                      const val = e.target.value;
+                      setProductForm(prev=>({ ...prev, discountPercent: val, discountAmount: val ? '' : prev.discountAmount }));
+                    }}
+                    step="0.01"
+                    min="0"
+                    max="100"
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    placeholder="e.g. 5"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Use either percent or final per-unit amount.</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Discounted Unit Amount (R)</label>
+                  <input
+                    type="number"
+                    name="discountAmount"
+                    value={productForm.discountAmount}
+                    onChange={(e)=>{
+                      const val = e.target.value;
+                      setProductForm(prev=>({ ...prev, discountAmount: val, discountPercent: val ? '' : prev.discountPercent }));
+                    }}
+                    step="0.01"
+                    min="0"
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    placeholder="e.g. 3200.00"
+                  />
+                </div>
+              </>
             )}
           </div>
           <div className="flex justify-end mb-2">
@@ -638,23 +694,124 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Total Amount</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Total Amount</label>
                 <div className="bg-gray-100 px-3 py-2 rounded-lg">
-                <span className="text-lg font-semibold">R{calculateTotal()}</span>
+                  <span className="text-lg font-semibold">R{calculateTotal()}</span>
+                </div>
               </div>
-            </div>
               <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Deposit Amount (R) *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Deposit Amount (R) *</label>
                 <div className="relative">
                   <FaDollarSign className="absolute left-3 top-3 text-gray-400" />
-                <input type="number" name="depositAmount" value={customerData.depositAmount} onChange={handleCustomerChange} step="0.01" min="0" max={calculateTotal()} className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 ${errors.depositAmount ? 'border-red-500' : 'border-gray-300'}`} placeholder="0.00" />
+                  <input type="number" name="depositAmount" value={customerData.depositAmount} onChange={handleCustomerChange} step="0.01" min="0" max={calculateTotal()} className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 ${errors.depositAmount ? 'border-red-500' : 'border-gray-300'}`} placeholder="0.00" />
+                </div>
+                {errors.depositAmount && <p className="text-red-500 text-sm mt-1">{errors.depositAmount}</p>}
               </div>
-              {errors.depositAmount && <p className="text-red-500 text-sm mt-1">{errors.depositAmount}</p>}
-            </div>
               <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Balance Amount</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Balance Amount</label>
                 <div className="bg-gray-100 px-3 py-2 rounded-lg">
-                <span className="text-lg font-semibold">R{calculateBalance()}</span>
+                  <span className="text-lg font-semibold">R{calculateBalance()}</span>
+                </div>
+              </div>
+            </div>
+            {/* Order-level discount and Lay-Buy toggles */}
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="md:col-span-1">
+                <label className="inline-flex items-center">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 text-yellow-600 bg-gray-100 border-gray-300 rounded focus:ring-yellow-500 focus:ring-2"
+                    checked={enableOrderDiscount}
+                    onChange={(e)=>setEnableOrderDiscount(e.target.checked)}
+                  />
+                  <span className="ml-2 text-sm text-gray-700">Apply order-level discount</span>
+                </label>
+                {enableOrderDiscount && (
+                  <div className="mt-3 space-y-2">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Discount Type</label>
+                      <select
+                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                        value={orderDiscountType}
+                        onChange={(e)=>setOrderDiscountType(e.target.value)}
+                      >
+                        <option value="percent">Percent (%)</option>
+                        <option value="amount">Final Total (R)</option>
+                      </select>
+                    </div>
+                    {orderDiscountType === 'percent' ? (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Percent (%)</label>
+                        <input
+                          type="number"
+                          value={orderDiscountPercent}
+                          onChange={(e)=>setOrderDiscountPercent(e.target.value)}
+                          min="0"
+                          max="100"
+                          step="0.01"
+                          className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                          placeholder="e.g. 10"
+                        />
+                      </div>
+                    ) : (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Final Total (R)</label>
+                        <input
+                          type="number"
+                          value={orderDiscountAmount}
+                          onChange={(e)=>setOrderDiscountAmount(e.target.value)}
+                          min="0"
+                          step="0.01"
+                          className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                          placeholder="e.g. 9000.00"
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="md:col-span-2">
+                <label className="inline-flex items-center">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 focus:ring-2"
+                    checked={requestLaybuyAfterCreate}
+                    onChange={(e)=>setRequestLaybuyAfterCreate(e.target.checked)}
+                  />
+                  <span className="ml-2 text-sm text-gray-700">Convert to Lay-Buy after creation</span>
+                </label>
+                {requestLaybuyAfterCreate && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Lay-Buy Terms</label>
+                      <select
+                        value={laybuyTerms}
+                        onChange={(e)=>setLaybuyTerms(e.target.value)}
+                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      >
+                        <option value="30_days">30 Days</option>
+                        <option value="60_days">60 Days</option>
+                        <option value="90_days">90 Days</option>
+                        <option value="custom">Custom</option>
+                      </select>
+                    </div>
+                    {laybuyTerms === 'custom' && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Lay-Buy Due Date</label>
+                        <input
+                          type="date"
+                          value={laybuyDueDate}
+                          onChange={(e)=>setLaybuyDueDate(e.target.value)}
+                          className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        />
+                      </div>
+                    )}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Note</label>
+                      <div className="text-xs text-gray-600">Deposit amount above will be used for lay-buy conversion.</div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

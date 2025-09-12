@@ -255,7 +255,7 @@ const Orders = ({ user, userRole, onLogout }) => {
         setSuccess('Order updated successfully');
       } else {
         // Step 1: create order
-        const { popFile, popNotes, ...pureOrder } = orderData;
+        const { popFile, popNotes, __laybuy_request__, ...pureOrder } = orderData;
         let created;
         try {
           created = await createOrder(pureOrder);
@@ -293,7 +293,23 @@ const Orders = ({ user, userRole, onLogout }) => {
         } catch (e) {
           throw new Error(e?.message || 'Failed to record payment');
         }
-        setSuccess('Order created and payment recorded');
+        // Optional: convert to lay-buy if requested
+        if (__laybuy_request__) {
+          try {
+            const { convertToLaybuy } = await import('../components/api');
+            await convertToLaybuy(newOrderId, {
+              deposit_amount: String(pureOrder?.deposit_amount ?? ''),
+              laybuy_terms: __laybuy_request__?.laybuy_terms,
+              laybuy_due_date: __laybuy_request__?.laybuy_terms === 'custom' ? __laybuy_request__?.laybuy_due_date : undefined,
+              payment_method: 'eft'
+            });
+            setSuccess('Order created, payment recorded, and converted to lay-buy');
+          } catch (e) {
+            setSuccess('Order created and payment recorded (Lay-Buy conversion failed)');
+          }
+        } else {
+          setSuccess('Order created and payment recorded');
+        }
       }
       setShowOrderModal(false);
       fetchAllData();
