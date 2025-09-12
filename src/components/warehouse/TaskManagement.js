@@ -14,7 +14,7 @@ import { usePolling } from '../../hooks/usePolling';
 import { 
   getWarehouseOrders, getTaskTypes, getUsersQuery, getWarehouseWorkersList, createTaskInOrder,
   updateTask, deleteTask, getTasksByStatus, assignWorkerToTask,
-  getTaskTemplates, bulkAssignTasks, getOrderDetailsForTasks
+  getTaskTemplates, bulkAssignTasks, getOrderDetailsForTasks, getProductionReadyOrders
 } from '../api';
 import { confirmDelete } from '../../utils/confirm';
 import { useNotify } from '../../hooks/useNotify';
@@ -80,7 +80,15 @@ const TaskManagement = ({ user }) => {
 
   // Load data with polling
   const { data: ordersData, refresh: refreshOrders } = usePolling(
-    () => getWarehouseOrders(),
+    // Prefer production-ready list if backend supports it; fallback to warehouseOrders
+    async () => {
+      try {
+        const ready = await getProductionReadyOrders();
+        return { orders: (ready?.results || ready || []).map(o => o) };
+      } catch {
+        return await getWarehouseOrders();
+      }
+    },
     30000
   );
 
@@ -549,7 +557,7 @@ const TaskManagement = ({ user }) => {
                       </Row>
                     </div>
 
-                    {/* Order Items with Specifications */}
+                    {/* Order Items with Specifications and Revamp/Repair info */}
                     {order.items && order.items.length > 0 && (
                       <div className="mb-3">
                         <small className="text-muted fw-semibold d-block mb-2">Order Items:</small>
@@ -589,6 +597,21 @@ const TaskManagement = ({ user }) => {
                               </div>
                             </div>
                           ))}
+                        </div>
+                      </div>
+                    )}
+                    {(order.order_type === 'revamp' || order.order_type === 'repair') && (
+                      <div className="mb-3">
+                        <small className="text-muted fw-semibold d-block mb-2">{order.order_type === 'repair' ? 'Repair' : 'Revamp'}:</small>
+                        <div className="p-2 bg-light rounded border">
+                          <div className="fw-semibold">{order.revamp_name}</div>
+                          {order.revamp_description && (
+                            <div className="small text-muted">{order.revamp_description}</div>
+                          )}
+                          <div className="small">Price: R{Number(order.revamp_price || 0).toFixed(2)}</div>
+                          {order.revamp_image && (
+                            <img src={order.revamp_image} alt="revamp" style={{ maxWidth: '120px', borderRadius: '6px', border: '1px solid #eee', marginTop: '6px' }} />
+                          )}
                         </div>
                       </div>
                     )}

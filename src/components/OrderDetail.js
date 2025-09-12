@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getOrder, updateOrder, getProducts, getColors, getFabrics } from './api';
+import { getOrder, updateOrder, getProducts, getColors, getFabrics, convertToLaybuy, makeLaybuyPayment, completeLaybuy } from './api';
 import { Button, Table, Form, Alert, Row, Col, Card, Badge, Spinner } from 'react-bootstrap';
 
 const OrderDetail = ({ orderId, onBack }) => {
@@ -12,6 +12,8 @@ const OrderDetail = ({ orderId, onBack }) => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [laybuy, setLaybuy] = useState({ deposit: '', amount: '', terms: '60_days' });
+  const [processing, setProcessing] = useState(false);
 
   // Moved fetchData outside useEffect
   const fetchData = useCallback(async () => {
@@ -156,6 +158,59 @@ const OrderDetail = ({ orderId, onBack }) => {
     }
   };
 
+  const canConvertToLaybuy = () => {
+    return order && !order.is_laybuy && ['deposit_pending','pending','confirmed'].includes(order.order_status);
+  };
+  const canMakeLaybuyPayment = () => order?.is_laybuy && ['active','overdue'].includes(order?.laybuy_status);
+  const canCompleteLaybuy = () => order?.is_laybuy && Number(order?.laybuy_balance) <= 0;
+
+  const handleConvertToLaybuy = async () => {
+    setProcessing(true);
+    setError(null);
+    try {
+      await convertToLaybuy(orderId, {
+        deposit_amount: Number(laybuy.deposit) || 0,
+        laybuy_terms: laybuy.terms,
+        notes: 'Converted from OrderDetail'
+      });
+      setSuccess('Order converted to lay-buy');
+      fetchData();
+    } catch (e) {
+      setError(e?.message || 'Failed to convert to lay-buy');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleLaybuyPayment = async () => {
+    setProcessing(true);
+    setError(null);
+    try {
+      const data = { amount: Number(laybuy.amount) || 0 };
+      await makeLaybuyPayment(orderId, data);
+      setSuccess('Lay-buy payment recorded');
+      fetchData();
+    } catch (e) {
+      setError(e?.message || 'Failed to record payment');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleCompleteLaybuy = async () => {
+    setProcessing(true);
+    setError(null);
+    try {
+      await completeLaybuy(orderId);
+      setSuccess('Lay-buy completed and moved to production');
+      fetchData();
+    } catch (e) {
+      setError(e?.message || 'Failed to complete lay-buy');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   // Keep showing loading until order is fetched; reference lists can load lazily
   if (loading || !order) return (
     <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '240px' }}>
@@ -176,6 +231,7 @@ const OrderDetail = ({ orderId, onBack }) => {
           <div className="d-flex gap-2 justify-content-end flex-wrap">
             <Badge bg="primary" className="text-uppercase">{order.order_status}</Badge>
             {order.payment_status && <Badge bg="warning" text="dark" className="text-uppercase">{order.payment_status}</Badge>}
+            {order.is_laybuy && <Badge bg={order.laybuy_status === 'overdue' ? 'danger' : 'info'} className="text-uppercase">Lay-Buy: {order.laybuy_status}</Badge>}
           </div>
         </div>
       </div>
@@ -313,6 +369,72 @@ const OrderDetail = ({ orderId, onBack }) => {
                     <div className="mt-3">
                       <div className="text-muted">Admin Notes</div>
                       <div>{order.admin_notes}</div>
+                    </div>
+                  )}
+
+                  {/* Revamp/Repair Info */}
+                  {order.order_type && (order.order_type === 'revamp' || order.order_type === 'repair') && (
+                    <div className="mt-3">
+                      <div className="text-muted">{order.order_type === 'repair' ? 'Repair' : 'Revamp'} Details</div>
+                      <div className="fw-semibold">{order.revamp_name || '-'}</div>
+                      <div className="small text-muted">Price: R{Number(order.revamp_price || 0).toFixed(2)}</div>
+                      {order.revamp_description && (<div className="small mt-1">{order.revamp_description}</div>)}
+                      {order.revamp_image && (
+                        <div className="mt-2">
+                          <img src={order.revamp_image} alt="revamp" style={{ maxWidth: '180px', borderRadius: '8px', border: '1px solid #eee' }} />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+
+          {/* Lay-Buy Actions */}
+          <Row className="g-3 mt-3">
+            <Col md={12}>
+              <Card>
+                <Card.Header>Lay-Buy</Card.Header>
+                <Card.Body>
+                  <div className="d-flex flex-wrap gap-3 align-items-end">
+                    {canConvertToLaybuy() && (
+                      <>
+                        <div>
+                          <div className="small text-muted">Deposit Amount (R)</div>
+                          <input type="number" min="0" step="0.01" className="form-control" value={laybuy.deposit} onChange={(e)=>setLaybuy(v=>({...v,deposit:e.target.value}))} />
+                        </div>
+                        <div>
+                          <div className="small text-muted">Terms</div>
+                          <select className="form-select" value={laybuy.terms} onChange={(e)=>setLaybuy(v=>({...v,terms:e.target.value}))}>
+                            <option value="30_days">30 Days</option>
+                            <option value="60_days">60 Days</option>
+                            <option value="90_days">90 Days</option>
+                            <option value="custom">Custom</option>
+                          </select>
+                        </div>
+                        <button className="btn btn-outline-primary" disabled={processing} onClick={handleConvertToLaybuy}>Convert to Lay-Buy</button>
+                      </>
+                    )}
+                    {canMakeLaybuyPayment() && (
+                      <>
+                        <div className="ms-auto" />
+                        <div>
+                          <div className="small text-muted">Payment Amount (R)</div>
+                          <input type="number" min="0" step="0.01" className="form-control" value={laybuy.amount} onChange={(e)=>setLaybuy(v=>({...v,amount:e.target.value}))} />
+                        </div>
+                        <button className="btn btn-outline-success" disabled={processing} onClick={handleLaybuyPayment}>Record Payment</button>
+                      </>
+                    )}
+                    {canCompleteLaybuy() && (
+                      <button className="btn btn-success ms-auto" disabled={processing} onClick={handleCompleteLaybuy}>Complete Lay-Buy</button>
+                    )}
+                  </div>
+
+                  {order.is_laybuy && (
+                    <div className="mt-3 small text-muted">
+                      <div>Status: {order.laybuy_status} • Due: {order.laybuy_due_date || '-'}</div>
+                      <div>Balance: R{Number(order.laybuy_balance || 0).toFixed(2)} • Paid: R{Number(order.laybuy_payments_made || 0).toFixed(2)}</div>
                     </div>
                   )}
                 </Card.Body>
