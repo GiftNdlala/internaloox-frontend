@@ -58,6 +58,8 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
   const [products, setProducts] = useState([]);
   const [colors, setColors] = useState([]);
   const [fabrics, setFabrics] = useState([]);
+  // Product search filter
+  const [productSearch, setProductSearch] = useState('');
   // Error state
   const [errors, setErrors] = useState({});
   const [formError, setFormError] = useState('');
@@ -146,6 +148,15 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
     setProductForm(prev => ({ ...prev, ...update }));
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
   };
+  // Derived filtered products list for the dropdown
+  const filteredProducts = (products || []).filter(p => {
+    if (!p || !p.available_for_order) return false;
+    const q = productSearch.trim().toLowerCase();
+    if (!q) return true;
+    const name = String(p.name || '').toLowerCase();
+    const code = String(p.model_code || '').toLowerCase();
+    return name.includes(q) || code.includes(q);
+  });
   // Add product to orderItems
   const handleAddProduct = () => {
     // Validate productForm
