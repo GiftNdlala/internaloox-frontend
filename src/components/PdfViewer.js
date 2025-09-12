@@ -26,6 +26,7 @@ const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
 	const [error, setError] = useState('');
   const containerRef = useRef(null);
   const [containerWidth, setContainerWidth] = useState(0);
+  const [forceIframe, setForceIframe] = useState(false);
 
   useEffect(() => {
     const update = () => setContainerWidth(containerRef.current ? containerRef.current.clientWidth : 0);
@@ -50,6 +51,7 @@ const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
 		console.error('PDF load error:', err);
 		setError(err?.message || 'Failed to load PDF. Please try refreshing the page.');
 		setLoading(false);
+    setForceIframe(true);
 	};
 
 	const zoomIn = () => setScale((s) => Math.min(2.5, s + 0.2));
@@ -72,6 +74,11 @@ const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
 		const testUrl = url || '';
 		return /(\.png|\.jpe?g|\.webp|\.gif)$/i.test(name) || /(\.png|\.jpe?g|\.webp|\.gif)$/i.test(testUrl);
 	})();
+  const isPdf = (() => {
+    const name = fileName || '';
+    const testUrl = url || '';
+    return /\.pdf$/i.test(name) || /\.pdf$/i.test(testUrl);
+  })();
 
 	return (
 		<div ref={containerRef}>
@@ -102,7 +109,7 @@ const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
 						<img src={url} alt={fileName} style={{ maxWidth: '100%', maxHeight: `calc(${height} - 40px)`, objectFit: 'contain' }} />
 					</div>
 				)}
-				{!error && !isImage && (
+				{!error && !isImage && !forceIframe && isPdf && (
 					<Document 
 						file={url} 
 						onLoadSuccess={onDocumentLoadSuccess} 
@@ -119,6 +126,9 @@ const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
 						</div>
 					</Document>
 				)}
+        {!error && (forceIframe || !isPdf) && (
+          <iframe title={fileName} src={url} style={{ width: '100%', height, border: 0 }} />
+        )}
 			</div>
 		</div>
 	);
