@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getOrder, updateOrder, getProducts, getColors, getFabrics } from './api';
-import { Button, Table, Form, Alert } from 'react-bootstrap';
+import { Button, Table, Form, Alert, Row, Col, Card, Badge, Spinner } from 'react-bootstrap';
 
 const OrderDetail = ({ orderId, onBack }) => {
   const [order, setOrder] = useState(null);
@@ -157,13 +157,28 @@ const OrderDetail = ({ orderId, onBack }) => {
   };
 
   // Keep showing loading until order is fetched; reference lists can load lazily
-  if (loading || !order) return <div>Loading...</div>;
+  if (loading || !order) return (
+    <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '240px' }}>
+      <div className="text-center">
+        <Spinner animation="border" role="status" />
+        <div className="mt-2 text-muted">Loading order...</div>
+      </div>
+    </div>
+  );
   if (error) return <Alert variant="danger">{error}</Alert>;
 
   return (
     <div className="order-detail">
-      <Button variant="secondary" onClick={onBack} className="mb-3">Back to Orders</Button>
-      <h2>Order #{order.order_number}</h2>
+      <div className="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+        <Button variant="outline-secondary" onClick={onBack}>Back</Button>
+        <div className="text-end">
+          <div className="h4 mb-1">Order #{order.order_number}</div>
+          <div className="d-flex gap-2 justify-content-end flex-wrap">
+            <Badge bg="primary" className="text-uppercase">{order.order_status}</Badge>
+            {order.payment_status && <Badge bg="warning" text="dark" className="text-uppercase">{order.payment_status}</Badge>}
+          </div>
+        </div>
+      </div>
       {success && <Alert variant="success">{success}</Alert>}
       {editMode ? (
         <>
@@ -270,13 +285,43 @@ const OrderDetail = ({ orderId, onBack }) => {
         </>
       ) : (
         <>
-          <h4>Order Details</h4>
-          <p><strong>Customer:</strong> {(order.customer && order.customer.name) || order.customer_name || '—'} ({(order.customer && order.customer.phone) || '—'})<br/>{(order.customer && order.customer.email) || '—'}<br/>{(order.customer && order.customer.address) || '—'}</p>
-          <p><strong>Expected Delivery:</strong> {order.expected_delivery_date}</p>
-          <p><strong>Status:</strong> {order.order_status}</p>
-          <p><strong>Admin Notes:</strong> {order.admin_notes}</p>
-          <h5>Products in Order</h5>
-          <Table bordered>
+          <Row className="g-3">
+            <Col md={6}>
+              <Card>
+                <Card.Header>Customer</Card.Header>
+                <Card.Body>
+                  <div className="mb-1 fw-semibold">{(order.customer && order.customer.name) || order.customer_name || '—'}</div>
+                  <div className="text-muted small">{(order.customer && order.customer.phone) || '—'}</div>
+                  <div className="text-muted small">{(order.customer && order.customer.email) || '—'}</div>
+                  <div className="text-muted small">{(order.customer && order.customer.address) || '—'}</div>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={6}>
+              <Card>
+                <Card.Header>Order Info</Card.Header>
+                <Card.Body>
+                  <div className="d-flex justify-content-between">
+                    <div className="text-muted">Expected Delivery</div>
+                    <div>{order.expected_delivery_date || '—'}</div>
+                  </div>
+                  <div className="d-flex justify-content-between mt-2">
+                    <div className="text-muted">Status</div>
+                    <div><Badge bg="primary" className="text-uppercase">{order.order_status}</Badge></div>
+                  </div>
+                  {order.admin_notes && (
+                    <div className="mt-3">
+                      <div className="text-muted">Admin Notes</div>
+                      <div>{order.admin_notes}</div>
+                    </div>
+                  )}
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+
+          <h5 className="mt-4">Products in Order</h5>
+          <Table bordered responsive size="sm" className="align-middle">
             <thead>
               <tr>
                 <th>Product</th>
