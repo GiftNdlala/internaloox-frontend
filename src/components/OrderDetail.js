@@ -395,46 +395,228 @@ const OrderDetail = ({ orderId, onBack }) => {
           <Row className="g-3 mt-3">
             <Col md={12}>
               <Card>
-                <Card.Header>Lay-Buy</Card.Header>
+                <Card.Header className="d-flex justify-content-between align-items-center">
+                  <span>Lay-Buy Management</span>
+                  {order.is_laybuy && (
+                    <Badge bg={order.laybuy_status === 'completed' ? 'success' : order.laybuy_status === 'overdue' ? 'danger' : 'warning'}>
+                      {order.laybuy_status}
+                    </Badge>
+                  )}
+                </Card.Header>
                 <Card.Body>
-                  <div className="d-flex flex-wrap gap-3 align-items-end">
-                    {canConvertToLaybuy() && (
-                      <>
-                        <div>
-                          <div className="small text-muted">Deposit Amount (R)</div>
-                          <input type="number" min="0" step="0.01" className="form-control" value={laybuy.deposit} onChange={(e)=>setLaybuy(v=>({...v,deposit:e.target.value}))} />
+                  {!order.is_laybuy ? (
+                    // Convert to Lay-Buy Section
+                    <div>
+                      <h6 className="mb-3">Convert to Lay-Buy</h6>
+                      <div className="row g-3 align-items-end">
+                        <div className="col-md-3">
+                          <label className="form-label small text-muted">Deposit Amount (R)</label>
+                          <input 
+                            type="number" 
+                            min="0" 
+                            step="0.01" 
+                            className="form-control" 
+                            value={laybuy.deposit} 
+                            onChange={(e)=>setLaybuy(v=>({...v,deposit:e.target.value}))}
+                            placeholder="0.00"
+                          />
                         </div>
-                        <div>
-                          <div className="small text-muted">Terms</div>
+                        <div className="col-md-3">
+                          <label className="form-label small text-muted">Payment Terms</label>
                           <select className="form-select" value={laybuy.terms} onChange={(e)=>setLaybuy(v=>({...v,terms:e.target.value}))}>
                             <option value="30_days">30 Days</option>
                             <option value="60_days">60 Days</option>
                             <option value="90_days">90 Days</option>
-                            <option value="custom">Custom</option>
+                            <option value="custom">Custom Terms</option>
                           </select>
                         </div>
-                        <button className="btn btn-outline-primary" disabled={processing} onClick={handleConvertToLaybuy}>Convert to Lay-Buy</button>
-                      </>
-                    )}
-                    {canMakeLaybuyPayment() && (
-                      <>
-                        <div className="ms-auto" />
-                        <div>
-                          <div className="small text-muted">Payment Amount (R)</div>
-                          <input type="number" min="0" step="0.01" className="form-control" value={laybuy.amount} onChange={(e)=>setLaybuy(v=>({...v,amount:e.target.value}))} />
+                        <div className="col-md-3">
+                          <button 
+                            className="btn btn-primary w-100" 
+                            disabled={processing || !laybuy.deposit} 
+                            onClick={handleConvertToLaybuy}
+                          >
+                            {processing ? 'Converting...' : 'Convert to Lay-Buy'}
+                          </button>
                         </div>
-                        <button className="btn btn-outline-success" disabled={processing} onClick={handleLaybuyPayment}>Record Payment</button>
-                      </>
-                    )}
-                    {canCompleteLaybuy() && (
-                      <button className="btn btn-success ms-auto" disabled={processing} onClick={handleCompleteLaybuy}>Complete Lay-Buy</button>
-                    )}
-                  </div>
+                        <div className="col-md-3">
+                          <div className="small text-muted">
+                            Balance: R{(Number(order.balance_amount || 0) - Number(laybuy.deposit || 0)).toFixed(2)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    // Lay-Buy Management Section
+                    <div>
+                      <h6 className="mb-3">Make Payment</h6>
+                      <div className="row g-3 align-items-end">
+                        <div className="col-md-4">
+                          <label className="form-label small text-muted">Payment Amount (R)</label>
+                          <input 
+                            type="number" 
+                            min="0" 
+                            step="0.01" 
+                            max={order.laybuy_balance || 0}
+                            className="form-control" 
+                            value={laybuy.amount} 
+                            onChange={(e)=>setLaybuy(v=>({...v,amount:e.target.value}))}
+                            placeholder="0.00"
+                          />
+                        </div>
+                        <div className="col-md-4">
+                          <button 
+                            className="btn btn-success w-100" 
+                            disabled={processing || !laybuy.amount || Number(laybuy.amount) <= 0} 
+                            onClick={handleLaybuyPayment}
+                          >
+                            {processing ? 'Processing...' : 'Record Payment'}
+                          </button>
+                        </div>
+                        <div className="col-md-4">
+                          {canCompleteLaybuy() && (
+                            <button 
+                              className="btn btn-outline-success w-100" 
+                              disabled={processing} 
+                              onClick={handleCompleteLaybuy}
+                            >
+                              Complete Lay-Buy
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {order.is_laybuy && (
-                    <div className="mt-3 small text-muted">
-                      <div>Status: {order.laybuy_status} • Due: {order.laybuy_due_date || '-'}</div>
-                      <div>Balance: R{Number(order.laybuy_balance || 0).toFixed(2)} • Paid: R{Number(order.laybuy_payments_made || 0).toFixed(2)}</div>
+                    <div className="mt-3">
+                      <div className="row g-3">
+                        <div className="col-md-6">
+                          <div className="card bg-light">
+                            <div className="card-body p-3">
+                              <h6 className="card-title mb-2">Lay-Buy Status</h6>
+                              <div className="d-flex justify-content-between align-items-center mb-1">
+                                <span className="text-muted">Status:</span>
+                                <Badge bg={order.laybuy_status === 'completed' ? 'success' : order.laybuy_status === 'overdue' ? 'danger' : 'warning'}>
+                                  {order.laybuy_status}
+                                </Badge>
+                              </div>
+                              <div className="d-flex justify-content-between align-items-center mb-1">
+                                <span className="text-muted">Terms:</span>
+                                <span className="fw-semibold">{order.laybuy_terms || 'Not set'}</span>
+                              </div>
+                              <div className="d-flex justify-content-between align-items-center">
+                                <span className="text-muted">Due Date:</span>
+                                <span className="fw-semibold">{order.laybuy_due_date || 'Not set'}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="col-md-6">
+                          <div className="card bg-light">
+                            <div className="card-body p-3">
+                              <h6 className="card-title mb-2">Payment Summary</h6>
+                              <div className="d-flex justify-content-between align-items-center mb-1">
+                                <span className="text-muted">Total Order:</span>
+                                <span className="fw-semibold">R{Number(order.total_amount || 0).toFixed(2)}</span>
+                              </div>
+                              <div className="d-flex justify-content-between align-items-center mb-1">
+                                <span className="text-muted">Payments Made:</span>
+                                <span className="text-success fw-semibold">R{Number(order.laybuy_payments_made || 0).toFixed(2)}</span>
+                              </div>
+                              <div className="d-flex justify-content-between align-items-center">
+                                <span className="text-muted">Remaining Balance:</span>
+                                <span className="text-danger fw-semibold">R{Number(order.laybuy_balance || 0).toFixed(2)}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Progress Bar */}
+                      <div className="mt-3">
+                        <div className="d-flex justify-content-between align-items-center mb-1">
+                          <span className="small text-muted">Payment Progress</span>
+                          <span className="small text-muted">
+                            {((Number(order.laybuy_payments_made || 0) / Number(order.total_amount || 1)) * 100).toFixed(1)}%
+                          </span>
+                        </div>
+                        <div className="progress" style={{ height: '8px' }}>
+                          <div 
+                            className="progress-bar bg-success" 
+                            style={{ 
+                              width: `${(Number(order.laybuy_payments_made || 0) / Number(order.total_amount || 1)) * 100}%` 
+                            }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      {/* Days Remaining */}
+                      {order.laybuy_due_date && (
+                        <div className="mt-2">
+                          {(() => {
+                            const dueDate = new Date(order.laybuy_due_date);
+                            const today = new Date();
+                            const daysRemaining = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+                            
+                            return (
+                              <div className={`alert ${daysRemaining < 0 ? 'alert-danger' : daysRemaining <= 7 ? 'alert-warning' : 'alert-info'} py-2`}>
+                                <small>
+                                  {daysRemaining < 0 
+                                    ? `Overdue by ${Math.abs(daysRemaining)} days` 
+                                    : daysRemaining === 0 
+                                    ? 'Due today' 
+                                    : `${daysRemaining} days remaining`
+                                  }
+                                </small>
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+
+          {/* Financial Summary */}
+          <Row className="g-3 mt-4">
+            <Col md={12}>
+              <Card>
+                <Card.Header>Financial Summary</Card.Header>
+                <Card.Body>
+                  <div className="row g-3">
+                    <div className="col-md-4">
+                      <div className="d-flex justify-content-between align-items-center">
+                        <span className="text-muted">Subtotal:</span>
+                        <span className="fw-semibold">R{Number(order.total_amount || 0).toFixed(2)}</span>
+                      </div>
+                    </div>
+                    <div className="col-md-4">
+                      <div className="d-flex justify-content-between align-items-center">
+                        <span className="text-muted">Deposit Paid:</span>
+                        <span className="text-success fw-semibold">R{Number(order.deposit_amount || 0).toFixed(2)}</span>
+                      </div>
+                    </div>
+                    <div className="col-md-4">
+                      <div className="d-flex justify-content-between align-items-center">
+                        <span className="text-muted">Balance:</span>
+                        <span className="text-danger fw-semibold">R{Number(order.balance_amount || 0).toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Show if there were any order-level discounts applied */}
+                  {(order.order_discount_percent || order.order_discount_amount) && (
+                    <div className="mt-3 p-2 bg-success bg-opacity-10 rounded">
+                      <div className="small text-success">
+                        <i className="bi bi-check-circle me-1"></i>
+                        Order-level discount applied
+                        {order.order_discount_percent && ` (${order.order_discount_percent}% off)`}
+                        {order.order_discount_amount && ` (Final amount: R${Number(order.order_discount_amount).toFixed(2)})`}
+                      </div>
                     </div>
                   )}
                 </Card.Body>
@@ -450,6 +632,7 @@ const OrderDetail = ({ orderId, onBack }) => {
                 <th>Description</th>
                 <th>Qty</th>
                 <th>Unit Price</th>
+                <th>Total</th>
                 <th>Color</th>
                 <th>Fabric</th>
               </tr>
@@ -463,12 +646,34 @@ const OrderDetail = ({ orderId, onBack }) => {
                   const productName = (productsList.find(p => String(p.id) === String(item.product))?.name) || item.product_name || '—';
                   const colorName = (colorsList.find(c => String(c.id) === String(item.color))?.name) || item.color_name || '';
                   const fabricName = (fabricsList.find(f => String(f.id) === String(item.fabric))?.name) || item.fabric_name || '';
+                  // Check if item has discount information (these would be stored in item metadata or calculated)
+                  const hasDiscount = item.original_unit_price && item.original_unit_price !== item.unit_price;
+                  const totalPrice = parseFloat(item.unit_price) * parseInt(item.quantity);
+                  
                   return (
                   <tr key={idx}>
                     <td>{productName}</td>
                     <td>{item.product_description}</td>
                     <td>{item.quantity}</td>
-                    <td>R{item.unit_price}</td>
+                    <td>
+                      {hasDiscount ? (
+                        <div>
+                          <div className="text-decoration-line-through text-muted small">R{item.original_unit_price}</div>
+                          <div className="text-success fw-semibold">R{item.unit_price}</div>
+                          <small className="text-success">Discounted</small>
+                        </div>
+                      ) : (
+                        <span>R{item.unit_price}</span>
+                      )}
+                    </td>
+                    <td>
+                      <span className="fw-semibold">R{totalPrice.toFixed(2)}</span>
+                      {hasDiscount && (
+                        <div className="text-muted small">
+                          <span className="text-decoration-line-through">R{(parseFloat(item.original_unit_price) * parseInt(item.quantity)).toFixed(2)}</span>
+                        </div>
+                      )}
+                    </td>
                     <td>{colorName}</td>
                     <td>{fabricName}</td>
                   </tr>
@@ -476,7 +681,7 @@ const OrderDetail = ({ orderId, onBack }) => {
                 })
               ) : (
                 <tr>
-                  <td colSpan="6" className="text-center text-muted">No products in this order</td>
+                  <td colSpan="7" className="text-center text-muted">No products in this order</td>
                 </tr>
               )}
             </tbody>
