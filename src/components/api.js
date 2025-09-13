@@ -83,6 +83,50 @@ export const getPaymentsDashboard = () => apiRequest('/orders/payments_dashboard
 export const updateOrderPayment = (orderId, data) => apiRequest(`/orders/${orderId}/update_payment/`, { method: 'PATCH', data });
 export const markPaymentOverdue = (orderId) => apiRequest(`/orders/${orderId}/mark_overdue/`, { method: 'POST' });
 
+// Lay-Buy endpoints (backend provided)
+export const convertToLaybuy = (orderId, data) => apiRequest(`/orders/${orderId}/convert_to_laybuy/`, { method: 'POST', data });
+export const makeLaybuyPayment = (orderId, data) => apiRequest(`/orders/${orderId}/make_laybuy_payment/`, { method: 'POST', data });
+export const completeLaybuy = (orderId) => apiRequest(`/orders/${orderId}/complete_laybuy/`, { method: 'POST' });
+export const getLaybuyOrders = () => apiRequest('/orders/laybuy_orders/');
+export const getOverdueLaybuy = () => apiRequest('/orders/overdue_laybuy/');
+export const getProductionReadyOrders = () => apiRequest('/orders/production_ready_orders/');
+export const getLaybuyDashboard = () => apiRequest('/orders/laybuy_dashboard/');
+
+// Helper: create or update order with optional revamp image via multipart form
+export const createOrderWithForm = (data) => {
+  const needsForm = data && (data.revamp_image instanceof File);
+  if (!needsForm) return createOrder(data);
+  const formData = new FormData();
+  Object.entries(data).forEach(([key, value]) => {
+    if (value === undefined || value === null) return;
+    if (key === 'revamp_image' && value instanceof File) {
+      formData.append('revamp_image', value);
+    } else if (typeof value === 'object' && !(value instanceof Blob)) {
+      formData.append(key, JSON.stringify(value));
+    } else {
+      formData.append(key, value);
+    }
+  });
+  return apiRequest('/orders/', { method: 'POST', data: formData, isForm: true });
+};
+
+export const updateOrderWithForm = (orderId, data) => {
+  const needsForm = data && (data.revamp_image instanceof File);
+  if (!needsForm) return updateOrder(orderId, data);
+  const formData = new FormData();
+  Object.entries(data).forEach(([key, value]) => {
+    if (value === undefined || value === null) return;
+    if (key === 'revamp_image' && value instanceof File) {
+      formData.append('revamp_image', value);
+    } else if (typeof value === 'object' && !(value instanceof Blob)) {
+      formData.append(key, JSON.stringify(value));
+    } else {
+      formData.append(key, value);
+    }
+  });
+  return apiRequest(`/orders/${orderId}/`, { method: 'PUT', data: formData, isForm: true });
+};
+
 // Role dashboards
 export const getOwnerOrdersDashboard = () => apiRequest('/orders/owner_dashboard/');
 export const getAdminOrdersDashboard = () => apiRequest('/orders/admin_dashboard/');

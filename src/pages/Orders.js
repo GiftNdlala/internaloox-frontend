@@ -11,10 +11,12 @@ import {
 } from 'react-icons/fa';
 import { 
   getOrders, getCustomers, getProducts, 
-  createOrder, updateOrder, deleteOrder, advanceOrderWorkflow
+  createOrder, updateOrder, deleteOrder, advanceOrderWorkflow,
+  createOrderWithForm, createCustomer
 } from '../components/api';
 import OrderForm from '../components/OrderForm';
 import OrderDetail from '../components/OrderDetail';
+import RevampForm from '../components/RevampForm';
 import SharedHeader from '../components/SharedHeader';
 import UniversalSidebar from '../components/UniversalSidebar';
 import { getOrderManagementData, patchOrderStatus } from '../components/api';
@@ -45,6 +47,8 @@ const Orders = ({ user, userRole, onLogout }) => {
   const [addressInput, setAddressInput] = useState('');
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewOrderId, setViewOrderId] = useState(null);
+  const [showRevampModal, setShowRevampModal] = useState(false);
+  const [revampType, setRevampType] = useState('revamp');
 
   // Filter and search states
   const [searchTerm, setSearchTerm] = useState('');
@@ -209,6 +213,12 @@ const Orders = ({ user, userRole, onLogout }) => {
     setShowOrderModal(true);
   };
 
+  const openRevampModal = (type = 'revamp') => {
+    if (!canCreate) return;
+    setRevampType(type);
+    setShowRevampModal(true);
+  };
+
   const handleEditOrder = (order) => {
     setEditingOrder(order);
     setShowOrderModal(true);
@@ -245,7 +255,7 @@ const Orders = ({ user, userRole, onLogout }) => {
         setSuccess('Order updated successfully');
       } else {
         // Step 1: create order
-        const { popFile, popNotes, ...pureOrder } = orderData;
+        const { popFile, popNotes, __laybuy_request__, ...pureOrder } = orderData;
         let created;
         try {
           created = await createOrder(pureOrder);
@@ -283,12 +293,86 @@ const Orders = ({ user, userRole, onLogout }) => {
         } catch (e) {
           throw new Error(e?.message || 'Failed to record payment');
         }
-        setSuccess('Order created and payment recorded');
+        // Optional: convert to lay-buy if requested
+        if (__laybuy_request__) {
+          try {
+            const { convertToLaybuy } = await import('../components/api');
+            await convertToLaybuy(newOrderId, {
+              deposit_amount: String(pureOrder?.deposit_amount ?? ''),
+              laybuy_terms: __laybuy_request__?.laybuy_terms,
+              laybuy_due_date: __laybuy_request__?.laybuy_terms === 'custom' ? __laybuy_request__?.laybuy_due_date : undefined,
+              payment_method: 'eft'
+            });
+            setSuccess('Order created, payment recorded, and converted to lay-buy');
+          } catch (e) {
+            setSuccess('Order created and payment recorded (Lay-Buy conversion failed)');
+          }
+        } else {
+          setSuccess('Order created and payment recorded');
+        }
       }
       setShowOrderModal(false);
       fetchAllData();
     } catch (err) {
       setError(err?.message ? String(err.message) : 'Failed to save order');
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleRevampSubmit = async (payload) => {
+    setError('');
+    setSuccess('');
+    setCreating(true);
+    try {
+      const { popFile, popNotes, customer_name, customer_phone, customer_email, customer_address, ...rest } = payload;
+      // 1) Find or create customer
+      const allCustomers = await getCustomers();
+      const list = allCustomers.results || allCustomers || [];
+      const existing = list.find(c => (
+        String(c.name || '').trim().toLowerCase() === String(customer_name || '').trim().toLowerCase() &&
+        String(c.phone || '').replace(/\D/g,'') === String(customer_phone || '').replace(/\D/g,'')
+      ));
+      let customerId = existing?.id;
+      if (!customerId) {
+        const newCustomer = await createCustomer({ name: customer_name, phone: customer_phone, email: customer_email, address: customer_address });
+        customerId = newCustomer?.id;
+      }
+
+      if (!customerId) throw new Error('Failed to resolve customer');
+
+      // 2) Create order (multipart if revamp_image provided)
+      const orderBody = {
+        ...rest,
+        customer_id: customerId
+      };
+      let created = await createOrderWithForm(orderBody);
+      const newOrderId = created?.id;
+      if (!newOrderId) throw new Error('Order creation failed (missing ID)');
+
+      if (!popFile) throw new Error('Payment proof required');
+      const form = new FormData();
+      form.append('order', newOrderId);
+      if (orderBody?.deposit_amount) form.append('amount', orderBody.deposit_amount);
+      form.append('payment_type', 'deposit');
+      form.append('proof_image', popFile);
+      if (popNotes) form.append('notes', popNotes);
+
+      const proof = await createPayment(form, true);
+      if (!proof?.id) throw new Error('Failed to upload payment proof (no id)');
+
+      await updateOrderPayment(newOrderId, {
+        payment_method: 'EFT',
+        payment_status: (Number(orderBody?.deposit_amount) >= Number(orderBody?.total_amount)) ? 'fully_paid' : 'deposit_paid',
+        deposit_amount: Number(orderBody?.deposit_amount) || 0,
+        proof_id: proof.id
+      });
+
+      setSuccess(`${revampType === 'repair' ? 'Repair' : 'Revamp'} order created`);
+      setShowRevampModal(false);
+      fetchAllData();
+    } catch (e) {
+      setError(e?.message || 'Failed to create revamp/repair order');
     } finally {
       setCreating(false);
     }
@@ -480,9 +564,17 @@ const Orders = ({ user, userRole, onLogout }) => {
             </Col>
             <Col className="text-end">
               {canCreate && (
-                <Button variant="primary" onClick={handleCreateOrder}>
-                  <FaPlus className="me-2" /> Add New Order
-                </Button>
+                <div className="d-flex justify-content-end gap-2">
+                  <Button variant="outline-success" onClick={() => openRevampModal('revamp')}>
+                    <FaPlus className="me-2" /> New Revamp
+                  </Button>
+                  <Button variant="outline-warning" onClick={() => openRevampModal('repair')}>
+                    <FaPlus className="me-2" /> New Repair
+                  </Button>
+                  <Button variant="primary" onClick={handleCreateOrder}>
+                    <FaPlus className="me-2" /> Add New Order
+                  </Button>
+                </div>
               )}
             </Col>
           </Row>
@@ -650,6 +742,18 @@ const Orders = ({ user, userRole, onLogout }) => {
               )}
             </Modal.Body>
           </Modal>
+
+          {/* Revamp/Repair Modal */}
+          {canCreate && (
+            <Modal show={showRevampModal} onHide={() => setShowRevampModal(false)} size="lg">
+              <Modal.Header closeButton>
+                <Modal.Title>{revampType === 'repair' ? 'Create Repair Order' : 'Create Revamp Order'}</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <RevampForm onClose={() => setShowRevampModal(false)} onSubmit={handleRevampSubmit} type={revampType} />
+              </Modal.Body>
+            </Modal>
+          )}
 
           {/* Status Change Modal */}
           {canEdit && (
