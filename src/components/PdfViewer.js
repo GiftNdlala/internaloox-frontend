@@ -3,19 +3,12 @@ import { Document, Page, pdfjs } from 'react-pdf';
 import { Spinner, Button, ButtonGroup } from 'react-bootstrap';
 import { FaSearchPlus, FaSearchMinus, FaDownload } from 'react-icons/fa';
 
-// Configure pdfjs worker to a locally bundled worker for reliability
+// Configure pdfjs worker to a reliable CDN URL (avoids bundling issues)
 const setupPdfWorker = () => {
   try {
-    // Use local worker file from public directory for better reliability
-    pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
+    pdfjs.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@5.3.31/build/pdf.worker.min.mjs';
   } catch (error) {
     console.warn('Failed to set PDF.js worker source:', error);
-    // Fallback to CDN if local file fails
-    try {
-      pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.54/pdf.worker.min.js`;
-    } catch (cdnError) {
-      console.warn('CDN fallback also failed:', cdnError);
-    }
   }
 };
 
@@ -31,6 +24,20 @@ const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
   const containerRef = useRef(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const [forceIframe, setForceIframe] = useState(false);
+
+  // Protected API helpers
+  const API_BASE = (typeof window !== 'undefined' && window.OOX_API_BASE) || process.env.REACT_APP_API_BASE || 'https://internaloox-1.onrender.com/api';
+  const token = (typeof window !== 'undefined') ? localStorage.getItem('oox_token') : null;
+  const isProtectedApiUrl = (u) => {
+    if (!u) return false;
+    try {
+      const parsed = new URL(u, window.location.origin);
+      const apiBase = new URL(API_BASE, window.location.origin);
+      return parsed.origin === apiBase.origin && parsed.pathname.startsWith(apiBase.pathname);
+    } catch {
+      return false;
+    }
+  };
 
   useEffect(() => {
     const update = () => setContainerWidth(containerRef.current ? containerRef.current.clientWidth : 0);
@@ -54,25 +61,53 @@ const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
 
 	const onDocumentLoadError = (err) => {
 		console.error('PDF load error:', err);
-		setError('');
+		setError('Failed to load PDF. You can try opening it in a new tab.');
 		setLoading(false);
-    setForceIframe(true);
 	};
 
 	const zoomIn = () => setScale((s) => Math.min(2.5, s + 0.2));
 	const zoomOut = () => setScale((s) => Math.max(0.6, s - 0.2));
-	const download = () => {
+	const download = async () => {
 		try {
-			const a = document.createElement('a');
-			a.href = url;
-			a.download = fileName;
-			a.target = '_blank';
-			a.rel = 'noreferrer';
-			a.click();
+			if (isProtectedApiUrl(url) && token) {
+				const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+				if (!res.ok) throw new Error(`HTTP ${res.status}`);
+				const blob = await res.blob();
+				const objectUrl = URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.href = objectUrl;
+				a.download = fileName;
+				a.click();
+				URL.revokeObjectURL(objectUrl);
+			} else {
+				const a = document.createElement('a');
+				a.href = url;
+				a.download = fileName;
+				a.target = '_blank';
+				a.rel = 'noreferrer';
+				a.click();
+			}
 		} catch (err) {
 			console.error('Download error:', err);
 		}
 	};
+
+  const openInNewTab = async () => {
+    try {
+      if (isProtectedApiUrl(url) && token) {
+        const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const blob = await res.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        window.open(objectUrl, '_blank', 'noopener,noreferrer');
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+      } else {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
+    } catch (err) {
+      console.error('Open in new tab error:', err);
+    }
+  };
 
 	const isImage = (() => {
 		const name = fileName || '';
@@ -104,7 +139,7 @@ const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
 				{error && (
 					<div className="text-center text-danger p-3">
 						<div className="mb-2">{error}</div>
-						<Button variant="outline-primary" size="sm" onClick={() => window.open(url, '_blank')}>
+						<Button variant="outline-primary" size="sm" onClick={openInNewTab}>
 							Open in New Tab
 						</Button>
 					</div>
@@ -116,7 +151,7 @@ const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
 				)}
 				{!error && !isImage && !forceIframe && isPdf && (
 					<Document 
-						file={url} 
+						file={isProtectedApiUrl(url) && token ? { url, httpHeaders: { Authorization: `Bearer ${token}` } } : url}
 						onLoadSuccess={onDocumentLoadSuccess} 
 						onLoadError={onDocumentLoadError} 
 						loading=" "
@@ -131,7 +166,7 @@ const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
 						</div>
 					</Document>
 				)}
-        {!error && (forceIframe || !isPdf) && (
+        {!error && !isPdf && (
           <iframe title={fileName} src={url} style={{ width: '100%', height, border: 0 }} />
         )}
 			</div>
