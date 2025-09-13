@@ -25,6 +25,7 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
     depositAmount: '',
     paymentStatus: 'deposit_only',
     orderStatus: 'pending',
+    paymentType: 'EFT', // Default to EFT, can be changed to 'Cash'
   });
   // Delivery option
   const [withDelivery, setWithDelivery] = useState(false);
@@ -325,9 +326,9 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
       newErrors.orderItems = 'Please add at least one product to the order using the "Add Product" button above';
     }
 
-    // Proof of payment required for new orders (EFT-only business)
-    if (!isEdit && !popFile) {
-      newErrors.popFile = 'Proof of payment is required';
+    // Proof of payment required only for EFT payments (not for cash payments)
+    if (!isEdit && customerData.paymentType === 'EFT' && !popFile) {
+      newErrors.popFile = 'Proof of payment is required for EFT payments';
     }
     
     setErrors(newErrors);
@@ -398,6 +399,7 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
         admin_notes: customerData.adminNotes,
         deposit_amount: depositAmount.toFixed(2),
         payment_status: customerData.paymentStatus,
+        payment_method: customerData.paymentType, // Include payment type
         order_status: customerData.orderStatus,
         production_status: 'not_started', // Add missing production_status field
         total_amount: totalAmount,
@@ -762,13 +764,29 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
             <h3 className="text-lg font-semibold text-yellow-900 mb-4 flex items-center">
             <FaDollarSign className="mr-2" /> Financial Information
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Total Amount</label>
                 <div className="bg-gray-100 px-3 py-2 rounded-lg">
                   <span className="text-lg font-semibold">R{calculateTotal()}</span>
                 </div>
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Payment Type *</label>
+                <select 
+                  name="paymentType" 
+                  value={customerData.paymentType} 
+                  onChange={handleCustomerChange}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 ${errors.paymentType ? 'border-red-500' : 'border-gray-300'}`}
+                >
+                  <option value="EFT">EFT (Electronic Transfer)</option>
+                  <option value="Cash">Cash Payment</option>
+                </select>
+                {errors.paymentType && <p className="text-red-500 text-sm mt-1">{errors.paymentType}</p>}
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Deposit Amount (R) *</label>
                 <div className="relative">
@@ -885,11 +903,24 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
               </div>
             </div>
           </div>
-          {!isEdit && (
+          {!isEdit && customerData.paymentType === 'EFT' && (
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">Proof of Payment (PDF/Image) *</label>
               <input type="file" accept="image/*,application/pdf" onChange={(e)=>setPopFile(e.target.files?.[0] || null)} className={`w-full px-3 py-2 border rounded-lg ${errors.popFile ? 'border-red-500' : 'border-gray-300'}`} />
               {errors.popFile && <p className="text-red-500 text-sm mt-1">{errors.popFile}</p>}
+              <p className="text-xs text-gray-500 mt-1">Required for EFT payments - upload bank statement or payment confirmation</p>
+            </div>
+          )}
+          
+          {!isEdit && customerData.paymentType === 'Cash' && (
+            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-center">
+                <div className="text-green-600 mr-2">💵</div>
+                <div>
+                  <p className="text-sm text-green-800 font-medium">Cash Payment Selected</p>
+                  <p className="text-xs text-green-600">No proof of payment required for cash payments</p>
+                </div>
+              </div>
             </div>
           )}
         </div>

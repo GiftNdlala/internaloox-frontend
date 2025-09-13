@@ -265,30 +265,32 @@ const Orders = ({ user, userRole, onLogout }) => {
         const newOrderId = created?.id;
         if (!newOrderId) throw new Error('Order creation failed (missing ID)');
 
-        // Step 2: upload PoP (PDF/Image) for EFT
-        if (!popFile) throw new Error('Payment proof required for EFT payments');
-        const form = new FormData();
-        form.append('order', newOrderId);
-        if (pureOrder?.deposit_amount) form.append('amount', pureOrder.deposit_amount);
-        form.append('payment_type', 'deposit');
-        form.append('proof_image', popFile);
-        if (popNotes) form.append('notes', popNotes);
+        // Step 2: upload PoP (PDF/Image) only for EFT payments
+        let proof = null;
+        if (pureOrder?.payment_method === 'EFT') {
+          if (!popFile) throw new Error('Payment proof required for EFT payments');
+          const form = new FormData();
+          form.append('order', newOrderId);
+          if (pureOrder?.deposit_amount) form.append('amount', pureOrder.deposit_amount);
+          form.append('payment_type', 'deposit');
+          form.append('proof_image', popFile);
+          if (popNotes) form.append('notes', popNotes);
 
-        let proof;
-        try {
-          proof = await createPayment(form, true);
-        } catch (e) {
-          throw new Error(e?.message || 'Failed to upload payment proof');
+          try {
+            proof = await createPayment(form, true);
+          } catch (e) {
+            throw new Error(e?.message || 'Failed to upload payment proof');
+          }
+          if (!proof?.id) throw new Error('Failed to upload payment proof (no id)');
         }
-        if (!proof?.id) throw new Error('Failed to upload payment proof (no id)');
 
-        // Step 3: commit deposit via update_payment with proof_id
+        // Step 3: commit deposit via update_payment
         try {
           await updateOrderPayment(newOrderId, {
-            payment_method: 'EFT',
+            payment_method: pureOrder?.payment_method || 'EFT', // Use the payment method from the form
             payment_status: (Number(pureOrder?.deposit_amount) >= Number(pureOrder?.total_amount)) ? 'fully_paid' : 'deposit_paid',
             deposit_amount: Number(pureOrder?.deposit_amount) || 0,
-            proof_id: proof.id
+            proof_id: proof?.id // Only include proof_id if proof exists (EFT payments)
           });
         } catch (e) {
           throw new Error(e?.message || 'Failed to record payment');
