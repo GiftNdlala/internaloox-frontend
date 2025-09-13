@@ -6,7 +6,7 @@ import SharedHeader from '../components/SharedHeader';
 import { getPaymentTransactions } from '../components/api';
 import PdfViewer from '../components/PdfViewer';
 import { Modal } from 'react-bootstrap';
-import { getPaymentProofSignedUrl, getPaymentProofFileUrl } from '../components/api';
+import { getPaymentProofSignedUrl, getPaymentProofFileUrl, resolvePaymentProofUrl } from '../components/api';
 
 const OwnerPaymentTransactions = ({ user, onLogout }) => {
 	const [loading, setLoading] = useState(true);
@@ -41,15 +41,7 @@ const OwnerPaymentTransactions = ({ user, onLogout }) => {
     const proof = tx?.proof;
     if (!proof?.id) return;
     try {
-      // Prefer signed URL; fallback to direct file endpoint
-      let url = '';
-      try {
-        const res = await getPaymentProofSignedUrl(proof.id, 300);
-        url = res?.url || '';
-      } catch {}
-      if (!url) {
-        url = getPaymentProofFileUrl(proof.id);
-      }
+      const url = await resolvePaymentProofUrl(proof.id, 300);
       const name = proof?.file_name || `proof_${proof.id}.pdf`;
       setViewer({ open: true, url, name });
     } catch (e) {

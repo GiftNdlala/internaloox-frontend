@@ -175,6 +175,29 @@ export const getPaymentProofSignedUrl = async (id, expires = 300) => {
   return apiRequest(`/payment-proofs/${id}/signed_url/?expires=${expires}`);
 };
 
+// Helper: validate a URL is accessible (lightweight fetch)
+const isUrlAccessible = async (url) => {
+  try {
+    const res = await fetch(url, { method: 'GET', headers: { 'Range': 'bytes=0-0' } });
+    return res.ok;
+  } catch {
+    return false;
+  }
+};
+
+// Resolve best URL for payment proof: prefer working signed URL; fallback to auth-protected file URL
+export const resolvePaymentProofUrl = async (id, expires = 300) => {
+  try {
+    const res = await getPaymentProofSignedUrl(id, expires);
+    const signedUrl = res?.url || '';
+    if (signedUrl) {
+      const ok = await isUrlAccessible(signedUrl);
+      if (ok) return signedUrl;
+    }
+  } catch {}
+  return getPaymentProofFileUrl(id);
+};
+
 // New: Invoice/Delivery/Reports data endpoints for client-side PDF rendering
 export const getOrderInvoiceData = (orderId) => apiRequest(`/orders/${orderId}/invoice_data/`);
 export const getOrderDeliveryNoteData = (orderId) => apiRequest(`/orders/${orderId}/delivery_note_data/`);

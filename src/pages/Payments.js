@@ -10,7 +10,7 @@ import UniversalSidebar from '../components/UniversalSidebar';
 import EnhancedPageHeader from '../components/EnhancedPageHeader';
 import SharedHeader from '../components/SharedHeader';
 import { getPayments, getOrders, getCustomers, createPayment, updatePayment, deletePayment, updateOrderPayment, markPaymentOverdue, getPaymentsDashboard, getPaymentProofsForOrder } from '../components/api';
-import { getPaymentProofSignedUrl, getPaymentProofFileUrl } from '../components/api';
+import { getPaymentProofSignedUrl, getPaymentProofFileUrl, resolvePaymentProofUrl } from '../components/api';
 import PdfViewer from '../components/PdfViewer';
 
 const Payments = ({ user, userRole, onLogout }) => {
@@ -172,12 +172,7 @@ const Payments = ({ user, userRole, onLogout }) => {
   const previewProof = async (proof) => {
     if (!proof?.id) return;
     try {
-      let url = '';
-      try {
-        const res = await getPaymentProofSignedUrl(proof.id, 300);
-        url = res?.url || '';
-      } catch {}
-      if (!url) url = getPaymentProofFileUrl(proof.id);
+      const url = await resolvePaymentProofUrl(proof.id, 300);
       const name = proof?.file_name || `proof_${proof.id}.pdf`;
       setViewer({ open: true, url, name });
     } catch (e) {
