@@ -6,16 +6,20 @@ import { FaSearchPlus, FaSearchMinus, FaDownload } from 'react-icons/fa';
 // Configure pdfjs worker to a locally bundled worker for reliability
 const setupPdfWorker = () => {
   try {
-    // Bundle worker from node_modules (esm mjs build)
-    // CRA/Webpack can resolve this URL during build
-    // eslint-disable-next-line no-new
-    pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url);
+    // Use local worker file from public directory for better reliability
+    pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
   } catch (error) {
-    // As an absolute last resort, keep default (may show fake worker warning)
+    console.warn('Failed to set PDF.js worker source:', error);
+    // Fallback to CDN if local file fails
+    try {
+      pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.54/pdf.worker.min.js`;
+    } catch (cdnError) {
+      console.warn('CDN fallback also failed:', cdnError);
+    }
   }
 };
 
-// Initialize worker
+// Initialize worker immediately when module loads
 setupPdfWorker();
 
 const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
@@ -40,6 +44,7 @@ const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
 		setNumPages(null);
 		setLoading(true);
 		setError('');
+		setForceIframe(false);
 	}, [url]);
 
 	const onDocumentLoadSuccess = ({ numPages }) => {
@@ -49,7 +54,7 @@ const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
 
 	const onDocumentLoadError = (err) => {
 		console.error('PDF load error:', err);
-		setError(err?.message || 'Failed to load PDF. Please try refreshing the page.');
+		setError('');
 		setLoading(false);
     setForceIframe(true);
 	};
