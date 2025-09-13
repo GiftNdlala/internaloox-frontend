@@ -39,6 +39,16 @@ const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
     }
   };
 
+  // Avoid attaching Authorization to signed URLs
+  const shouldAttachAuth = (u) => {
+    if (!isProtectedApiUrl(u) || !token) return false;
+    try {
+      const { pathname } = new URL(u, window.location.origin);
+      if (pathname.includes('/payment-proofs/signed_file/')) return false;
+    } catch {}
+    return true;
+  };
+
   useEffect(() => {
     const update = () => setContainerWidth(containerRef.current ? containerRef.current.clientWidth : 0);
     update();
@@ -69,7 +79,7 @@ const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
 	const zoomOut = () => setScale((s) => Math.max(0.6, s - 0.2));
 	const download = async () => {
 		try {
-			if (isProtectedApiUrl(url) && token) {
+			if (shouldAttachAuth(url)) {
 				const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
 				if (!res.ok) throw new Error(`HTTP ${res.status}`);
 				const blob = await res.blob();
@@ -94,7 +104,7 @@ const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
 
   const openInNewTab = async () => {
     try {
-      if (isProtectedApiUrl(url) && token) {
+      if (shouldAttachAuth(url)) {
         const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const blob = await res.blob();
@@ -151,7 +161,7 @@ const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
 				)}
 				{!error && !isImage && !forceIframe && isPdf && (
 					<Document 
-						file={isProtectedApiUrl(url) && token ? { url, httpHeaders: { Authorization: `Bearer ${token}` } } : url}
+						file={shouldAttachAuth(url) ? { url, httpHeaders: { Authorization: `Bearer ${token}` } } : url}
 						onLoadSuccess={onDocumentLoadSuccess} 
 						onLoadError={onDocumentLoadError} 
 						loading=" "
