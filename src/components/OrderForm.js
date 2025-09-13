@@ -611,6 +611,28 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
               </div>
               {errors.unitPrice && <p className="text-red-500 text-sm mt-1">{errors.unitPrice}</p>}
             </div>
+            {showColor && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Color</label>
+                <select name="color" value={productForm.color} onChange={handleProductChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                  <option value="">Select a color</option>
+                  {allowedColors.map(color => (
+                    <option key={color.id} value={color.id}>{color.name || color.color_name || color.color_code}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+            {showFabric && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Fabric</label>
+                <select name="fabric" value={productForm.fabric} onChange={handleProductChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                  <option value="">Select a fabric</option>
+                  {allowedFabrics.map(fabric => (
+                    <option key={fabric.id} value={fabric.id}>{fabric.name || fabric.fabric_name || fabric.fabric_letter}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             {enableItemDiscounts && (
               <>
                 <div>
@@ -690,14 +712,40 @@ const OrderForm = ({ onClose, onSubmit, loading = false, initialData = null, ini
                       <td className="px-3 py-2">{prod ? prod.name : item.productName}</td>
                       <td className="px-3 py-2">{item.productDescription}</td>
                       <td className="px-3 py-2">{item.quantity}</td>
-                      <td className="px-3 py-2">R{item.unitPrice}</td>
+                      <td className="px-3 py-2">
+                        {item.discountAmount ? (
+                          <div>
+                            <span className="text-red-600 line-through text-sm">R{item.unitPrice}</span>
+                            <br />
+                            <span className="text-green-600 font-semibold">R{item.discountAmount}</span>
+                          </div>
+                        ) : item.discountPercent ? (
+                          <div>
+                            <span className="text-red-600 line-through text-sm">R{item.unitPrice}</span>
+                            <br />
+                            <span className="text-green-600 font-semibold">R{(parseFloat(item.unitPrice) * (1 - parseFloat(item.discountPercent) / 100)).toFixed(2)}</span>
+                          </div>
+                        ) : (
+                          <span>R{item.unitPrice}</span>
+                        )}
+                      </td>
                       <td className="px-3 py-2">
                         {colorObj ? (colorObj.name || colorObj.color_name || colorObj.color_code || 'Unknown Color') : (item.color ? `Color ID: ${item.color}` : 'Not specified')}
                       </td>
                       <td className="px-3 py-2">
                         {fabricObj ? (fabricObj.name || fabricObj.fabric_name || fabricObj.fabric_letter || 'Unknown Fabric') : (item.fabric ? `Fabric ID: ${item.fabric}` : 'Not specified')}
                       </td>
-                      <td className="px-3 py-2">R{(parseFloat(item.unitPrice) * parseInt(item.quantity)).toFixed(2)}</td>
+                      <td className="px-3 py-2">
+                        {(() => {
+                          let effectivePrice = parseFloat(item.unitPrice);
+                          if (item.discountAmount) {
+                            effectivePrice = parseFloat(item.discountAmount);
+                          } else if (item.discountPercent) {
+                            effectivePrice = parseFloat(item.unitPrice) * (1 - parseFloat(item.discountPercent) / 100);
+                          }
+                          return <span>R{(effectivePrice * parseInt(item.quantity)).toFixed(2)}</span>;
+                        })()}
+                      </td>
                       <td className="px-3 py-2">
                         <button type="button" onClick={() => handleRemoveProduct(idx)} className="text-red-600 hover:underline">Remove</button>
                       </td>
