@@ -368,11 +368,11 @@ const Orders = ({ user, userRole, onLogout }) => {
         proof_id: proof.id
       });
 
-      setSuccess(`${revampType === 'repair' ? 'Repair' : 'Revamp'} order created`);
+      setSuccess('Revamp order created');
       setShowRevampModal(false);
       fetchAllData();
     } catch (e) {
-      setError(e?.message || 'Failed to create revamp/repair order');
+      setError(e?.message || 'Failed to create revamp order');
     } finally {
       setCreating(false);
     }
@@ -565,11 +565,8 @@ const Orders = ({ user, userRole, onLogout }) => {
             <Col className="text-end">
               {canCreate && (
                 <div className="d-flex justify-content-end gap-2">
-                  <Button variant="outline-success" onClick={() => openRevampModal('revamp')}>
+                  <Button variant="outline-success" onClick={() => openRevampModal()}>
                     <FaPlus className="me-2" /> New Revamp
-                  </Button>
-                  <Button variant="outline-warning" onClick={() => openRevampModal('repair')}>
-                    <FaPlus className="me-2" /> New Repair
                   </Button>
                   <Button variant="primary" onClick={handleCreateOrder}>
                     <FaPlus className="me-2" /> Add New Order
@@ -747,7 +744,7 @@ const Orders = ({ user, userRole, onLogout }) => {
           {canCreate && (
             <Modal show={showRevampModal} onHide={() => setShowRevampModal(false)} size="lg">
               <Modal.Header closeButton>
-                <Modal.Title>{revampType === 'repair' ? 'Create Repair Order' : 'Create Revamp Order'}</Modal.Title>
+                <Modal.Title>Create Revamp Order</Modal.Title>
               </Modal.Header>
               <Modal.Body>
                 <RevampForm onClose={() => setShowRevampModal(false)} onSubmit={handleRevampSubmit} type={revampType} />
