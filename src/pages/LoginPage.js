@@ -20,7 +20,7 @@ import {
 import '../styles/MobileFirst.css';
 
 // API configuration
-const API_BASE = process.env.REACT_APP_API_BASE || 'https://internaloox-1.onrender.com/api';
+const API_BASE = process.env.REACT_APP_API_BASE || 'https://internaloox-backend.onrender.com/api';
 
 const LoginPage = ({ onLogin }) => {
   const navigate = useNavigate();
