@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
+import {
   FaEye, 
   FaEyeSlash, 
   FaUser, 
@@ -18,9 +18,7 @@ import {
   FaGem
 } from 'react-icons/fa';
 import '../styles/MobileFirst.css';
-
-// API configuration
-const API_BASE = process.env.REACT_APP_API_BASE || 'https://internaloox-backend.onrender.com/api';
+import { API_BASE } from '../utils/apiBase';
 
 const LoginPage = ({ onLogin }) => {
   const navigate = useNavigate();

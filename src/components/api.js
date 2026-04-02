@@ -1,4 +1,4 @@
-const API_BASE = process.env.REACT_APP_API_BASE || 'https://internaloox-1.onrender.com/api';
+import { API_BASE } from '../utils/apiBase';
 
 async function apiRequest(endpoint, { method = 'GET', data, isForm = false } = {}) {
   const url = `${API_BASE}${endpoint}`;

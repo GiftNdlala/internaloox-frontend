@@ -20,6 +20,7 @@ import ProductColorFabricManager from '../components/warehouse/ProductColorFabri
 import SecureImage from '../components/SecureImage';
 import { confirmDelete } from '../utils/confirm';
 import { useNotify } from '../hooks/useNotify';
+import { API_BASE } from '../utils/apiBase';
 
 const WarehouseProducts = () => {
   const navigate = useNavigate();
@@ -95,8 +96,6 @@ const WarehouseProducts = () => {
       // Fetch remaining pages if paginated
       let nextUrl = productsResponse?.next;
       const token = localStorage.getItem('oox_token');
-      const API_BASE = process.env.REACT_APP_API_BASE || 'https://internaloox-1.onrender.com/api';
-      
       while (nextUrl) {
         try {
           const absoluteUrl = nextUrl.startsWith('http') ? nextUrl : `${API_BASE}${nextUrl}`;

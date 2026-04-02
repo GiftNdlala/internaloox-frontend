@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Spinner, Button, ButtonGroup } from 'react-bootstrap';
 import { FaSearchPlus, FaSearchMinus, FaDownload } from 'react-icons/fa';
+import { API_BASE } from '../utils/apiBase';
 
 // Configure pdfjs worker to a reliable CDN URL (avoids bundling issues)
 const setupPdfWorker = () => {
@@ -26,7 +27,6 @@ const PdfViewer = ({ url, fileName = 'document.pdf', height = '70vh' }) => {
   const [forceIframe, setForceIframe] = useState(false);
 
   // Protected API helpers
-  const API_BASE = (typeof window !== 'undefined' && window.OOX_API_BASE) || process.env.REACT_APP_API_BASE || 'https://internaloox-1.onrender.com/api';
   const token = (typeof window !== 'undefined') ? localStorage.getItem('oox_token') : null;
   const isProtectedApiUrl = (u) => {
     if (!u) return false;
